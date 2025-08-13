@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "ascendium",
+  "version": "${version}",
+  "name": "Ascendium",
+  "description": "Minecraft client",
+  "authors": [
+    "BetterClient"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/ascendium/icon.png",
+  "environment": "client",
+  "entrypoints": {},
+  "mixins": [
+    "ascendium.mixins.json"
+  ],
+  "depends": {
+    "fabric-language-kotlin": ">=${kotlin_loader_version}",
+    "minecraft": "${minecraft_version}"
+  }
+}
