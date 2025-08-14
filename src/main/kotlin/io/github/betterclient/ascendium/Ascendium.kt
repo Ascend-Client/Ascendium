@@ -1,6 +1,11 @@
 package io.github.betterclient.ascendium
 
+import io.github.betterclient.ascendium.compose.SkiaRenderer
+import io.github.betterclient.ascendium.event.EventTarget
+import io.github.betterclient.ascendium.event.RenderHudEvent
+import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.screen.AscendiumScreen
+import org.jetbrains.skia.Paint
 import org.slf4j.LoggerFactory
 
 object Ascendium {
@@ -15,6 +20,16 @@ object Ascendium {
             Bridge.client.openScreen(
                 AscendiumScreen()
             )
+        }
+
+        eventBus.subscribe()
+    }
+
+    @EventTarget
+    fun onRender(renderHudEvent: RenderHudEvent) {
+        SkiaRenderer.init()
+        SkiaRenderer.withSkia { canvas ->
+            canvas.drawCircle(50f, 50f, 25f, Paint().apply { color = -1 })
         }
     }
 }

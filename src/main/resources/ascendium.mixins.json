@@ -6,9 +6,11 @@
   "mixins": [
   ],
   "client": [
+    "MixinInGameHud",
     "MixinKeybinding",
     "MixinMinecraftClient",
-    "MixinOptions"
+    "MixinOptions",
+    "MixinWindow"
   ],
   "injectors": {
     "defaultRequire": 1

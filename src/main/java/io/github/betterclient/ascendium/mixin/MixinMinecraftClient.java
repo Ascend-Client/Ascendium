@@ -1,14 +1,12 @@
 package io.github.betterclient.ascendium.mixin;
 
-import io.github.betterclient.ascendium.Ascendium;
-import io.github.betterclient.ascendium.BridgeScreen;
-import io.github.betterclient.ascendium.MinecraftBridge;
-import io.github.betterclient.ascendium.OptionsBridge;
+import io.github.betterclient.ascendium.*;
 import io.github.betterclient.ascendium.util.BridgedScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.util.Window;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -24,6 +22,8 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
 
     @Shadow public abstract void setScreen(@Nullable Screen screen);
 
+    @Shadow @Final private Window window;
+
     @Override
     public @NotNull OptionsBridge getGameOptions() {
         return (OptionsBridge) this.options;
@@ -37,5 +37,10 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(RunArgs args, CallbackInfo ci) {
         Ascendium.INSTANCE.start();
+    }
+
+    @Override
+    public @NotNull WindowBridge getWindow() {
+        return (WindowBridge) (Object) this.window;
     }
 }

@@ -9,7 +9,14 @@ object Bridge {
 
 interface MinecraftBridge {
     val gameOptions: OptionsBridge
+    val window: WindowBridge
     fun openScreen(screen: BridgeScreen)
+}
+
+interface WindowBridge {
+    val fbWidth: Int
+    val fbHeight: Int
+    val fbo: Int
 }
 
 interface OptionsBridge {
