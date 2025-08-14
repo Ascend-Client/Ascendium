@@ -9,6 +9,8 @@ import org.jetbrains.skia.FramebufferFormat
 import org.jetbrains.skia.Surface
 import org.jetbrains.skia.SurfaceColorFormat
 import org.jetbrains.skia.SurfaceOrigin
+import org.lwjgl.opengl.GL11C
+import org.lwjgl.opengl.GL21C
 
 object SkiaRenderer {
     private var vpW = 0
@@ -17,8 +19,21 @@ object SkiaRenderer {
     private lateinit var renderTarget: BackendRenderTarget
     private lateinit var surface: Surface
 
+    private fun setKnownGoodState() {
+        //"known good state for skia" - Gemini
+        GL21C.glBindBuffer(GL21C.GL_PIXEL_UNPACK_BUFFER, 0)
+        GL11C.glPixelStorei(GL11C.GL_UNPACK_SWAP_BYTES, GL11C.GL_FALSE)
+        GL11C.glPixelStorei(GL11C.GL_UNPACK_LSB_FIRST, GL11C.GL_FALSE)
+        GL11C.glPixelStorei(GL11C.GL_UNPACK_ROW_LENGTH, 0)
+        GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_ROWS, 0)
+        GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_PIXELS, 0)
+        GL11C.glPixelStorei(GL11C.GL_UNPACK_ALIGNMENT, 4)
+    }
+
     fun withSkia(block: (Canvas) -> Unit) {
         GlStateUtil.save()
+
+        setKnownGoodState()
         this.context.resetGLAll()
 
         block(surface.canvas)

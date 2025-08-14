@@ -1,22 +1,54 @@
 package io.github.betterclient.ascendium.screen
 
-import io.github.betterclient.ascendium.BridgeRenderer
-import io.github.betterclient.ascendium.BridgeScreen
-import io.github.betterclient.ascendium.compose.SkiaRenderer
-import org.jetbrains.skia.Paint
-import java.awt.Color
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.unit.*
+import io.github.betterclient.ascendium.compose.ComposeUI
 
-class AscendiumScreen : BridgeScreen() {
-    override fun render(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) {
-        SkiaRenderer.withSkia {
-            it.drawCircle(150f, 150f, 25f, Paint().apply { color = Color.RED.rgb })
-        }
-        SkiaRenderer.withSkia {
-            it.drawCircle(150f, 150f, 12f, Paint().apply { color = -1 })
-        }
-    }
+object AscendiumScreen : ComposeUI({
+    ComposeM3Test()
+})
 
-    override fun init() {
-        SkiaRenderer.init()
+@Composable
+fun ComposeM3Test() {
+    var sliderValue by remember { mutableStateOf(0.5f) }
+    var checked by remember { mutableStateOf(false) }
+    var counter by remember { mutableStateOf(0) }
+
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Material3 Test UI")
+            Button(onClick = { counter++ }) {
+                Text("Clicked $counter times")
+            }
+            Slider(
+                value = sliderValue,
+                onValueChange = { sliderValue = it }
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = { checked = it }
+                )
+                Text("Enable feature")
+            }
+            ElevatedCard {
+                Box(
+                    modifier = Modifier
+                        .size(120.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Card Content")
+                }
+            }
+        }
     }
 }

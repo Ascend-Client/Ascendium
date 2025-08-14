@@ -35,6 +35,12 @@ public class BridgedScreen extends Screen {
     }
 
     @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        this.screen.mouseScrolled((int) mouseX, (int) mouseY, horizontalAmount, verticalAmount);
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         this.screen.keyPressed(keyCode, scanCode, modifiers);
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -44,6 +50,12 @@ public class BridgedScreen extends Screen {
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         this.screen.keyReleased(keyCode, scanCode, modifiers);
         return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char chr, int modifiers) {
+        this.screen.charTyped(chr, modifiers);
+        return super.charTyped(chr, modifiers);
     }
 
     @Override

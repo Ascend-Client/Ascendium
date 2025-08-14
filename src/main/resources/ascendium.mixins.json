@@ -9,6 +9,7 @@
     "MixinInGameHud",
     "MixinKeybinding",
     "MixinMinecraftClient",
+    "MixinMouse",
     "MixinOptions",
     "MixinWindow"
   ],

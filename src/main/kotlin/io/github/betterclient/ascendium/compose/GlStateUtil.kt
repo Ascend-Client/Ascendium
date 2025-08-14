@@ -1,7 +1,10 @@
+package io.github.betterclient.ascendium.compose
+
 import org.lwjgl.opengl.GL11C
 import org.lwjgl.opengl.GL13C
 import org.lwjgl.opengl.GL14C
 import org.lwjgl.opengl.GL20C
+import org.lwjgl.opengl.GL21C
 import org.lwjgl.opengl.GL30C
 import org.lwjgl.system.MemoryStack
 
@@ -34,7 +37,9 @@ object GlStateUtil {
         val colorMaskR: Boolean,
         val colorMaskG: Boolean,
         val colorMaskB: Boolean,
-        val colorMaskA: Boolean
+        val colorMaskA: Boolean,
+        val unpackAlignment: Int,
+        val pixelUnpackBufferBinding: Int
     ) {
         fun restore() {
             if (blendEnabled) {
@@ -67,6 +72,8 @@ object GlStateUtil {
             GL30C.glBindVertexArray(vaoBinding)
 
             GL11C.glColorMask(colorMaskR, colorMaskG, colorMaskB, colorMaskA)
+            GL11C.glPixelStorei(GL11C.GL_UNPACK_ALIGNMENT, unpackAlignment)
+            GL21C.glBindBuffer(GL21C.GL_PIXEL_UNPACK_BUFFER, pixelUnpackBufferBinding)
         }
 
         companion object {
@@ -92,6 +99,8 @@ object GlStateUtil {
 
                     val program = GL11C.glGetInteger(GL20C.GL_CURRENT_PROGRAM)
                     val vaoBinding = GL11C.glGetInteger(GL30C.GL_VERTEX_ARRAY_BINDING)
+                    val unpackAlignment = GL11C.glGetInteger(GL11C.GL_UNPACK_ALIGNMENT)
+                    val pixelUnpackBufferBinding = GL11C.glGetInteger(GL21C.GL_PIXEL_UNPACK_BUFFER_BINDING)
 
                     GL11C.glGetBooleanv(GL11C.GL_COLOR_WRITEMASK, colorMask)
 
@@ -103,7 +112,9 @@ object GlStateUtil {
                         activeTexture, textureBinding2D,
                         program, vaoBinding,
                         colorMask[0].toInt() != 0, colorMask[1].toInt() != 0,
-                        colorMask[2].toInt() != 0, colorMask[3].toInt() != 0
+                        colorMask[2].toInt() != 0, colorMask[3].toInt() != 0,
+                        unpackAlignment,
+                        pixelUnpackBufferBinding
                     )
                 }
             }

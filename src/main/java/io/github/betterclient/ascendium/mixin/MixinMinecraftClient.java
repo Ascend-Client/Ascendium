@@ -3,6 +3,7 @@ package io.github.betterclient.ascendium.mixin;
 import io.github.betterclient.ascendium.*;
 import io.github.betterclient.ascendium.util.BridgedScreen;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Mouse;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.GameOptions;
@@ -24,6 +25,8 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
 
     @Shadow @Final private Window window;
 
+    @Shadow @Final public Mouse mouse;
+
     @Override
     public @NotNull OptionsBridge getGameOptions() {
         return (OptionsBridge) this.options;
@@ -42,5 +45,10 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Override
     public @NotNull WindowBridge getWindow() {
         return (WindowBridge) (Object) this.window;
+    }
+
+    @Override
+    public @NotNull MouseBridge getMouse() {
+        return (MouseBridge) this.mouse;
     }
 }

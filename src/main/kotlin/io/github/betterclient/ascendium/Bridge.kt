@@ -8,15 +8,24 @@ object Bridge {
 }
 
 interface MinecraftBridge {
+    val mouse: MouseBridge
     val gameOptions: OptionsBridge
     val window: WindowBridge
     fun openScreen(screen: BridgeScreen)
 }
 
 interface WindowBridge {
+    val windowHandle: Long
+    val scale: Double
     val fbWidth: Int
     val fbHeight: Int
     val fbo: Int
+}
+
+interface MouseBridge {
+    //renamed to xPos to avoid conflict with Minecraft's Mouse class
+    val xPos: Int
+    val yPos: Int
 }
 
 interface OptionsBridge {
@@ -36,8 +45,10 @@ open class BridgeScreen {
     open fun render(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) {}
     open fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {}
     open fun mouseReleased(mouseX: Int, mouseY: Int, button: Int) {}
+    open fun mouseScrolled(mouseX: Int, mouseY: Int, scrollX: Double, scrollY: Double) {}
     open fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int) {}
     open fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int) {}
+    open fun charTyped(chr: Char, modifiers: Int) {}
     open fun close() {}
     open fun init() {}
     open fun shouldCloseOnEsc() = true
