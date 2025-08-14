@@ -8,6 +8,8 @@ object Bridge {
 }
 
 interface MinecraftBridge {
+    val fps: Int
+    val textRenderer: TextRendererBridge
     val mouse: MouseBridge
     val gameOptions: OptionsBridge
     val window: WindowBridge
@@ -20,6 +22,11 @@ interface WindowBridge {
     val fbWidth: Int
     val fbHeight: Int
     val fbo: Int
+}
+
+interface TextRendererBridge {
+    fun getWidth(text: String): Int
+    fun getFontHeight(): Int
 }
 
 interface MouseBridge {

@@ -5,6 +5,7 @@ import io.github.betterclient.ascendium.util.BridgedScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.RunArgs;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.Window;
@@ -26,6 +27,10 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Shadow @Final private Window window;
 
     @Shadow @Final public Mouse mouse;
+
+    @Shadow private static int currentFps;
+
+    @Shadow @Final public TextRenderer textRenderer;
 
     @Override
     public @NotNull OptionsBridge getGameOptions() {
@@ -50,5 +55,15 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Override
     public @NotNull MouseBridge getMouse() {
         return (MouseBridge) this.mouse;
+    }
+
+    @Override
+    public @NotNull int getFps() {
+        return currentFps;
+    }
+
+    @Override
+    public @NotNull TextRendererBridge getTextRenderer() {
+        return (TextRendererBridge) this.textRenderer;
     }
 }

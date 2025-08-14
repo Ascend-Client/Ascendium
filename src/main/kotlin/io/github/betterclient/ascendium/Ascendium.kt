@@ -1,6 +1,6 @@
 package io.github.betterclient.ascendium
 
-import io.github.betterclient.ascendium.screen.AscendiumScreen
+import io.github.betterclient.ascendium.screen.ModsUI
 import org.slf4j.LoggerFactory
 
 object Ascendium {
@@ -12,7 +12,7 @@ object Ascendium {
             name = "Open GUI",
             category = "Ascendium"
         ).onPressed {
-            Bridge.client.openScreen(AscendiumScreen)
+            Bridge.client.openScreen(ModsUI())
         }
     }
 }

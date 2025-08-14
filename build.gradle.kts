@@ -62,9 +62,12 @@ dependencies {
     use(compose.uiTooling)
     use(compose.animation)
 
+    var i = 0
     transitiveInclude.resolvedConfiguration.resolvedArtifacts.forEach {
+        i++
         include(it.moduleVersion.id.toString())
     }
+    println("Bundled $i transitive dependencies.")
 
     modRuntimeOnly("maven.modrinth:sodium:mc1.21.4-0.6.13-fabric")
     modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:0.119.4+1.21.4")

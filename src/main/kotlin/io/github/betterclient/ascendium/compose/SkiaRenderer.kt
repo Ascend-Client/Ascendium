@@ -6,6 +6,7 @@ import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.ColorSpace
 import org.jetbrains.skia.DirectContext
 import org.jetbrains.skia.FramebufferFormat
+import org.jetbrains.skia.Paint
 import org.jetbrains.skia.Surface
 import org.jetbrains.skia.SurfaceColorFormat
 import org.jetbrains.skia.SurfaceOrigin
@@ -19,7 +20,7 @@ object SkiaRenderer {
     private lateinit var renderTarget: BackendRenderTarget
     private lateinit var surface: Surface
 
-    private fun setKnownGoodState() {
+    private fun setKnownGoodStateForSkia() {
         //"known good state for skia" - Gemini
         GL21C.glBindBuffer(GL21C.GL_PIXEL_UNPACK_BUFFER, 0)
         GL11C.glPixelStorei(GL11C.GL_UNPACK_SWAP_BYTES, GL11C.GL_FALSE)
@@ -28,18 +29,28 @@ object SkiaRenderer {
         GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_ROWS, 0)
         GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_PIXELS, 0)
         GL11C.glPixelStorei(GL11C.GL_UNPACK_ALIGNMENT, 4)
+
+        if (GL11C.glIsEnabled(GL11C.GL_SCISSOR_TEST)) {
+            GL11C.glDisable(GL11C.GL_SCISSOR_TEST)
+        }
+    }
+
+    private fun setKnownGoodStateForMc() {
+        if (GL11C.glIsEnabled(GL11C.GL_SCISSOR_TEST)) {
+            GL11C.glDisable(GL11C.GL_SCISSOR_TEST)
+        }
     }
 
     fun withSkia(block: (Canvas) -> Unit) {
         GlStateUtil.save()
-
-        setKnownGoodState()
+        setKnownGoodStateForSkia()
         this.context.resetGLAll()
 
         block(surface.canvas)
 
         this.context.flush()
         GlStateUtil.restore()
+        setKnownGoodStateForMc()
     }
 
     fun init() {
@@ -90,4 +101,18 @@ object SkiaRenderer {
             vpH = window.fbHeight
         }
     }
+
+    fun <T : Number> getUnscaled(i: T): Float {
+        val scaleFactor = Bridge.client.window.scale
+        return ((i.toDouble() * scaleFactor).toFloat())
+    }
+
+    fun <T : Number> getScaled(i: T): Float {
+        val scaleFactor = Bridge.client.window.scale
+        return ((i.toDouble() / scaleFactor).toFloat())
+    }
 }
+
+fun Int.asPaint() = Paint().apply { color = this@asPaint }
+fun Number.getScaled() = SkiaRenderer.getScaled(this)
+fun Number.getUnscaled() = SkiaRenderer.getUnscaled(this)

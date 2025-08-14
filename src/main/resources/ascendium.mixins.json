@@ -11,6 +11,7 @@
     "MixinMinecraftClient",
     "MixinMouse",
     "MixinOptions",
+    "MixinTextRenderer",
     "MixinWindow"
   ],
   "injectors": {
