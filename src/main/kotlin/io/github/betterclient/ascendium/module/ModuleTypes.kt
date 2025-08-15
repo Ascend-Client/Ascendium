@@ -1,5 +1,6 @@
 package io.github.betterclient.ascendium.module
 
+import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.compose.SkiaRenderer
 import io.github.betterclient.ascendium.event.EventTarget
@@ -8,12 +9,16 @@ import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ColorSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager
+import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.module.config.Setting
+import io.github.betterclient.ascendium.module.config.StringSetting
 
 open class Module(val name: String, val description: String) {
     var enabled: Boolean = false
     val settings: MutableList<Setting> = mutableListOf()
+    val client
+        get() = Bridge.client
 
     open fun toggle() {
         enabled = !enabled
@@ -29,15 +34,30 @@ open class Module(val name: String, val description: String) {
 
     open fun onEnable() {}
     open fun onDisable() {}
+
+    fun boolean(name: String, value: Boolean) =
+        BooleanSetting(name, value).apply { this@Module.settings.add(this) }::value
+
+    fun number(name: String, value: Double, min: Double = Double.NEGATIVE_INFINITY, max: Double = Double.POSITIVE_INFINITY) =
+        NumberSetting(name, value, min, max).apply { this@Module.settings.add(this) }::value
+
+    fun string(name: String, value: String) =
+        StringSetting(name, value).apply { this@Module.settings.add(this) }::value
+
+    fun dropdown(name: String, value: String, vararg options: String) =
+        DropdownSetting(name, value, options.toList()).apply { this@Module.settings.add(this) }::value
+
+    fun color(name: String, value: Int) =
+        ColorSetting(name, value).apply { this@Module.settings.add(this) }::value
 }
 
 abstract class HUDModule(name: String, description: String, hasBackground: Boolean = true) : Module(name, description) {
     var x = 100
     var y = 100
-    val textColor by ColorSetting("Text Color", -1).delegate(this)
+    val textColor by color("Text Color", -1)
     val backgroundColor = ColorSetting("Background Color", 0x51000000)
-    val minecraftRenderer by BooleanSetting("Use Minecraft Renderer", true).delegate(this)
-    val scale by NumberSetting("Scale", 1.0, 0.25, 3.0).delegate(this)
+    val minecraftRenderer by boolean("Use Minecraft Renderer", true)
+    val scale by number("Scale", 1.0, 0.25, 3.0)
 
     val width: Int
         get() {
@@ -83,4 +103,12 @@ abstract class HUDModule(name: String, description: String, hasBackground: Boole
             }
         }
     }
+}
+
+abstract class TextModule(name: String, description: String) : HUDModule(name, description, true) {
+    override fun render(renderer: Renderable) {
+        renderer.renderText(render(), 0, 0)
+    }
+
+    abstract fun render(): String
 }

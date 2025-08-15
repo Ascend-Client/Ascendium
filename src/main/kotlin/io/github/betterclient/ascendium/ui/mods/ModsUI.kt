@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.screen.mods
+package io.github.betterclient.ascendium.ui.mods
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background

@@ -111,9 +111,9 @@ class Renderable(val mod: HUDModule, private val renderer: ModRenderer) {
     var width = 0
     var height = 0
 
-    private val nullRenderer = NullRenderer(mod.scale.value.toFloat(), mod.minecraftRenderer.value)
+    private val nullRenderer = NullRenderer(mod.scale.toFloat(), mod.minecraftRenderer)
     fun renderText(text: String, x: Int, y: Int) {
-        val renderText = renderer.renderText(text, mod.x + x, mod.y + y, mod.textColor.value)
+        val renderText = renderer.renderText(text, mod.x + x, mod.y + y, mod.textColor)
         width = max(x + renderText.width, width)
         height = max(y + renderText.height, height)
     }

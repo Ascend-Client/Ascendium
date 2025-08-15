@@ -1,7 +1,7 @@
 package io.github.betterclient.ascendium
 
 import io.github.betterclient.ascendium.module.config.ConfigManager
-import io.github.betterclient.ascendium.screen.mods.ModsUI
+import io.github.betterclient.ascendium.ui.mods.ModsUI
 import org.slf4j.LoggerFactory
 
 object Ascendium {

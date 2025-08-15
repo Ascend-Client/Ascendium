@@ -1,9 +1,6 @@
 package io.github.betterclient.ascendium.module.config
 
-import io.github.betterclient.ascendium.module.Module
 import kotlinx.serialization.Serializable
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 
 @Serializable
 sealed class Setting() {
@@ -25,8 +22,6 @@ class BooleanSetting(
         val out = json as BooleanSetting //if type doesn't match, blame the config manager, not us, this shouldn't end up here if its the wrong type
         value = out.value
     }
-
-    fun delegate(module: Module) = module.settings.add(this).let { ::value } //dirty hack
 }
 
 @Serializable
@@ -40,8 +35,6 @@ class NumberSetting(
         val out = json as NumberSetting
         value = out.value.coerceIn(min, max)
     }
-
-    fun delegate(module: Module) = module.settings.add(this).let { ::value } //dirty hack
 }
 
 @Serializable
@@ -54,8 +47,6 @@ class StringSetting(
         val out = json as StringSetting
         value = out.value.take(maxLength)
     }
-
-    fun delegate(module: Module) = module.settings.add(this).let { ::value }
 }
 
 @Serializable
@@ -76,8 +67,6 @@ class DropdownSetting(
         val out = json as DropdownSetting
         set(out.value)
     }
-
-    fun delegate(module: Module) = module.settings.add(this).let { ::value }
 }
 
 @Serializable
@@ -89,6 +78,4 @@ class ColorSetting(
         val out = json as ColorSetting
         value = out.value
     }
-
-    fun delegate(module: Module) = module.settings.add(this).let { ::value } //dirty hack
 }
