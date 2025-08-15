@@ -10,8 +10,7 @@ import org.jetbrains.skia.Paint
 import org.jetbrains.skia.Surface
 import org.jetbrains.skia.SurfaceColorFormat
 import org.jetbrains.skia.SurfaceOrigin
-import org.lwjgl.opengl.GL11C
-import org.lwjgl.opengl.GL21C
+import org.lwjgl.opengl.GL33C
 
 object SkiaRenderer {
     private var vpW = 0
@@ -22,23 +21,13 @@ object SkiaRenderer {
 
     private fun setKnownGoodStateForSkia() {
         //"known good state for skia" - Gemini
-        GL21C.glBindBuffer(GL21C.GL_PIXEL_UNPACK_BUFFER, 0)
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_SWAP_BYTES, GL11C.GL_FALSE)
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_LSB_FIRST, GL11C.GL_FALSE)
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_ROW_LENGTH, 0)
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_ROWS, 0)
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_PIXELS, 0)
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_ALIGNMENT, 4)
-
-        if (GL11C.glIsEnabled(GL11C.GL_SCISSOR_TEST)) {
-            GL11C.glDisable(GL11C.GL_SCISSOR_TEST)
-        }
-    }
-
-    private fun setKnownGoodStateForMc() {
-        if (GL11C.glIsEnabled(GL11C.GL_SCISSOR_TEST)) {
-            GL11C.glDisable(GL11C.GL_SCISSOR_TEST)
-        }
+        GL33C.glBindBuffer(GL33C.GL_PIXEL_UNPACK_BUFFER, 0)
+        GL33C.glPixelStorei(GL33C.GL_UNPACK_SWAP_BYTES, GL33C.GL_FALSE)
+        GL33C.glPixelStorei(GL33C.GL_UNPACK_LSB_FIRST, GL33C.GL_FALSE)
+        GL33C.glPixelStorei(GL33C.GL_UNPACK_ROW_LENGTH, 0)
+        GL33C.glPixelStorei(GL33C.GL_UNPACK_SKIP_ROWS, 0)
+        GL33C.glPixelStorei(GL33C.GL_UNPACK_SKIP_PIXELS, 0)
+        GL33C.glPixelStorei(GL33C.GL_UNPACK_ALIGNMENT, 4)
     }
 
     fun withSkia(block: (Canvas) -> Unit) {
@@ -50,7 +39,6 @@ object SkiaRenderer {
 
         this.context.flush()
         GlStateUtil.restore()
-        setKnownGoodStateForMc()
     }
 
     fun init() {
@@ -71,7 +59,7 @@ object SkiaRenderer {
                 renderTarget,
                 SurfaceOrigin.BOTTOM_LEFT,
                 SurfaceColorFormat.RGBA_8888,
-                ColorSpace.sRGB
+                ColorSpace.sRGBLinear
             )!!
             vpW = window.fbWidth
             vpH = window.fbHeight
@@ -94,7 +82,7 @@ object SkiaRenderer {
                 renderTarget,
                 SurfaceOrigin.BOTTOM_LEFT,
                 SurfaceColorFormat.RGBA_8888,
-                ColorSpace.sRGB
+                ColorSpace.sRGBLinear
             )!!
 
             vpW = window.fbWidth

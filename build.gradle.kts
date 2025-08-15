@@ -61,6 +61,7 @@ dependencies {
     use(compose.material3)
     use(compose.uiTooling)
     use(compose.animation)
+    use(compose.materialIconsExtended)
 
     var i = 0
     transitiveInclude.resolvedConfiguration.resolvedArtifacts.forEach {

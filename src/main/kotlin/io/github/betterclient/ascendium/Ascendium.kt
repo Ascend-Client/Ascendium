@@ -1,11 +1,13 @@
 package io.github.betterclient.ascendium
 
-import io.github.betterclient.ascendium.screen.ModsUI
+import io.github.betterclient.ascendium.module.config.ConfigManager
+import io.github.betterclient.ascendium.screen.mods.ModsUI
 import org.slf4j.LoggerFactory
 
 object Ascendium {
     fun start() {
         Logger.info("Starting!")
+        ConfigManager
 
         Bridge.client.gameOptions.addKeybinding(
             defaultKey = 344,

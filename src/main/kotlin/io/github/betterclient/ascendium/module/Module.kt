@@ -5,6 +5,10 @@ import io.github.betterclient.ascendium.compose.SkiaRenderer
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
+import io.github.betterclient.ascendium.module.config.BooleanSetting
+import io.github.betterclient.ascendium.module.config.ColorSetting
+import io.github.betterclient.ascendium.module.config.NumberSetting
+import io.github.betterclient.ascendium.module.config.Setting
 
 open class Module(val name: String, val description: String) {
     var enabled: Boolean = false

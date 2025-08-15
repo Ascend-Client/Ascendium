@@ -19,7 +19,7 @@ object GlStateUtil {
         savedState.restore()
     }
 
-    private data class State(
+    private class State(
         val blendEnabled: Boolean,
         val blendSrcRgb: Int,
         val blendDstRgb: Int,
@@ -39,7 +39,9 @@ object GlStateUtil {
         val colorMaskB: Boolean,
         val colorMaskA: Boolean,
         val unpackAlignment: Int,
-        val pixelUnpackBufferBinding: Int
+        val pixelUnpackBufferBinding: Int,
+        val scissorTestEnabled: Boolean,
+        val scissorBox: IntArray
     ) {
         fun restore() {
             if (blendEnabled) {
@@ -74,6 +76,13 @@ object GlStateUtil {
             GL11C.glColorMask(colorMaskR, colorMaskG, colorMaskB, colorMaskA)
             GL11C.glPixelStorei(GL11C.GL_UNPACK_ALIGNMENT, unpackAlignment)
             GL21C.glBindBuffer(GL21C.GL_PIXEL_UNPACK_BUFFER, pixelUnpackBufferBinding)
+
+            if (scissorTestEnabled) {
+                GL11C.glEnable(GL11C.GL_SCISSOR_TEST)
+            } else {
+                GL11C.glDisable(GL11C.GL_SCISSOR_TEST)
+            }
+            GL11C.glScissor(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3])
         }
 
         companion object {
@@ -102,6 +111,10 @@ object GlStateUtil {
                     val unpackAlignment = GL11C.glGetInteger(GL11C.GL_UNPACK_ALIGNMENT)
                     val pixelUnpackBufferBinding = GL11C.glGetInteger(GL21C.GL_PIXEL_UNPACK_BUFFER_BINDING)
 
+                    val scissorTestEnabled = GL11C.glIsEnabled(GL11C.GL_SCISSOR_TEST)
+                    val scissorBox = stack.mallocInt(4)
+                    GL11C.glGetIntegerv(GL11C.GL_SCISSOR_BOX, scissorBox)
+
                     GL11C.glGetBooleanv(GL11C.GL_COLOR_WRITEMASK, colorMask)
 
                     return State(
@@ -114,7 +127,9 @@ object GlStateUtil {
                         colorMask[0].toInt() != 0, colorMask[1].toInt() != 0,
                         colorMask[2].toInt() != 0, colorMask[3].toInt() != 0,
                         unpackAlignment,
-                        pixelUnpackBufferBinding
+                        pixelUnpackBufferBinding,
+                        scissorTestEnabled,
+                        intArrayOf(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3])
                     )
                 }
             }

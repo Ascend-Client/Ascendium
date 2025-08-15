@@ -15,10 +15,6 @@ import androidx.compose.ui.unit.IntSize
 import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.BridgeScreen
-import org.jetbrains.skia.Font
-import org.jetbrains.skia.FontMgr
-import org.jetbrains.skia.FontStyle
-import org.jetbrains.skia.Paint
 import kotlin.math.min
 import kotlin.properties.Delegates
 import java.awt.event.KeyEvent as AwtKeyEvent
@@ -84,6 +80,14 @@ open class ComposeUI(
 
     //awt events
     override fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {
+        mouseHandlers.forEach { handler ->
+            val composeMouse = Offset(Bridge.client.mouse.xPos.toFloat(), Bridge.client.mouse.yPos.toFloat())
+            val mcMouse = Offset(mouseX.toFloat(), mouseY.toFloat())
+            if (handler(composeMouse, mcMouse, button, true)) {
+                return@forEach //this handler demands that we don't talk about this when talking to compose, ok!
+            }
+        }
+
         val client = Bridge.client
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
@@ -93,6 +97,14 @@ open class ComposeUI(
     }
 
     override fun mouseReleased(mouseX: Int, mouseY: Int, button: Int) {
+        mouseHandlers.forEach { handler ->
+            val composeMouse = Offset(Bridge.client.mouse.xPos.toFloat(), Bridge.client.mouse.yPos.toFloat())
+            val mcMouse = Offset(mouseX.toFloat(), mouseY.toFloat())
+            if (handler(composeMouse, mcMouse, button, false)) {
+                return@forEach //this handler demands that we don't talk about this when talking to compose, ok! (can you notice that I copied and pasted it?)
+            }
+        }
+
         val client = Bridge.client
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
@@ -160,5 +172,11 @@ open class ComposeUI(
 
     fun switchTo(newContent: @Composable () -> Unit) {
         _content.value = newContent
+    }
+
+    private val mouseHandlers = mutableListOf<(composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean>()
+
+    fun addMouseHandler(handler: (composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean) {
+        mouseHandlers.add(handler)
     }
 }

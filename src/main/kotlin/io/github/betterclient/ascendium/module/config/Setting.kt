@@ -1,10 +1,10 @@
-package io.github.betterclient.ascendium.module
+package io.github.betterclient.ascendium.module.config
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-sealed class Setting {
+sealed class Setting() {
     abstract val name: String
 
     abstract fun setFromString(json: String)
