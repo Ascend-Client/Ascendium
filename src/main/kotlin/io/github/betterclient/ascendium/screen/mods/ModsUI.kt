@@ -1,32 +1,22 @@
 package io.github.betterclient.ascendium.screen.mods
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.compose.ComposeUI
 
 //TODO: remove after ModMoveUI
 class ModsUI : ComposeUI({
-    //ModsUI(false)
-    //debugging
-    Icon(
-        imageVector = Icons.Default.Add,
-        contentDescription = null,
-        tint = Color.Green,
-        modifier = Modifier.size(20.dp)
-    )
+    ModsUI(false)
 })
 
 @Composable
