@@ -36,12 +36,18 @@ object ConfigManager {
             if (!modConfigFile.exists()) continue
             val modConfig = Json.decodeFromString<ConfigModule>(modConfigFile.readText())
 
-            module.enabled = modConfig.enabled
+            if (module.enabled != modConfig.enabled) {
+                module.toggle()
+            }
             for (setting in modConfig.settings) {
                 module
                     .settings
                     .find { setting.name == it.name }
-                    ?.setFromString(Json.encodeToString(setting))
+                    ?.let {
+                        if (it::class == setting::class) {
+                            it.setFromString(setting)
+                        }
+                    }
             }
 
             if (module is HUDModule) {

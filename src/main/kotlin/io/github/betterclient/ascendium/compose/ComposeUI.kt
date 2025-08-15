@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.IntSize
 import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.BridgeScreen
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.min
 import kotlin.properties.Delegates
 import java.awt.event.KeyEvent as AwtKeyEvent
@@ -26,6 +27,7 @@ open class ComposeUI(
     private val _content = mutableStateOf<@Composable () -> Unit>(value = {
         content()
     })
+    private val _toast = mutableStateOf<@Composable () -> Unit>(value = { })
 
     private lateinit var scene: ComposeScene
     private var handle by Delegates.notNull<Long>()
@@ -50,8 +52,13 @@ open class ComposeUI(
             scene.setContent {
                 //for switching
                 val content = _content.value
+
                 Box {
                     content()
+                }
+
+                Box {
+                    _toast.value()
                 }
             }
         } else {
@@ -171,12 +178,22 @@ open class ComposeUI(
     }
 
     fun switchTo(newContent: @Composable () -> Unit) {
+        mouseHandlers.clear()
+
         _content.value = newContent
     }
 
-    private val mouseHandlers = mutableListOf<(composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean>()
+    private val mouseHandlers = CopyOnWriteArrayList<(composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean>()
 
     fun addMouseHandler(handler: (composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean) {
         mouseHandlers.add(handler)
+    }
+
+    fun removeMouseHandler(handler: (Offset, Offset, Int, Boolean) -> Boolean) {
+        mouseHandlers.remove(handler)
+    }
+
+    fun toast(content: @Composable () -> Unit) {
+        _toast.value = content
     }
 }

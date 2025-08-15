@@ -6,8 +6,9 @@ import io.github.betterclient.ascendium.module.Renderable
 import io.github.betterclient.ascendium.module.config.StringSetting
 
 object FPSMod : HUDModule("FPS", "Display your frames per second.") {
-    val format = StringSetting("Format", "%FPS% fps")
+    val template by StringSetting("Template", "%FPS% fps").delegate(this)
+
     override fun render(renderer: Renderable) {
-        renderer.renderText(format.value.replace("%FPS%", "${Bridge.client.fps}"), 0, 0)
+        renderer.renderText(template.replace("%FPS%", Bridge.client.fps.toString()), 0, 0)
     }
 }

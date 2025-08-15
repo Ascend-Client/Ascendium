@@ -1,13 +1,15 @@
 package io.github.betterclient.ascendium.module.config
 
+import io.github.betterclient.ascendium.module.Module
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 @Serializable
 sealed class Setting() {
     abstract val name: String
 
-    abstract fun setFromString(json: String)
+    abstract fun setFromString(json: Setting)
 }
 
 @Serializable
@@ -19,10 +21,12 @@ class BooleanSetting(
         value = !value
     }
 
-    override fun setFromString(json: String) {
-        val out = Json.decodeFromString<BooleanSetting>(json)
+    override fun setFromString(json: Setting) {
+        val out = json as BooleanSetting //if type doesn't match, blame the config manager, not us, this shouldn't end up here if its the wrong type
         value = out.value
     }
+
+    fun delegate(module: Module) = module.settings.add(this).let { ::value } //dirty hack
 }
 
 @Serializable
@@ -32,10 +36,12 @@ class NumberSetting(
     val min: Double = Double.NEGATIVE_INFINITY,
     val max: Double = Double.POSITIVE_INFINITY,
 ) : Setting() {
-    override fun setFromString(json: String) {
-        val out = Json.decodeFromString<NumberSetting>(json)
+    override fun setFromString(json: Setting) {
+        val out = json as NumberSetting
         value = out.value.coerceIn(min, max)
     }
+
+    fun delegate(module: Module) = module.settings.add(this).let { ::value } //dirty hack
 }
 
 @Serializable
@@ -44,10 +50,12 @@ class StringSetting(
     var value: String = "",
     val maxLength: Int = 256,
 ) : Setting() {
-    override fun setFromString(json: String) {
-        val out = Json.decodeFromString<StringSetting>(json)
+    override fun setFromString(json: Setting) {
+        val out = json as StringSetting
         value = out.value.take(maxLength)
     }
+
+    fun delegate(module: Module) = module.settings.add(this).let { ::value }
 }
 
 @Serializable
@@ -64,10 +72,12 @@ class DropdownSetting(
         }
     }
 
-    override fun setFromString(json: String) {
-        val out = Json.decodeFromString<DropdownSetting>(json)
+    override fun setFromString(json: Setting) {
+        val out = json as DropdownSetting
         set(out.value)
     }
+
+    fun delegate(module: Module) = module.settings.add(this).let { ::value }
 }
 
 @Serializable
@@ -75,8 +85,10 @@ class ColorSetting(
     override val name: String,
     var value: Int = -1,
 ) : Setting() {
-    override fun setFromString(json: String) {
-        val out = Json.decodeFromString<ColorSetting>(json)
+    override fun setFromString(json: Setting) {
+        val out = json as ColorSetting
         value = out.value
     }
+
+    fun delegate(module: Module) = module.settings.add(this).let { ::value } //dirty hack
 }

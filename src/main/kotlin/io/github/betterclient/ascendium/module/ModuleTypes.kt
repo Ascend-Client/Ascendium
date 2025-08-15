@@ -7,6 +7,7 @@ import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ColorSetting
+import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.module.config.Setting
 
@@ -23,6 +24,7 @@ open class Module(val name: String, val description: String) {
             onDisable()
             eventBus.unsubscribe()
         }
+        ConfigManager.saveConfig()
     }
 
     open fun onEnable() {}
@@ -32,20 +34,20 @@ open class Module(val name: String, val description: String) {
 abstract class HUDModule(name: String, description: String, hasBackground: Boolean = true) : Module(name, description) {
     var x = 100
     var y = 100
-    val textColor = ColorSetting("Text Color", -1)
+    val textColor by ColorSetting("Text Color", -1).delegate(this)
     val backgroundColor = ColorSetting("Background Color", 0x51000000)
-    val minecraftRenderer = BooleanSetting("Use Minecraft Renderer", true)
-    val scale = NumberSetting("Scale", 1.0, 0.25, 3.0)
+    val minecraftRenderer by BooleanSetting("Use Minecraft Renderer", true).delegate(this)
+    val scale by NumberSetting("Scale", 1.0, 0.25, 3.0).delegate(this)
 
     val width: Int
         get() {
-            val renderable = Renderable(this, NullRenderer(scale.value.toFloat(), minecraftRenderer.value))
+            val renderable = Renderable(this, NullRenderer(scale.toFloat(), minecraftRenderer))
             render(renderable)
             return renderable.width
         }
     val height: Int
         get() {
-            val renderable = Renderable(this, NullRenderer(scale.value.toFloat(), minecraftRenderer.value))
+            val renderable = Renderable(this, NullRenderer(scale.toFloat(), minecraftRenderer))
             render(renderable)
             return renderable.height
         }
@@ -54,10 +56,6 @@ abstract class HUDModule(name: String, description: String, hasBackground: Boole
         if (hasBackground) {
             settings.add(backgroundColor)
         }
-
-        settings.add(textColor)
-        settings.add(minecraftRenderer)
-        settings.add(scale)
     }
 
     abstract fun render(renderer: Renderable)
@@ -68,17 +66,17 @@ abstract class HUDModule(name: String, description: String, hasBackground: Boole
     }
 
     fun render(context: BridgeRenderer) {
-        val nullR = Renderable(this, NullRenderer(scale.value.toFloat(), minecraftRenderer.value))
+        val nullR = Renderable(this, NullRenderer(scale.toFloat(), minecraftRenderer))
         render(nullR)
 
-        if (minecraftRenderer.value) {
-            val renderer = Renderable(this, Renderer(scale.value.toFloat(), context, null))
+        if (minecraftRenderer) {
+            val renderer = Renderable(this, Renderer(scale.toFloat(), context, null))
             renderer.renderBG(nullR)
 
             render(renderer)
         } else {
             SkiaRenderer.withSkia {
-                val renderer = Renderable(this, Renderer(scale.value.toFloat(), null, it))
+                val renderer = Renderable(this, Renderer(scale.toFloat(), null, it))
                 renderer.renderBG(nullR)
 
                 render(renderer)
