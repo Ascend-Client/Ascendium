@@ -69,8 +69,6 @@ open class ComposeUI(
             scene.size = IntSize(window.fbWidth, window.fbHeight)
             scene.density = density
         }
-
-        SkiaRenderer.init()
     }
 
     override fun render(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) {

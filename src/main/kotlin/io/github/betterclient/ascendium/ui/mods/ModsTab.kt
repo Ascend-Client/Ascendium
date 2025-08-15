@@ -32,8 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.dp
+import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.Module
+import io.github.betterclient.ascendium.module.config.ConfigManager
+import io.github.betterclient.ascendium.ui.config.ConfigUI
 
 @Composable
 fun ModsTab() {
@@ -44,13 +47,13 @@ fun ModsTab() {
         LazyColumn(state = scroll) {
             itemsIndexed(items) { index, mods ->
                 Row {
-                    Spacer(Modifier.width(16.dp))
+                    Spacer(Modifier.width(SPACING.dp))
                     mods.forEachIndexed { index0, module ->
                         ModuleView(module)
-                        Spacer(Modifier.width(16.dp))
+                        Spacer(Modifier.width(SPACING.dp))
                     }
                 }
-                if (index != (items.size - 1)) Spacer(Modifier.height(16.dp))
+                if (index != (items.size - 1)) Spacer(Modifier.height(SPACING.dp))
             }
         }
 
@@ -61,6 +64,10 @@ fun ModsTab() {
     }
 }
 
+const val SPACING = 32
+const val WIDTH = 172
+const val HEIGHT = 120
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ModuleView(module: Module) {
@@ -68,17 +75,14 @@ private fun ModuleView(module: Module) {
     val theme = MaterialTheme.colorScheme
 
     val cornerRadius by animateDpAsState(
-        targetValue = if (enabled) 48.dp else 16.dp
+        targetValue = if (enabled) 32.dp else 16.dp
     )
     val backgroundColor by animateColorAsState(
-        targetValue = if (enabled) theme.primaryContainer else theme.surfaceContainer
-    )
-    val contentColor by animateColorAsState(
-        targetValue = if (enabled) theme.onPrimaryContainer else theme.onSurface
+        targetValue = if (enabled) theme.primary else theme.surfaceContainer
     )
 
     Box(Modifier
-        .size(192.dp, 140.dp)
+        .size(WIDTH.dp, HEIGHT.dp)
         .background(
             backgroundColor,
             RoundedCornerShape(cornerRadius)
@@ -86,14 +90,17 @@ private fun ModuleView(module: Module) {
         .clip(RoundedCornerShape(cornerRadius))
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Secondary),
-            onClick = { println("Config!!") }
+            onClick = {
+                ComposeUI.current.switchTo {
+                    ConfigUI(module, true)
+                }
+            }
         )
-        .clickable { enabled = !enabled; module.toggle() }
+        .clickable { enabled = !enabled; module.toggle(); ConfigManager.saveConfig() }
     ) {
         Text(
             module.name,
-            modifier = Modifier.align(Alignment.Center),
-            color = contentColor
+            modifier = Modifier.align(Alignment.Center)
         )
     }
 }

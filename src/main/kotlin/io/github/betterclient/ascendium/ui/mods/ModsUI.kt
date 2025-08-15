@@ -4,7 +4,9 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,11 +14,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.github.betterclient.ascendium.Ascendium
+import io.github.betterclient.ascendium.compose.AscendiumTheme
+import io.github.betterclient.ascendium.compose.Center
+import io.github.betterclient.ascendium.compose.ComposeUI
+import io.github.betterclient.ascendium.compose.rainbowAsState
+import io.github.betterclient.ascendium.module.ModManager
+import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 
 @Composable
 fun ModsUI(smallen: Boolean) {
-    MaterialTheme(darkColorScheme()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    AscendiumTheme {
+        Center {
             var expanded by remember { mutableStateOf(false) }
             val targetSize: Dp = if (smallen) {
                 (if (!expanded) 512 + 256 + 128 else 512 + 128).dp
@@ -38,10 +48,28 @@ fun ModsUI(smallen: Boolean) {
 
             Box(Modifier
                 .size(animatedWidth, animatedHeight)
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6f), RoundedCornerShape(32.dp))
+                .background(MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacity.toFloat()), RoundedCornerShape(32.dp))
                 .safeContentPadding()
                 .clip(RoundedCornerShape(32.dp))
             ) {
+                Row(modifier = Modifier.align(Alignment.TopStart)) {
+                    Spacer(Modifier.width(8.dp))
+                    Button(onClick = {
+                        ComposeUI.current.switchTo {
+                            MoveModuleUI(ModManager.getHUDModules(), false)
+                        }
+                    }) {
+                        Text("Back")
+                    }
+                }
+
+                Row(modifier = Modifier.align(Alignment.TopEnd), verticalAlignment = Alignment.CenterVertically) {
+                    Button(onClick = {}, enabled = false) {
+                        Text("Ascendium", fontSize = 18.sp, color = rainbowAsState().value)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                }
+
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
                     ModsContent()
                 }

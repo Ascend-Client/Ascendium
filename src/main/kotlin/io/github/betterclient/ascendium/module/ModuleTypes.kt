@@ -57,7 +57,7 @@ abstract class HUDModule(name: String, description: String, hasBackground: Boole
     val textColor by color("Text Color", -1)
     val backgroundColor = ColorSetting("Background Color", 0x51000000)
     val minecraftRenderer by boolean("Use Minecraft Renderer", true)
-    val scale by number("Scale", 1.0, 0.25, 3.0)
+    var scale by number("Scale", 1.0, 0.25, 3.0)
 
     val width: Int
         get() {
@@ -102,6 +102,21 @@ abstract class HUDModule(name: String, description: String, hasBackground: Boole
                 render(renderer)
             }
         }
+    }
+
+    fun renderAt(x: Int, y: Int, scale: Double, context: BridgeRenderer) {
+        val xo = this.x
+        val yo = this.y
+        val so = this.scale
+        this.x = x
+        this.y = y
+        this.scale = scale
+
+        render(context)
+
+        this.x = xo
+        this.y = yo
+        this.scale = so
     }
 }
 

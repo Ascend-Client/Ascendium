@@ -30,16 +30,20 @@ class NullMinecraftModRenderer(var size: Float) : ModRenderer {
     override fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int) {}
 }
 
-class NullSkiaModRenderer(var size: Float) : ModRenderer {
-    companion object {
-        val font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f)
-    }
+class NullSkiaModRenderer(size: Float) : ModRenderer {
+    private var _size = size
+    var size
+        set(value) {
+            _size = value
+            font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f * value)
+        }
+        get() = _size
+
+    var font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f * size)
 
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
-        return IntSize(
-            (font.measureTextWidth(text) * size).toInt().getScaled().toInt(),
-            size.toInt().getScaled().toInt()
-        )
+        val textR = font.measureText(text)
+        return IntSize(textR.right.getScaled().toInt(), textR.bottom.getScaled().toInt())
     }
 
     override fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int) {}
@@ -57,16 +61,15 @@ class SkiaModRenderer(size: Float, private val canvas: Canvas) : ModRenderer {
     var font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f * size)
 
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
-        val textWidth = font.measureTextWidth(text)
-        val textHeight = font.size
+        val textR = font.measureText(text)
 
-        canvas.drawString(text, x.getUnscaled(), y.getUnscaled(), font, color.asPaint())
+        canvas.drawString(text, x.getUnscaled(), y.getUnscaled() + (textR.bottom / 2), font, color.asPaint())
 
-        return IntSize(textWidth.getScaled().toInt(), textHeight.getScaled().toInt())
+        return IntSize(textR.width.getScaled().toInt(), textR.bottom.getScaled().toInt())
     }
 
     override fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int) {
-        val rect = Rect.makeXYWH(x.getUnscaled(), y.getUnscaled(), width.getUnscaled() * size, height.getUnscaled() * size)
+        val rect = Rect.makeXYWH(x.getUnscaled(), y.getUnscaled(), (width * size).getUnscaled(), (height * size).getUnscaled())
         canvas.drawRect(rect, color.asPaint())
     }
 }
@@ -83,7 +86,7 @@ class MinecraftModRenderer(var size: Float, private val context: BridgeRenderer)
     }
 
     override fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int) {
-        context.drawRect(x, y, (width * size).toInt(), (height * size).toInt(), color)
+        context.drawRect(x, y, width, height, color)
     }
 }
 

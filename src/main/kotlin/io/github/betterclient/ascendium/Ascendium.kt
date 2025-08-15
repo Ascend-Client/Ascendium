@@ -2,10 +2,14 @@ package io.github.betterclient.ascendium
 
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.config.ConfigManager
+import io.github.betterclient.ascendium.module.config.DropdownSetting
+import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import org.slf4j.LoggerFactory
 
 object Ascendium {
+    val settings = ClientSettings()
+
     fun start() {
         Logger.info("Starting!")
         ConfigManager
@@ -24,4 +28,14 @@ object Logger {
     internal val logger = LoggerFactory.getLogger("Ascendium")
 
     fun info(s: String) = logger.info(s)
+}
+
+class ClientSettings {
+    private val _bo = NumberSetting("Background opacity", 0.7, 0.1, 1.0)
+    val backgroundOpacity by _bo::value
+
+    private val _t = DropdownSetting("Theme", "Dark", listOf("Dark", "Light"))
+    val theme by _t::value
+
+    val settings = listOf(_bo, _t)
 }

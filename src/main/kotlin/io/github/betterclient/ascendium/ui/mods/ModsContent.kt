@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.betterclient.ascendium.Ascendium
+import io.github.betterclient.ascendium.ui.config.SettingEditor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +42,11 @@ fun ModsContent() {
 
     when(selectedTab) {
         0 -> ModsTab()
-        1 -> {}//TODO
+        1 -> {
+            for (setting in Ascendium.settings.settings) {
+                SettingEditor(setting)
+            }
+        }
         2 -> ConfigTab()
     }
 }

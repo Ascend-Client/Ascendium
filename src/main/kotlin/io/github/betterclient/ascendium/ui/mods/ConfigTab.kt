@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import io.github.betterclient.ascendium.compose.Center
 import io.github.betterclient.ascendium.compose.detectOutsideClick
 import io.github.betterclient.ascendium.compose.showToast
 import io.github.betterclient.ascendium.module.config.ConfigManager
@@ -27,7 +28,7 @@ import java.io.File
 
 @Composable
 fun ConfigTab() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Center {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -55,6 +56,7 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
                     .size(300.dp, 120.dp).detectOutsideClick { showCreate = false },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(Modifier.height(8.dp))
                 var name by remember { mutableStateOf("") }
                 OutlinedTextField(
                     value = name,
@@ -64,8 +66,8 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
                     colors = OutlinedTextFieldDefaults
                         .colors()
                         .copy(
-                            unfocusedTextColor = Color.White,
-                            focusedTextColor = Color.White,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                            focusedTextColor = MaterialTheme.colorScheme.onBackground,
                             unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer //make the container visible while unfocused
                         )
                 )
@@ -162,7 +164,7 @@ private fun ConfigList(configs0: MutableState<List<String>>) {
                         color = if (config == active) {
                             Color.Green
                         } else {
-                            Color.White
+                            MaterialTheme.colorScheme.onBackground
                         }
                     )
 

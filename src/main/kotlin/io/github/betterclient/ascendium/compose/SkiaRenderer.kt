@@ -31,6 +31,7 @@ object SkiaRenderer {
     }
 
     fun withSkia(block: (Canvas) -> Unit) {
+        init()
         GlStateUtil.save()
         setKnownGoodStateForSkia()
         this.context.resetGLAll()

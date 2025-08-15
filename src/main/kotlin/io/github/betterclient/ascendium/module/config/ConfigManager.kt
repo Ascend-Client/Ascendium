@@ -1,5 +1,6 @@
 package io.github.betterclient.ascendium.module.config
 
+import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.module.HUDModule
 import io.github.betterclient.ascendium.module.ModManager
 import kotlinx.serialization.Serializable
@@ -51,12 +52,27 @@ object ConfigManager {
             }
 
             if (module is HUDModule) {
-                val xSetting = module.settings.find { it.name == "x" } as? NumberSetting
-                val ySetting = module.settings.find { it.name == "y" } as? NumberSetting
+                val xSetting = modConfig.settings.find { it.name == "x" } as? NumberSetting
+                val ySetting = modConfig.settings.find { it.name == "y" } as? NumberSetting
                 if (xSetting != null && ySetting != null) {
                     module.x = xSetting.value.toInt()
                     module.y = ySetting.value.toInt()
                 }
+            }
+        }
+
+        val clientConfig = File(configDir, "Ascendium.json")
+        if (clientConfig.exists()) {
+            val modConfig = Json.decodeFromString<ConfigModule>(clientConfig.readText())
+            for (setting in modConfig.settings) {
+                Ascendium.settings
+                    .settings
+                    .find { setting.name == it.name }
+                    ?.let {
+                        if (it::class == setting::class) {
+                            it.setFromString(setting)
+                        }
+                    }
             }
         }
 
@@ -83,6 +99,10 @@ object ConfigManager {
             }
             modConfigFile.writeText(Json.encodeToString(modConfig))
         }
+
+        val clientConfigFile = File(configDir, "Ascendium.json")
+        val cfg = ConfigModule(true, Ascendium.settings.settings)
+        clientConfigFile.writeText(Json.encodeToString(cfg))
     }
 }
 

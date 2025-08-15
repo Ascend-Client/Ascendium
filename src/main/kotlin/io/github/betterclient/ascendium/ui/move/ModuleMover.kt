@@ -3,6 +3,7 @@ package io.github.betterclient.ascendium.ui.move
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.module.HUDModule
+import io.github.betterclient.ascendium.module.config.ConfigManager
 import org.jetbrains.skia.Rect
 
 class ModuleMover(val mods: List<HUDModule>) {
@@ -19,7 +20,7 @@ class ModuleMover(val mods: List<HUDModule>) {
 
         current.addMouseHandler { _, mcCoords, button, clicked ->
             if (button != 0) return@addMouseHandler false
-            if (!clicked) return@addMouseHandler isDragging.also { isDragging = false } //ew
+            if (!clicked) return@addMouseHandler isDragging.also { isDragging = false; ConfigManager.saveConfig() } //ew
 
             return@addMouseHandler handleClick(mcCoords.x, mcCoords.y)
         }
