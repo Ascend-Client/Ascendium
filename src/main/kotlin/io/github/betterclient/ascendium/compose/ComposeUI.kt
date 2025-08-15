@@ -7,6 +7,7 @@ import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
@@ -77,6 +78,10 @@ open class ComposeUI(
             scene.render(it.asComposeCanvas(), System.nanoTime())
         }
 
+        renderHandlers.forEach { handler ->
+            handler(renderer, mouseX, mouseY)
+        }
+
         val client = Bridge.client
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
@@ -99,7 +104,8 @@ open class ComposeUI(
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
             eventType = PointerEventType.Press,
-            nativeEvent = AWTUtils.MouseEvent(AWTUtils.getAwtMods(handle), button)
+            nativeEvent = AWTUtils.MouseEvent(AWTUtils.getAwtMods(handle), button),
+            button = PointerButton(button)
         )
     }
 
@@ -116,7 +122,8 @@ open class ComposeUI(
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
             eventType = PointerEventType.Release,
-            nativeEvent = AWTUtils.MouseEvent(AWTUtils.getAwtMods(handle), button)
+            nativeEvent = AWTUtils.MouseEvent(AWTUtils.getAwtMods(handle), button),
+            button = PointerButton(button)
         )
     }
 
@@ -179,11 +186,14 @@ open class ComposeUI(
 
     fun switchTo(newContent: @Composable () -> Unit) {
         mouseHandlers.clear()
+        renderHandlers.clear()
+        _toast.value = { } //clear toast
 
         _content.value = newContent
     }
 
     private val mouseHandlers = CopyOnWriteArrayList<(composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean>()
+    private val renderHandlers = CopyOnWriteArrayList<(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) -> Unit>()
 
     fun addMouseHandler(handler: (composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean) {
         mouseHandlers.add(handler)
@@ -195,5 +205,9 @@ open class ComposeUI(
 
     fun toast(content: @Composable () -> Unit) {
         _toast.value = content
+    }
+
+    fun addRenderHandler(function: (renderer: BridgeRenderer, mouseX: Int, mouseY: Int) -> Unit) {
+        renderHandlers.add(function)
     }
 }

@@ -2,6 +2,8 @@ package io.github.betterclient.ascendium.ui.mods
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.PointerMatcher
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.onClick
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.Module
@@ -57,6 +61,7 @@ fun ModsTab() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ModuleView(module: Module) {
     var enabled by remember { mutableStateOf(module.enabled) }
@@ -79,6 +84,10 @@ private fun ModuleView(module: Module) {
             RoundedCornerShape(cornerRadius)
         )
         .clip(RoundedCornerShape(cornerRadius))
+        .onClick(
+            matcher = PointerMatcher.mouse(PointerButton.Secondary),
+            onClick = { println("Config!!") }
+        )
         .clickable { enabled = !enabled; module.toggle() }
     ) {
         Text(

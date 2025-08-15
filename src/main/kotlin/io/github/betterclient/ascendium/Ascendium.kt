@@ -1,7 +1,8 @@
 package io.github.betterclient.ascendium
 
+import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.config.ConfigManager
-import io.github.betterclient.ascendium.ui.mods.ModsUI
+import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import org.slf4j.LoggerFactory
 
 object Ascendium {
@@ -14,7 +15,7 @@ object Ascendium {
             name = "Open GUI",
             category = "Ascendium"
         ).onPressed {
-            Bridge.client.openScreen(ModsUI())
+            Bridge.client.openScreen(MoveModuleUI(ModManager.getHUDModules()))
         }
     }
 }

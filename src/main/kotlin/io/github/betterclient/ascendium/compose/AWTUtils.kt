@@ -36,8 +36,15 @@ internal object AWTUtils {
         return awtMods
     }
 
+    fun glfwToAwtButton(glfwButton: Int): Int = when (glfwButton) {
+        GLFW_MOUSE_BUTTON_1 -> java.awt.event.MouseEvent.BUTTON1
+        GLFW_MOUSE_BUTTON_2 -> java.awt.event.MouseEvent.BUTTON2
+        GLFW_MOUSE_BUTTON_3 -> java.awt.event.MouseEvent.BUTTON3
+        else -> java.awt.event.MouseEvent.BUTTON1
+    }
+
     fun MouseEvent(awtMods: Int, button: Int) = java.awt.event.MouseEvent(
-        awtComponent, 0, 0, awtMods, 0, 0, 1, false, button
+        awtComponent, 0, 0, awtMods, 0, 0, 1, false, glfwToAwtButton(button)
     )
 
     fun MouseWheelEvent(awtMods: Int) = MouseWheelEvent(

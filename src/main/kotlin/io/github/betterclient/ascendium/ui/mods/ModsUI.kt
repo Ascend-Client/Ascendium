@@ -12,12 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.compose.ComposeUI
-
-//TODO: remove after ModMoveUI
-class ModsUI : ComposeUI({
-    ModsUI(false)
-})
 
 @Composable
 fun ModsUI(smallen: Boolean) {

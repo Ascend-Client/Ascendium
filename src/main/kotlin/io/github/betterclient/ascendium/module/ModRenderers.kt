@@ -37,8 +37,8 @@ class NullSkiaModRenderer(var size: Float) : ModRenderer {
 
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
         return IntSize(
-            (font.measureTextWidth(text) * size).toInt(),
-            (font.size * size).toInt()
+            (font.measureTextWidth(text) * size).toInt().getScaled().toInt(),
+            size.toInt().getScaled().toInt()
         )
     }
 
