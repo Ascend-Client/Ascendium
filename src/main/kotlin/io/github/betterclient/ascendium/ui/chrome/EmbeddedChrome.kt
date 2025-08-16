@@ -61,7 +61,7 @@ fun ComposeChrome() {
                         .focusable()
                         .onKeyEvent { keyEvent ->
                             val p0 = keyEvent.nativeKeyEvent as KeyEvent
-                            val p1 = KeyEvent(browser.browser.uiComponent, p0.id, p0.`when`, p0.modifiers, p0.keyCode, p0.keyChar, p0.keyLocation)
+                            val p1 = KeyEvent(browser.browser.uiComponent, p0.id, p0.`when`, p0.modifiersEx, p0.keyCode, p0.keyChar, p0.keyLocation)
                             browser.browser.sendKeyEvent(p1)
                             println(p1)
                             true

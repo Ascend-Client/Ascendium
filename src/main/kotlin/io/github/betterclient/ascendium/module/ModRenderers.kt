@@ -31,45 +31,41 @@ class NullMinecraftModRenderer(var size: Float) : ModRenderer {
 }
 
 class NullSkiaModRenderer(size: Float) : ModRenderer {
-    private var _size = size
-    var size
-        set(value) {
-            _size = value
-            font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f * value)
-        }
-        get() = _size
+    init {
+        font.size = 16 * size
+    }
 
-    var font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f * size)
+    companion object {
+        val font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f)
+    }
 
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
         val textR = font.measureText(text)
-        return IntSize(textR.right.getScaled().toInt(), textR.bottom.getScaled().toInt())
+        return IntSize(textR.right.getScaled().toInt(), textR.height.getScaled().toInt())
     }
 
     override fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int) {}
 }
 
 class SkiaModRenderer(size: Float, private val canvas: Canvas) : ModRenderer {
-    private var _size = size
-    var size
-        set(value) {
-            _size = value
-            font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f * value)
-        }
-        get() = _size
+    init {
+        font.size = 16 * size
+    }
 
-    var font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f * size)
+    companion object {
+        val font = Font(FontMgr.default.matchFamilyStyle("Arial", FontStyle.NORMAL), 16f)
+    }
 
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
         val textR = font.measureText(text)
 
-        canvas.drawString(text, x.getUnscaled(), y.getUnscaled() + (textR.bottom / 2), font, color.asPaint())
+        canvas.drawString(text, x.getUnscaled(), y.getUnscaled() + (textR.height / 2), font, color.asPaint())
 
-        return IntSize(textR.width.getScaled().toInt(), textR.bottom.getScaled().toInt())
+        return IntSize(textR.width.getScaled().toInt(), textR.height.getScaled().toInt())
     }
 
     override fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int) {
-        val rect = Rect.makeXYWH(x.getUnscaled(), y.getUnscaled(), (width * size).getUnscaled(), (height * size).getUnscaled())
+        val rect = Rect.makeXYWH(x.getUnscaled(), y.getUnscaled(), (width).getUnscaled(), (height).getUnscaled())
         canvas.drawRect(rect, color.asPaint())
     }
 }

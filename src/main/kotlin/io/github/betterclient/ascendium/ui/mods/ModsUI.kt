@@ -7,7 +7,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.compose.rainbowAsState
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.ui.chrome.ComposeChrome
+import io.github.betterclient.ascendium.ui.chrome.OffscreenBrowser
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 
 @Composable
@@ -66,7 +66,7 @@ fun ModsUI(smallen: Boolean) {
 
                 Row(modifier = Modifier.align(Alignment.TopEnd), verticalAlignment = Alignment.CenterVertically) {
                     Button(onClick = {
-                        if (Ascendium.settings.CHROME == null) return@Button
+                        if (OffscreenBrowser.CHROME == null) return@Button
                         ComposeUI.current.switchTo {
                             ComposeChrome()
                         }

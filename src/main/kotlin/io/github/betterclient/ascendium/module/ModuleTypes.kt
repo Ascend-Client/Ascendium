@@ -13,6 +13,8 @@ import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.module.config.Setting
 import io.github.betterclient.ascendium.module.config.StringSetting
+import kotlin.system.measureNanoTime
+import kotlin.system.measureTimeMillis
 
 open class Module(val name: String, val description: String) {
     var enabled: Boolean = false
@@ -98,7 +100,6 @@ abstract class HUDModule(name: String, description: String, hasBackground: Boole
             SkiaRenderer.withSkia {
                 val renderer = Renderable(this, Renderer(scale.toFloat(), null, it))
                 renderer.renderBG(nullR)
-
                 render(renderer)
             }
         }

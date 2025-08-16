@@ -1,18 +1,11 @@
 package io.github.betterclient.ascendium
 
-import dev.datlag.kcef.KCEF
-import dev.datlag.kcef.KCEFClient
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
-import io.github.betterclient.ascendium.ui.chrome.OffscreenBrowser
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import java.io.File
-import javax.swing.JOptionPane
-import kotlin.system.exitProcess
 
 object Ascendium {
     val settings = ClientSettings()

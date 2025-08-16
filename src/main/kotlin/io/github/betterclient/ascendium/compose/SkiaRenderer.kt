@@ -1,15 +1,7 @@
 package io.github.betterclient.ascendium.compose
 
 import io.github.betterclient.ascendium.Bridge
-import org.jetbrains.skia.BackendRenderTarget
-import org.jetbrains.skia.Canvas
-import org.jetbrains.skia.ColorSpace
-import org.jetbrains.skia.DirectContext
-import org.jetbrains.skia.FramebufferFormat
-import org.jetbrains.skia.Paint
-import org.jetbrains.skia.Surface
-import org.jetbrains.skia.SurfaceColorFormat
-import org.jetbrains.skia.SurfaceOrigin
+import org.jetbrains.skia.*
 import org.lwjgl.opengl.GL33C
 
 object SkiaRenderer {
@@ -34,11 +26,11 @@ object SkiaRenderer {
         init()
         GlStateUtil.save()
         setKnownGoodStateForSkia()
-        this.context.resetGLAll()
 
+        this.context.resetAll()
         block(surface.canvas)
-
         this.context.flush()
+
         GlStateUtil.restore()
     }
 
@@ -102,6 +94,7 @@ object SkiaRenderer {
     }
 }
 
-fun Int.asPaint() = Paint().apply { color = this@asPaint }
+private val cache = mutableMapOf<Int, Paint>()
+fun Int.asPaint() = cache.computeIfAbsent(this) { Paint().apply { color = this@asPaint } }
 fun Number.getScaled() = SkiaRenderer.getScaled(this)
 fun Number.getUnscaled() = SkiaRenderer.getUnscaled(this)

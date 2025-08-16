@@ -94,6 +94,9 @@ fun SettingEditor(setting: Setting) {
 fun ResetButton(onClick: () -> Unit) {
     IconButton(onClick = {
         onClick()
-    }) { Icon(imageVector = Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(20.dp)) }
+    }) { Icon(imageVector = Icons.Default.Replay, contentDescription = null, modifier = Modifier.background(
+        MaterialTheme.colorScheme.primary,
+        RoundedCornerShape(4.dp)
+    ).size(20.dp)) }
     Spacer(Modifier.width(4.dp))
 }
