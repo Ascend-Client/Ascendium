@@ -60,7 +60,7 @@ object SkiaRenderer {
                 renderTarget,
                 SurfaceOrigin.BOTTOM_LEFT,
                 SurfaceColorFormat.RGBA_8888,
-                ColorSpace.sRGBLinear
+                ColorSpace.sRGB
             )!!
             vpW = window.fbWidth
             vpH = window.fbHeight
@@ -83,7 +83,7 @@ object SkiaRenderer {
                 renderTarget,
                 SurfaceOrigin.BOTTOM_LEFT,
                 SurfaceColorFormat.RGBA_8888,
-                ColorSpace.sRGBLinear
+                ColorSpace.sRGB
             )!!
 
             vpW = window.fbWidth

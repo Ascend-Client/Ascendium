@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.IntSize
 import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.BridgeScreen
+import java.awt.event.MouseEvent
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.min
 import kotlin.properties.Delegates
@@ -81,10 +82,20 @@ open class ComposeUI(
         }
 
         val client = Bridge.client
+        val event = AWTUtils.MouseEvent(
+            client.mouse.xPos,
+            client.mouse.yPos,
+            AWTUtils.getAwtMods(handle),
+            0, //NO BUTTON
+            MouseEvent.MOUSE_MOVED
+        )
+        mouseEventHandlers.forEach {
+            it(client.mouse.xPos, client.mouse.yPos, event) //this event is going out no matter what, sorry.
+        }
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
             eventType = PointerEventType.Move,
-            nativeEvent = AWTUtils.MouseEvent(AWTUtils.getAwtMods(handle), 0 /*NO_BUTTON*/)
+            nativeEvent = event
         )
     }
 
@@ -99,10 +110,23 @@ open class ComposeUI(
         }
 
         val client = Bridge.client
+        val event = AWTUtils.MouseEvent(
+            client.mouse.xPos,
+            client.mouse.yPos,
+            AWTUtils.getAwtMods(handle),
+            button,
+            MouseEvent.MOUSE_PRESSED
+        )
+        mouseEventHandlers.forEach {
+            if (it(client.mouse.xPos, client.mouse.yPos, event)) {
+                //no event for compose :(
+                return
+            }
+        }
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
             eventType = PointerEventType.Press,
-            nativeEvent = AWTUtils.MouseEvent(AWTUtils.getAwtMods(handle), button),
+            nativeEvent = event,
             button = PointerButton(button)
         )
     }
@@ -112,26 +136,60 @@ open class ComposeUI(
             val composeMouse = Offset(Bridge.client.mouse.xPos.toFloat(), Bridge.client.mouse.yPos.toFloat())
             val mcMouse = Offset(mouseX.toFloat(), mouseY.toFloat())
             if (handler(composeMouse, mcMouse, button, false)) {
-                return@forEach //this handler demands that we don't talk about this when talking to compose, ok! (can you notice that I copied and pasted it?)
+                return //this handler demands that we don't talk about this when talking to compose, ok! (can you notice that I copied and pasted it?)
+            }
+        }
+        val client = Bridge.client
+        val event = AWTUtils.MouseEvent(
+            client.mouse.xPos,
+            client.mouse.yPos,
+            AWTUtils.getAwtMods(handle),
+            button,
+            MouseEvent.MOUSE_RELEASED
+        )
+        mouseEventHandlers.forEach {
+            if (it(client.mouse.xPos, client.mouse.yPos, event)) {
+                if (it(client.mouse.xPos, client.mouse.yPos, AWTUtils.MouseEvent(
+                        client.mouse.xPos,
+                        client.mouse.yPos,
+                        AWTUtils.getAwtMods(handle),
+                        button,
+                        MouseEvent.MOUSE_CLICKED
+                    ))) {
+                    return
+                }
+                return
             }
         }
 
-        val client = Bridge.client
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
             eventType = PointerEventType.Release,
-            nativeEvent = AWTUtils.MouseEvent(AWTUtils.getAwtMods(handle), button),
+            nativeEvent = event,
             button = PointerButton(button)
         )
     }
 
     override fun mouseScrolled(mouseX: Int, mouseY: Int, scrollX: Double, scrollY: Double) {
         val client = Bridge.client
+        val event = AWTUtils.MouseWheelEvent(
+            client.mouse.xPos,
+            client.mouse.yPos,
+            scrollY,
+            AWTUtils.getAwtMods(handle),
+            MouseEvent.MOUSE_WHEEL
+        )
+        mouseEventHandlers.forEach {
+            if (it(client.mouse.xPos, client.mouse.yPos, event)) {
+                return
+            }
+        }
+
         scene.sendPointerEvent(
             position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
             eventType = PointerEventType.Scroll,
             scrollDelta = Offset(scrollX.toFloat(), -scrollY.toFloat()),
-            nativeEvent = AWTUtils.MouseWheelEvent(AWTUtils.getAwtMods(handle))
+            nativeEvent = event
         )
         super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)
     }
@@ -192,6 +250,7 @@ open class ComposeUI(
 
     private val mouseHandlers = CopyOnWriteArrayList<(composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean>()
     private val renderHandlers = CopyOnWriteArrayList<(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) -> Unit>()
+    private val mouseEventHandlers = CopyOnWriteArrayList<(mouseX: Int, mouseY: Int, event: MouseEvent) -> Boolean>()
 
     fun addMouseHandler(handler: (composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean) {
         mouseHandlers.add(handler)
@@ -207,5 +266,9 @@ open class ComposeUI(
 
     fun addRenderHandler(function: (renderer: BridgeRenderer, mouseX: Int, mouseY: Int) -> Unit) {
         renderHandlers.add(function)
+    }
+
+    fun addMouseEventHandler(function: (mouseX: Int, mouseY: Int, event: MouseEvent) -> Boolean) {
+        mouseEventHandlers.add(function)
     }
 }

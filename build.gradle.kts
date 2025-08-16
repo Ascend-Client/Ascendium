@@ -28,6 +28,19 @@ repositories {
     maven("https://maven.google.com/")
     google()
     maven("https://api.modrinth.com/maven")
+    maven("https://jogamp.org/deployment/maven")
+}
+
+loom {
+    runs {
+        forEach {
+            it.programArgs(
+                "--add-opens java.desktop/sun.awt=ALL-UNNAMED",
+                "--add-opens java.desktop/sun.lwawt=ALL-UNNAMED",
+                "--add-opens java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
+            )
+        }
+    }
 }
 
 val transitiveInclude: Configuration by configurations.creating {
@@ -62,6 +75,19 @@ dependencies {
     use(compose.uiTooling)
     use(compose.animation)
     use(compose.materialIconsExtended)
+
+    use("dev.datlag:kcef:2025.03.23")
+    val joglVersion = "2.5.0"
+    use("org.jogamp.gluegen:gluegen-rt-main:$joglVersion")
+    use("org.jogamp.jogl:jogl-all-main:$joglVersion")
+    use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-linux-amd64")
+    use("org.jogamp.jogl:jogl-all:$joglVersion:natives-linux-amd64")
+    use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-linux-aarch64")
+    use("org.jogamp.jogl:jogl-all:$joglVersion:natives-linux-aarch64")
+    use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-windows-amd64")
+    use("org.jogamp.jogl:jogl-all:$joglVersion:natives-windows-amd64")
+    use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-macosx-universal")
+    use("org.jogamp.jogl:jogl-all:$joglVersion:natives-macosx-universal")
 
     var i = 0
     transitiveInclude.resolvedConfiguration.resolvedArtifacts.forEach {

@@ -43,13 +43,23 @@ internal object AWTUtils {
         else -> java.awt.event.MouseEvent.BUTTON1
     }
 
-    fun MouseEvent(awtMods: Int, button: Int) = java.awt.event.MouseEvent(
-        awtComponent, 0, 0, awtMods, 0, 0, 1, false, glfwToAwtButton(button)
+    fun MouseEvent(mouseX: Int, mouseY: Int, awtMods: Int, button: Int, eventType: Int) = java.awt.event.MouseEvent(
+        awtComponent, eventType, System.currentTimeMillis(), awtMods, mouseX, mouseY, 1, false, glfwToAwtButton(button)
     )
 
-    fun MouseWheelEvent(awtMods: Int) = MouseWheelEvent(
-        awtComponent, 0, 0, awtMods, 0, 0, 1, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, 3, 1
-    )
+    fun MouseWheelEvent(x: Int, y: Int, scrollY: Double, awtMods: Int, eventType: Int) =
+        MouseWheelEvent(
+            awtComponent,
+            eventType, System.currentTimeMillis(),
+            awtMods,
+            x,
+            y,
+            0,
+            false,
+            MouseWheelEvent.WHEEL_UNIT_SCROLL,
+            1,
+            (-scrollY).toInt()
+        )
 
     private fun isCtrlPressed(windowHandle: Long): Boolean {
         return glfwGetKey(windowHandle, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(windowHandle, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;

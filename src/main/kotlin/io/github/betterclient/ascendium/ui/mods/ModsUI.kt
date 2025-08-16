@@ -21,6 +21,7 @@ import io.github.betterclient.ascendium.compose.Center
 import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.compose.rainbowAsState
 import io.github.betterclient.ascendium.module.ModManager
+import io.github.betterclient.ascendium.ui.chrome.ComposeChrome
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 
 @Composable
@@ -64,7 +65,12 @@ fun ModsUI(smallen: Boolean) {
                 }
 
                 Row(modifier = Modifier.align(Alignment.TopEnd), verticalAlignment = Alignment.CenterVertically) {
-                    Button(onClick = {}, enabled = false) {
+                    Button(onClick = {
+                        if (Ascendium.settings.CHROME == null) return@Button
+                        ComposeUI.current.switchTo {
+                            ComposeChrome()
+                        }
+                    }) {
                         Text("Ascendium", fontSize = 18.sp, color = rainbowAsState().value)
                     }
                     Spacer(Modifier.width(8.dp))

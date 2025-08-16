@@ -11,7 +11,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ScrollbarAdapter
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -56,15 +56,15 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.BridgeRenderer
 import org.jetbrains.skia.IRect
-import kotlin.compareTo
+import java.awt.Component
+import java.awt.event.MouseEvent
+import java.awt.event.MouseWheelEvent
 import kotlin.math.min
 
 @Composable
@@ -283,7 +283,7 @@ fun DropdownMenu(
                 }
 
                 VerticalScrollbar(
-                    adapter = ScrollbarAdapter(scrollState),
+                    adapter = rememberScrollbarAdapter(scrollState),
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(8.dp)
@@ -297,4 +297,66 @@ fun DropdownMenu(
 fun TrailingIcon(expanded: Boolean) {
     //Copied from ExposedDropdownMenuDefaults.TrailingIcon
     Icon(Icons.Default.ArrowDropDown, null, Modifier.rotate(if (expanded) 180f else 0f))
+}
+
+@Composable
+fun Modifier.detectInsideEvent(component: Component, func: (mouseX: Int, mouseY: Int, event: MouseEvent) -> Unit): Modifier {
+    var position by remember { mutableStateOf<Rect?>(null) }
+    LaunchedEffect(Unit) {
+        ComposeUI.current.addMouseEventHandler { x, y, event ->
+            if (position == null) return@addMouseEventHandler false
+
+            if (x < position!!.left || x > position!!.right ||
+                y < position!!.top || y > position!!.bottom) {
+                return@addMouseEventHandler false //outside
+            }
+
+            func(
+                (x - position!!.left).toInt(),
+                (y - position!!.top).toInt(),
+                translateMouseEvent(component, position!!.left.toInt(), position!!.top.toInt(), event)
+            )
+            return@addMouseEventHandler false
+        }
+    }
+    return this.onGloballyPositioned {
+        position = it.toRect()
+    }
+}
+
+private fun translateMouseEvent(
+    component: Component,
+    x: Int,
+    y: Int,
+    event: MouseEvent
+): MouseEvent {
+    val translatedX = event.x - x
+    val translatedY = event.y - y
+
+    return when (event) {
+        is MouseWheelEvent -> MouseWheelEvent(
+            component,
+            event.id,
+            event.`when`,
+            event.modifiersEx,
+            translatedX,
+            translatedY,
+            event.clickCount,
+            event.isPopupTrigger,
+            event.scrollType,
+            event.scrollAmount,
+            event.wheelRotation
+        )
+        else -> MouseEvent(
+            component,
+            event.id,
+            event.`when`,
+            event.modifiersEx,
+            translatedX,
+            translatedY,
+            event.clickCount,
+            event.isPopupTrigger,
+            event.button
+        )
+    }
 }
