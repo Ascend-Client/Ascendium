@@ -48,7 +48,12 @@ fun ConfigContent(preview: Boolean, mod: Module) {
         val state = rememberScrollState()
         Column(Modifier.verticalScroll(state)) {
             Spacer(Modifier.height(4.dp))
-            Row { Spacer(Modifier.width(32.dp)); Text(mod.description, fontSize = 20.sp, color = MaterialTheme.colorScheme.onBackground) }
+            Row { Spacer(Modifier.width(32.dp)); Text(
+                text = mod.description,
+                fontSize = 24.sp,
+                fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
+                color = MaterialTheme.colorScheme.onBackground
+            ) }
             Spacer(Modifier.height(4.dp))
             ModToggle(mod)
             Spacer(Modifier.height(4.dp))

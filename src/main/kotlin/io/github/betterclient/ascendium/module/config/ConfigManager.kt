@@ -1,6 +1,7 @@
 package io.github.betterclient.ascendium.module.config
 
 import io.github.betterclient.ascendium.Ascendium
+import io.github.betterclient.ascendium.Logger
 import io.github.betterclient.ascendium.module.HUDModule
 import io.github.betterclient.ascendium.module.ModManager
 import kotlinx.serialization.Serializable
@@ -35,11 +36,18 @@ object ConfigManager {
         for (module in ModManager.modules) {
             val modConfigFile = File(configDir, "${module.name}.json")
             if (!modConfigFile.exists()) continue
-            val modConfig = Json.decodeFromString<ConfigModule>(modConfigFile.readText())
+            val modConfig: ConfigModule
+            try {
+                 modConfig = Json.decodeFromString(modConfigFile.readText())
+            } catch (_: Exception) {
+                Logger.info("Corrupted mod ${module.name}")
+                continue
+            }
 
             if (module.enabled != modConfig.enabled) {
                 module.toggle()
             }
+
             for (setting in modConfig.settings) {
                 module
                     .settings
@@ -63,7 +71,13 @@ object ConfigManager {
 
         val clientConfig = File(configDir, "Ascendium.json")
         if (clientConfig.exists()) {
-            val modConfig = Json.decodeFromString<ConfigModule>(clientConfig.readText())
+            val modConfig: ConfigModule
+            try {
+                modConfig = Json.decodeFromString(clientConfig.readText())
+            } catch (_: Exception) {
+                Logger.info("Client config corrupted")
+                return
+            }
             for (setting in modConfig.settings) {
                 Ascendium.settings
                     .settings

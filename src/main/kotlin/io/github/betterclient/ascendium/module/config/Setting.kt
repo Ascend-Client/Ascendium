@@ -2,6 +2,7 @@ package io.github.betterclient.ascendium.module.config
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -21,10 +22,12 @@ sealed class Setting() {
 @Serializable
 class BooleanSetting(
     override val name: String,
-    private val _value: Boolean = false
+    @Transient private val _value: Boolean = false
 ) : Setting() {
-    @Transient val state: MutableState<Boolean> = mutableStateOf(_value)
+    @Transient
+    val state: MutableState<Boolean> = mutableStateOf(_value)
 
+    @SerialName("bool_value")
     var value
         set(value) {
             state.value = value
@@ -44,12 +47,14 @@ class BooleanSetting(
 @Serializable
 class NumberSetting(
     override val name: String,
-    private val _value: Double = 0.0,
+    @Transient private val _value: Double = 0.0,
     val min: Double = Double.NEGATIVE_INFINITY,
     val max: Double = Double.POSITIVE_INFINITY,
 ) : Setting() {
-    @Transient val state: MutableState<Double> = mutableStateOf(_value)
+    @Transient
+    val state: MutableState<Double> = mutableStateOf(_value)
 
+    @SerialName("number_value")
     var value
         set(value) {
             state.value = value
@@ -69,10 +74,11 @@ class NumberSetting(
 @Serializable
 class StringSetting(
     override val name: String,
-    private val _value: String = ""
+    @Transient private val _value: String = ""
 ) : Setting() {
     @Transient val state: MutableState<String> = mutableStateOf(_value)
 
+    @SerialName("string_value")
     var value
         set(value) {
             state.value = value
@@ -92,11 +98,12 @@ class StringSetting(
 @Serializable
 class DropdownSetting(
     override val name: String,
-    private val _value: String = "",
-    val options: List<String> = emptyList(),
+    @Transient private val _value: String = "",
+    @Transient val options: List<String> = emptyList(),
 ) : Setting() {
     @Transient val state: MutableState<String> = mutableStateOf(_value)
 
+    @SerialName("dropdown_value")
     var value
         set(value) {
             state.value = value
@@ -124,11 +131,11 @@ class DropdownSetting(
 @Serializable
 class ColorSetting(
     override val name: String,
-    private val _value: Int = -1,
+    @Transient private val _value: Int = -1,
 ) : Setting() {
-
     @Transient val state: MutableState<Int> = mutableStateOf(_value)
 
+    @SerialName("color_value")
     var value
         set(value) {
             state.value = value

@@ -62,6 +62,9 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.BridgeRenderer
@@ -163,22 +166,34 @@ fun showToast(text: String) {
 @Composable
 fun AscendiumTheme(content: @Composable () -> Unit) {
     val colorScheme = colorScheme()
+    val font = FontFamily(Font(
+        "Minecraft",
+        Ascendium::class.java.getResourceAsStream("/assets/ascendium/Minecraft.ttf")!!.use { it.readAllBytes() },
+        FontWeight.Medium
+    ))
+
+    @Composable
+    fun TextStyle.MCFont(): TextStyle {
+        return if (Ascendium.settings.mcFontState) this.copy(fontFamily = font, fontSize = this.fontSize * 1.3) else this
+    }
+
+    val bt = Typography()
     val t = Typography(
-        displayLarge = TextStyle(color = colorScheme.onBackground),
-        displayMedium = TextStyle(color = colorScheme.onBackground),
-        displaySmall = TextStyle(color = colorScheme.onBackground),
-        headlineLarge = TextStyle(color = colorScheme.onBackground),
-        headlineMedium = TextStyle(color = colorScheme.onBackground),
-        headlineSmall = TextStyle(color = colorScheme.onBackground),
-        titleLarge = TextStyle(color = colorScheme.onBackground),
-        titleMedium = TextStyle(color = colorScheme.onBackground),
-        titleSmall = TextStyle(color = colorScheme.onBackground),
-        bodyLarge = TextStyle(color = colorScheme.onBackground),
-        bodyMedium = TextStyle(color = colorScheme.onBackground),
-        bodySmall = TextStyle(color = colorScheme.onBackground),
-        labelLarge = TextStyle(color = colorScheme.onBackground),
-        labelMedium = TextStyle(color = colorScheme.onBackground),
-        labelSmall = TextStyle(color = colorScheme.onBackground),
+        displayLarge = bt.displayLarge.copy(color = colorScheme.onBackground).MCFont(),
+        displayMedium = bt.displayMedium.copy(color = colorScheme.onBackground).MCFont(),
+        displaySmall = bt.displaySmall.copy(color = colorScheme.onBackground).MCFont(),
+        headlineLarge = bt.headlineLarge.copy(color = colorScheme.onBackground).MCFont(),
+        headlineMedium = bt.headlineMedium.copy(color = colorScheme.onBackground).MCFont(),
+        headlineSmall = bt.headlineSmall.copy(color = colorScheme.onBackground).MCFont(),
+        titleLarge = bt.titleLarge.copy(color = colorScheme.onBackground).MCFont(),
+        titleMedium = bt.titleMedium.copy(color = colorScheme.onBackground).MCFont(),
+        titleSmall = bt.titleSmall.copy(color = colorScheme.onBackground).MCFont(),
+        bodyLarge = bt.bodyLarge.copy(color = colorScheme.onBackground).MCFont(),
+        bodyMedium = bt.bodyMedium.copy(color = colorScheme.onBackground).MCFont(),
+        bodySmall = bt.bodySmall.copy(color = colorScheme.onBackground).MCFont(),
+        labelLarge = bt.labelLarge.copy(color = colorScheme.onBackground).MCFont(),
+        labelMedium = bt.labelMedium.copy(color = colorScheme.onBackground).MCFont(),
+        labelSmall = bt.labelSmall.copy(color = colorScheme.onBackground).MCFont(),
     )
 
     MaterialTheme(

@@ -2,6 +2,7 @@ package io.github.betterclient.ascendium
 
 import androidx.compose.runtime.getValue
 import io.github.betterclient.ascendium.module.ModManager
+import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
@@ -41,5 +42,8 @@ class ClientSettings {
     private val _t = DropdownSetting("Theme", "Minecraft", listOf("Minecraft", "Diamond", "Dark", "Light"))
     val themeState by _t.state
 
-    val settings = listOf(_bo, _t)
+    private val _mf = BooleanSetting("Use minecraft font in UI's", false)
+    val mcFontState: Boolean by _mf.state
+
+    val settings = listOf(_t, _mf, _bo)
 }
