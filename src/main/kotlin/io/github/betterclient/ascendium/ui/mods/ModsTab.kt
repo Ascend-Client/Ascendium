@@ -78,7 +78,7 @@ private fun ModuleView(module: Module) {
         targetValue = if (enabled) 32.dp else 16.dp
     )
     val backgroundColor by animateColorAsState(
-        targetValue = if (enabled) theme.primary else theme.surfaceContainer
+        targetValue = if (enabled) theme.primaryContainer else theme.surfaceContainer
     )
 
     Box(Modifier

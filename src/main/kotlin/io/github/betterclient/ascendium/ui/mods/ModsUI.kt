@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -49,7 +50,7 @@ fun ModsUI(smallen: Boolean) {
 
             Box(Modifier
                 .size(animatedWidth, animatedHeight)
-                .background(MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacity.toFloat()), RoundedCornerShape(32.dp))
+                .background(MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()), RoundedCornerShape(32.dp))
                 .safeContentPadding()
                 .clip(RoundedCornerShape(32.dp))
             ) {
@@ -59,7 +60,9 @@ fun ModsUI(smallen: Boolean) {
                         ComposeUI.current.switchTo {
                             MoveModuleUI(ModManager.getHUDModules(), false)
                         }
-                    }) {
+                    },
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
                         Text("Back")
                     }
                 }
@@ -70,7 +73,7 @@ fun ModsUI(smallen: Boolean) {
                         ComposeUI.current.switchTo {
                             ComposeChrome()
                         }
-                    }) {
+                    }, colors = ButtonDefaults.buttonColors()) {
                         Text("Ascendium", fontSize = 18.sp, color = rainbowAsState().value)
                     }
                     Spacer(Modifier.width(8.dp))

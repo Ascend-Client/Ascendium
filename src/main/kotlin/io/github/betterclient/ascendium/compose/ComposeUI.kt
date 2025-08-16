@@ -20,7 +20,6 @@ import java.awt.event.MouseEvent
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.min
 import kotlin.properties.Delegates
-import kotlin.system.measureTimeMillis
 import java.awt.event.KeyEvent as AwtKeyEvent
 
 @OptIn(InternalComposeUiApi::class)

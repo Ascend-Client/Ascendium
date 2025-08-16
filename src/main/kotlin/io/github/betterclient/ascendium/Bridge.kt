@@ -25,7 +25,7 @@ interface WindowBridge {
 }
 
 interface TextRendererBridge {
-    fun getWidth(text: String): Int
+    fun getTextWidth(text: String): Int
     fun getFontHeight(): Int
 }
 

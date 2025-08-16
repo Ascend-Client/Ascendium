@@ -30,6 +30,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,9 +42,11 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -101,11 +105,14 @@ private fun LayoutCoordinates.toRect() = Rect(
     bottom = this.positionInRoot().y + this.size.height
 )
 
-private fun colorScheme() = when(Ascendium.settings.theme) {
-    "Dark" -> darkColorScheme()
-    "Light" -> lightColorScheme()
+@Composable
+private fun colorScheme() = when(Ascendium.settings.themeState) {
+    "Dark" -> darkColorScheme().setButtonColors()
+    "Light" -> lightColorScheme().setButtonColors()
     else -> throw IllegalStateException()
 }
+
+private fun ColorScheme.setButtonColors() = this.copy(primary = primaryContainer, onPrimary = onPrimaryContainer)
 
 fun showToast(text: String) {
     ComposeUI.current.toast {
@@ -155,10 +162,21 @@ fun showToast(text: String) {
 fun AscendiumTheme(content: @Composable () -> Unit) {
     val colorScheme = colorScheme()
     val t = Typography(
+        displayLarge = TextStyle(color = colorScheme.onBackground),
+        displayMedium = TextStyle(color = colorScheme.onBackground),
+        displaySmall = TextStyle(color = colorScheme.onBackground),
+        headlineLarge = TextStyle(color = colorScheme.onBackground),
+        headlineMedium = TextStyle(color = colorScheme.onBackground),
+        headlineSmall = TextStyle(color = colorScheme.onBackground),
+        titleLarge = TextStyle(color = colorScheme.onBackground),
+        titleMedium = TextStyle(color = colorScheme.onBackground),
+        titleSmall = TextStyle(color = colorScheme.onBackground),
         bodyLarge = TextStyle(color = colorScheme.onBackground),
         bodyMedium = TextStyle(color = colorScheme.onBackground),
         bodySmall = TextStyle(color = colorScheme.onBackground),
-        // you can override other text styles too if needed
+        labelLarge = TextStyle(color = colorScheme.onBackground),
+        labelMedium = TextStyle(color = colorScheme.onBackground),
+        labelSmall = TextStyle(color = colorScheme.onBackground),
     )
 
     MaterialTheme(
@@ -277,7 +295,7 @@ fun DropdownMenu(
                             curOption.value = option
                             expanded = false
                         }) {
-                            Text(option, color = Color.White)
+                            Text(option)
                         }
                     }
                 }

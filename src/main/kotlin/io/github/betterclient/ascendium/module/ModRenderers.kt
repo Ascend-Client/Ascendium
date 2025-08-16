@@ -22,7 +22,7 @@ class NullMinecraftModRenderer(var size: Float) : ModRenderer {
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
         val textRenderer = Bridge.client.textRenderer
 
-        val width = textRenderer.getWidth(text) * size
+        val width = textRenderer.getTextWidth(text) * size
         val height = textRenderer.getFontHeight() * size
         return IntSize(width.toInt(), height.toInt())
     }
@@ -73,7 +73,7 @@ class SkiaModRenderer(val size: Float, private val canvas: Canvas) : ModRenderer
 class MinecraftModRenderer(var size: Float, private val context: BridgeRenderer): ModRenderer {
     val font = Bridge.client.textRenderer
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
-        val textWidth = font.getWidth(text)
+        val textWidth = font.getTextWidth(text)
         val textHeight = font.getFontHeight()
 
         context.drawText(text, x, y, color, size)

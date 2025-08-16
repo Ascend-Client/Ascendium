@@ -5,28 +5,19 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.compose.AWTUtils.awtComponent
 import io.github.betterclient.ascendium.compose.AscendiumTheme
 import io.github.betterclient.ascendium.compose.Center
 import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.compose.detectInsideEvent
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import kotlinx.coroutines.runBlocking
-import org.cef.CefApp
 import java.awt.event.KeyEvent
 import java.awt.event.MouseWheelEvent
-import kotlin.let
 
 @Composable
 fun ComposeChrome() {

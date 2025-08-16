@@ -54,16 +54,21 @@ fun SettingEditor(setting: Setting) {
                     text = it
                     setting.value = it
                     ConfigManager.saveConfig()
-                }, modifier = Modifier.weight(1f))
+                }, modifier = Modifier.weight(1f), singleLine = true)
             }
             is NumberSetting -> {
                 var num by remember { mutableStateOf(setting.value) }
                 ResetButton { setting.reset(); num = setting.value }
-                Slider(num.toFloat(), onValueChange = {
-                    num = it.toDouble()
-                    setting.value = it.toDouble()
-                    ConfigManager.saveConfig()
-                }, modifier = Modifier.weight(1f), valueRange = setting.min.toFloat()..setting.max.toFloat())
+                Slider(
+                    num.toFloat(),
+                    onValueChange = {
+                            num = it.toDouble()
+                            setting.value = it.toDouble()
+                            ConfigManager.saveConfig()
+                    },
+                    onValueChangeFinished = { ConfigManager.saveConfig() },
+                    modifier = Modifier.weight(1f), valueRange = setting.min.toFloat()..setting.max.toFloat()
+                )
             }
             is ColorSetting -> {
                 //TODO: color picker

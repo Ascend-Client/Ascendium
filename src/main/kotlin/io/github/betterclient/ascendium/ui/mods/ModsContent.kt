@@ -42,11 +42,7 @@ fun ModsContent() {
 
     when(selectedTab) {
         0 -> ModsTab()
-        1 -> {
-            for (setting in Ascendium.settings.settings) {
-                SettingEditor(setting)
-            }
-        }
+        1 -> ClientTab()
         2 -> ConfigTab()
     }
 }

@@ -44,7 +44,7 @@ fun ConfigUI(mod: Module, fromMods: Boolean) {
             Box(
                 Modifier
                     .size(boxWidth, boxHeight)
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacity.toFloat()),
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
                         RoundedCornerShape(32.dp)
                     )
             ) {

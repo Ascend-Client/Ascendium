@@ -1,5 +1,6 @@
 package io.github.betterclient.ascendium
 
+import androidx.compose.runtime.getValue
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.DropdownSetting
@@ -35,10 +36,10 @@ object Logger {
 
 class ClientSettings {
     private val _bo = NumberSetting("Background opacity", 0.7, 0.1, 1.0)
-    val backgroundOpacity by _bo::value
+    val backgroundOpacityState by _bo.state
 
     private val _t = DropdownSetting("Theme", "Dark", listOf("Dark", "Light"))
-    val theme by _t::value
+    val themeState by _t.state
 
     val settings = listOf(_bo, _t)
 }

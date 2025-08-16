@@ -6,15 +6,7 @@ import io.github.betterclient.ascendium.compose.SkiaRenderer
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
-import io.github.betterclient.ascendium.module.config.BooleanSetting
-import io.github.betterclient.ascendium.module.config.ColorSetting
-import io.github.betterclient.ascendium.module.config.ConfigManager
-import io.github.betterclient.ascendium.module.config.DropdownSetting
-import io.github.betterclient.ascendium.module.config.NumberSetting
-import io.github.betterclient.ascendium.module.config.Setting
-import io.github.betterclient.ascendium.module.config.StringSetting
-import kotlin.system.measureNanoTime
-import kotlin.system.measureTimeMillis
+import io.github.betterclient.ascendium.module.config.*
 
 open class Module(val name: String, val description: String) {
     var enabled: Boolean = false
@@ -83,6 +75,7 @@ abstract class HUDModule(name: String, description: String, hasBackground: Boole
     abstract fun render(renderer: Renderable)
 
     @EventTarget
+    @Suppress("Unused")
     fun _render(hudRenderHudEvent: RenderHudEvent) {
         render(hudRenderHudEvent.renderer)
     }

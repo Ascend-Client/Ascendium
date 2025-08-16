@@ -10,14 +10,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +34,7 @@ import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.compose.renderWithMC
@@ -42,6 +47,10 @@ fun ConfigContent(preview: Boolean, mod: Module) {
     Box(Modifier.fillMaxSize()) {
         val state = rememberScrollState()
         Column(Modifier.verticalScroll(state)) {
+            Spacer(Modifier.height(4.dp))
+            Row { Spacer(Modifier.width(32.dp)); Text(mod.description, fontSize = 20.sp, color = MaterialTheme.colorScheme.onBackground) }
+            Spacer(Modifier.height(4.dp))
+            ModToggle(mod)
             Spacer(Modifier.height(4.dp))
             for (setting in mod.settings) {
                 SettingEditor(setting)
