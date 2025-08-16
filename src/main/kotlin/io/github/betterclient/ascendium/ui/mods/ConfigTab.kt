@@ -20,10 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.compose.Center
-import io.github.betterclient.ascendium.compose.detectOutsideClick
-import io.github.betterclient.ascendium.compose.showToast
 import io.github.betterclient.ascendium.module.config.ConfigManager
+import io.github.betterclient.ascendium.ui.utils.Center
+import io.github.betterclient.ascendium.ui.utils.detectOutsideClick
+import io.github.betterclient.ascendium.ui.utils.showToast
 import java.io.File
 
 @Composable

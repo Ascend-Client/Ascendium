@@ -37,9 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.BridgeRenderer
-import io.github.betterclient.ascendium.compose.renderWithMC
 import io.github.betterclient.ascendium.module.HUDModule
 import io.github.betterclient.ascendium.module.Module
+import io.github.betterclient.ascendium.ui.utils.renderWithMC
 import org.jetbrains.skia.IRect
 
 @Composable

@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.compose.AscendiumTheme
-import io.github.betterclient.ascendium.compose.Center
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.compose.detectInsideEvent
 import io.github.betterclient.ascendium.ui.mods.ModsUI
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import io.github.betterclient.ascendium.ui.utils.Center
+import io.github.betterclient.ascendium.ui.utils.detectInsideEvent
 import kotlinx.coroutines.runBlocking
 import java.awt.event.KeyEvent
 import java.awt.event.MouseWheelEvent

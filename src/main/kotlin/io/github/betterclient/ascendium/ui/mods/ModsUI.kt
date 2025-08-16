@@ -16,14 +16,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
-import io.github.betterclient.ascendium.compose.AscendiumTheme
-import io.github.betterclient.ascendium.compose.Center
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.compose.rainbowAsState
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.ui.chrome.ComposeChrome
 import io.github.betterclient.ascendium.ui.chrome.OffscreenBrowser
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import io.github.betterclient.ascendium.ui.utils.Center
+import io.github.betterclient.ascendium.ui.utils.rainbowAsState
 
 @Composable
 fun ModsUI(smallen: Boolean) {

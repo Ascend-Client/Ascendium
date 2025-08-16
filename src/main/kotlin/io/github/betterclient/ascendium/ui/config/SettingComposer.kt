@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.betterclient.ascendium.compose.DropdownMenu
 import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ColorSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager
@@ -30,6 +29,7 @@ import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.module.config.Setting
 import io.github.betterclient.ascendium.module.config.StringSetting
+import io.github.betterclient.ascendium.ui.utils.DropdownMenu
 
 @Composable
 fun SettingEditor(setting: Setting) {
