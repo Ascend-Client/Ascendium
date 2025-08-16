@@ -10,7 +10,7 @@ import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontMgr
 import org.jetbrains.skia.FontStyle
-import org.jetbrains.skia.Rect
+import org.jetbrains.skia.RRect
 import kotlin.math.max
 
 interface ModRenderer {
@@ -41,13 +41,13 @@ class NullSkiaModRenderer(size: Float) : ModRenderer {
 
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
         val textR = font.measureText(text)
-        return IntSize(textR.right.getScaled().toInt(), textR.height.getScaled().toInt())
+        return IntSize(textR.width.getScaled().toInt(), textR.height.getScaled().toInt())
     }
 
     override fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int) {}
 }
 
-class SkiaModRenderer(size: Float, private val canvas: Canvas) : ModRenderer {
+class SkiaModRenderer(val size: Float, private val canvas: Canvas) : ModRenderer {
     init {
         font.size = 16 * size
     }
@@ -59,14 +59,14 @@ class SkiaModRenderer(size: Float, private val canvas: Canvas) : ModRenderer {
     override fun renderText(text: String, x: Int, y: Int, color: Int): IntSize {
         val textR = font.measureText(text)
 
-        canvas.drawString(text, x.getUnscaled(), y.getUnscaled() + (textR.height / 2), font, color.asPaint())
+        canvas.drawString(text, x.getUnscaled(), y.getUnscaled() - font.metrics.ascent - (2f * size), font, color.asPaint())
 
         return IntSize(textR.width.getScaled().toInt(), textR.height.getScaled().toInt())
     }
 
     override fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int) {
-        val rect = Rect.makeXYWH(x.getUnscaled(), y.getUnscaled(), (width).getUnscaled(), (height).getUnscaled())
-        canvas.drawRect(rect, color.asPaint())
+        val rect = RRect.makeXYWH(x.getUnscaled(), y.getUnscaled(), (width).getUnscaled(), (height).getUnscaled(), 3f)
+        canvas.drawRRect(rect, color.asPaint())
     }
 }
 
