@@ -5,11 +5,12 @@ import io.github.betterclient.ascendium.Logger
 import io.github.betterclient.ascendium.module.HUDModule
 import io.github.betterclient.ascendium.module.ModManager
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.io.File
 
 object ConfigManager {
     var activeConfig = "main"
+    val json = kotlinx.serialization.json.Json { encodeDefaults = true }
+
     init {
         //generate directory ".ascendium" if it does not exist
         val dir = File(".ascendium")
@@ -25,7 +26,7 @@ object ConfigManager {
         }
 
         val configFile = File(dir, "activeConfig.json")
-        val activeConfig = Json.decodeFromString<ActiveConfigFile>(configFile.readText())
+        val activeConfig = json.decodeFromString<ActiveConfigFile>(configFile.readText())
 
         loadConfig(activeConfig.name)
     }
@@ -38,7 +39,7 @@ object ConfigManager {
             if (!modConfigFile.exists()) continue
             val modConfig: ConfigModule
             try {
-                 modConfig = Json.decodeFromString(modConfigFile.readText())
+                 modConfig = json.decodeFromString(modConfigFile.readText())
             } catch (_: Exception) {
                 Logger.info("Corrupted mod ${module.name}")
                 continue
@@ -73,7 +74,7 @@ object ConfigManager {
         if (clientConfig.exists()) {
             val modConfig: ConfigModule
             try {
-                modConfig = Json.decodeFromString(clientConfig.readText())
+                modConfig = json.decodeFromString(clientConfig.readText())
             } catch (_: Exception) {
                 Logger.info("Client config corrupted")
                 return
@@ -92,7 +93,7 @@ object ConfigManager {
 
         activeConfig = name
         val activeConfigFile = File(".ascendium", "activeConfig.json")
-        activeConfigFile.writeText(Json.encodeToString(ActiveConfigFile(name)))
+        activeConfigFile.writeText(json.encodeToString(ActiveConfigFile(name)))
     }
 
     fun saveConfig() {
@@ -111,12 +112,12 @@ object ConfigManager {
                     it.add(NumberSetting("y", module.y.toDouble()))
                 }
             }
-            modConfigFile.writeText(Json.encodeToString(modConfig))
+            modConfigFile.writeText(json.encodeToString(modConfig))
         }
 
         val clientConfigFile = File(configDir, "Ascendium.json")
         val cfg = ConfigModule(true, Ascendium.settings.settings)
-        clientConfigFile.writeText(Json.encodeToString(cfg))
+        clientConfigFile.writeText(json.encodeToString(cfg))
     }
 }
 

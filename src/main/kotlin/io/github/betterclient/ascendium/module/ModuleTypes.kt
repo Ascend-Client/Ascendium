@@ -23,7 +23,6 @@ open class Module(val name: String, val description: String) {
             onDisable()
             eventBus.unsubscribe()
         }
-        ConfigManager.saveConfig()
     }
 
     open fun onEnable() {}

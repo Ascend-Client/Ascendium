@@ -41,11 +41,11 @@ import io.github.betterclient.ascendium.ui.config.ConfigUI
 @Composable
 fun ModsTab() {
     Box(Modifier.fillMaxSize()) {
-        val items = remember { List(16) { ModManager.modules }.flatten().chunked(3) }
+        val items = remember { ModManager.modules }
         val scroll = rememberLazyListState()
 
         LazyColumn(state = scroll) {
-            itemsIndexed(items) { index, mods ->
+            itemsIndexed(items.chunked(3)) { index, mods ->
                 Row {
                     Spacer(Modifier.width(SPACING.dp))
                     mods.forEachIndexed { index0, module ->

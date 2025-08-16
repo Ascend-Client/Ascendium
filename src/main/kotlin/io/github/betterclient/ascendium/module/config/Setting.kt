@@ -22,68 +22,95 @@ sealed class Setting() {
 @Serializable
 class BooleanSetting(
     override val name: String,
-    @Transient private val _value: Boolean = false
-) : Setting() {
     @Transient
-    val state: MutableState<Boolean> = mutableStateOf(_value)
-
+    private val _defaultValue: Boolean = false,
+) : Setting() {
     @SerialName("bool_value")
-    var value
-        set(value) {
-            state.value = value
-        }
+    private var storedValue: Boolean = _defaultValue
+
+    @Transient
+    val state: MutableState<Boolean> = mutableStateOf(storedValue)
+
+    var value: Boolean
         get() = state.value
+        set(v) {
+            state.value = v
+            storedValue = v
+        }
+
+    init {
+        state.value = storedValue
+    }
 
     override fun setFromString(json: Setting) {
-        val out = json as BooleanSetting //if type doesn't match, blame the config manager, not us, this shouldn't end up here if its the wrong type
+        val out = json as BooleanSetting
         value = out.value
     }
 
     override fun _reset() {
-        value = _value
+        value = _defaultValue
     }
 }
+
 
 @Serializable
 class NumberSetting(
     override val name: String,
-    @Transient private val _value: Double = 0.0,
+    @Transient
+    private val _defaultValue: Double = 0.0,
+    @Transient
     val min: Double = Double.NEGATIVE_INFINITY,
+    @Transient
     val max: Double = Double.POSITIVE_INFINITY,
 ) : Setting() {
-    @Transient
-    val state: MutableState<Double> = mutableStateOf(_value)
-
     @SerialName("number_value")
-    var value
-        set(value) {
-            state.value = value
-        }
+    private var storedValue: Double = _defaultValue
+
+    @Transient
+    val state: MutableState<Double> = mutableStateOf(storedValue)
+
+    var value: Double
         get() = state.value
+        set(v) {
+            state.value = v.coerceIn(min, max)
+            storedValue = state.value
+        }
+
+    init {
+        state.value = storedValue.coerceIn(min, max)
+    }
 
     override fun setFromString(json: Setting) {
         val out = json as NumberSetting
-        value = out.value.coerceIn(min, max)
+        value = out.value
     }
 
     override fun _reset() {
-        value = _value
+        value = _defaultValue
     }
 }
 
 @Serializable
 class StringSetting(
     override val name: String,
-    @Transient private val _value: String = ""
+    @Transient
+    private val _defaultValue: String = ""
 ) : Setting() {
-    @Transient val state: MutableState<String> = mutableStateOf(_value)
-
     @SerialName("string_value")
-    var value
-        set(value) {
-            state.value = value
-        }
+    private var storedValue: String = _defaultValue
+    @Transient
+    val state: MutableState<String> = mutableStateOf(storedValue)
+
+    var value: String
         get() = state.value
+        set(v) {
+            state.value = v
+            storedValue = v
+        }
+
+    init {
+        state.value = storedValue
+    }
 
     override fun setFromString(json: Setting) {
         val out = json as StringSetting
@@ -91,56 +118,71 @@ class StringSetting(
     }
 
     override fun _reset() {
-        value = _value
+        value = _defaultValue
     }
 }
 
 @Serializable
 class DropdownSetting(
     override val name: String,
-    @Transient private val _value: String = "",
-    @Transient val options: List<String> = emptyList(),
+    @Transient private val _defaultValue: String = "",
+    @Transient val options: List<String> = emptyList()
 ) : Setting() {
-    @Transient val state: MutableState<String> = mutableStateOf(_value)
-
     @SerialName("dropdown_value")
-    var value
-        set(value) {
-            state.value = value
-        }
+    var storedValue: String = _defaultValue
+
+    @Transient
+    val state: MutableState<String> = mutableStateOf(_defaultValue)
+
+    var value: String
         get() = state.value
+        set(v) {
+            if (options.isEmpty()) {
+                state.value = v
+                storedValue = v
+            } else {
+                val coerced = if (options.contains(v)) v else options.firstOrNull() ?: _defaultValue
+                state.value = coerced
+                storedValue = coerced
+            }
+        }
 
     fun set(newValue: String) {
-        value = if (options.contains(newValue)) {
-            newValue
-        } else {
-            options.first()
-        }
+        value = newValue
     }
 
     override fun setFromString(json: Setting) {
         val out = json as DropdownSetting
-        set(out.value)
+        set(out.storedValue)
     }
 
     override fun _reset() {
-        value = _value
+        value = _defaultValue
     }
 }
 
 @Serializable
 class ColorSetting(
     override val name: String,
-    @Transient private val _value: Int = -1,
+    @Transient
+    private val _defaultValue: Int = -1,
 ) : Setting() {
-    @Transient val state: MutableState<Int> = mutableStateOf(_value)
-
     @SerialName("color_value")
-    var value
-        set(value) {
-            state.value = value
-        }
+    private var storedValue: Int = _defaultValue
+
+    @Transient
+    val state: MutableState<Int> = mutableStateOf(storedValue)
+
+    var value: Int
         get() = state.value
+        set(v) {
+            state.value = v
+            storedValue = v
+        }
+
+    init {
+        state.value = storedValue
+    }
 
     override fun setFromString(json: Setting) {
         val out = json as ColorSetting
@@ -148,6 +190,6 @@ class ColorSetting(
     }
 
     override fun _reset() {
-        value = _value
+        value = _defaultValue
     }
 }
