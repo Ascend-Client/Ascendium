@@ -38,7 +38,7 @@ class ClientSettings {
     private val _bo = NumberSetting("Background opacity", 0.7, 0.1, 1.0)
     val backgroundOpacityState by _bo.state
 
-    private val _t = DropdownSetting("Theme", "Dark", listOf("Dark", "Light"))
+    private val _t = DropdownSetting("Theme", "Minecraft", listOf("Minecraft", "Diamond", "Dark", "Light"))
     val themeState by _t.state
 
     val settings = listOf(_bo, _t)
