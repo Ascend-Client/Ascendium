@@ -1,9 +1,13 @@
 package io.github.betterclient.ascendium.mixin;
 
 import io.github.betterclient.ascendium.MouseBridge;
+import io.github.betterclient.ascendium.event.MouseClickEvent;
 import net.minecraft.client.Mouse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Mouse.class)
 public class MixinMouse implements MouseBridge {
@@ -18,5 +22,10 @@ public class MixinMouse implements MouseBridge {
     @Override
     public int getYPos() {
         return (int) this.y;
+    }
+
+    @Inject(method = "onMouseButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/KeyBinding;setKeyPressed(Lnet/minecraft/client/util/InputUtil$Key;Z)V", ordinal = 0))
+    public void onClick(long window, int button, int action, int mods, CallbackInfo ci) {
+        new MouseClickEvent(button, action == 1).broadcast();
     }
 }
