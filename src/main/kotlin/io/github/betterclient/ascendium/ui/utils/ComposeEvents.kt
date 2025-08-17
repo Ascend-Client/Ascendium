@@ -30,6 +30,7 @@ fun Modifier.detectOutsideClick(
         fun handler(composeCoords: Offset, mcMouse: Offset, button: Int, clicked: Boolean): Boolean {
             if (position == null) return false
             if (button != 0) return false
+            if (!clicked) return false
 
             if (composeCoords.x < position!!.left || composeCoords.x > position!!.right ||
                 composeCoords.y < position!!.top || composeCoords.y > position!!.bottom) {

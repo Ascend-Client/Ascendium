@@ -180,6 +180,8 @@ class ColorSetting(
             storedValue = v
         }
 
+    val defaultValue = _defaultValue
+
     init {
         state.value = storedValue
     }

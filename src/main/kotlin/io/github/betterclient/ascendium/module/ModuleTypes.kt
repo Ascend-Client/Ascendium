@@ -42,7 +42,12 @@ open class Module(val name: String, val description: String) {
 
     fun color(name: String, value: Int) =
         ColorSetting(name, value).apply { this@Module.settings.add(this) }::value
+
+    infix fun `is`(@Suppress("UNUSED_PARAMETER") state: enabled) = this.enabled
+    infix fun `is`(@Suppress("UNUSED_PARAMETER") state: disabled) = !this.enabled
 }
+object enabled
+object disabled
 
 abstract class HUDModule(name: String, description: String, hasBackground: Boolean = true) : Module(name, description) {
     var x = 100

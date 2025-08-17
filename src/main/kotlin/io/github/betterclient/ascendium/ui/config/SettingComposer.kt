@@ -71,8 +71,10 @@ fun SettingEditor(setting: Setting) {
                 )
             }
             is ColorSetting -> {
-                //TODO: color picker
-                Box(Modifier.size(20.dp).background(Color(setting.value), RoundedCornerShape(2.dp)))
+                ColorPicker(Color(setting.value), Color(setting.defaultValue)) {
+                    setting.value = it.rgb
+                    ConfigManager.saveConfig()
+                }
             }
             is DropdownSetting -> {
                 val selected = remember { mutableStateOf(setting.value) }

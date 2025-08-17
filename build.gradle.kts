@@ -75,19 +75,9 @@ dependencies {
     use(compose.uiTooling)
     use(compose.animation)
     use(compose.materialIconsExtended)
-
-    use("dev.datlag:kcef:2025.03.23")
-    val joglVersion = "2.5.0"
-    use("org.jogamp.gluegen:gluegen-rt-main:$joglVersion")
-    use("org.jogamp.jogl:jogl-all-main:$joglVersion")
-    use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-linux-amd64")
-    use("org.jogamp.jogl:jogl-all:$joglVersion:natives-linux-amd64")
-    use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-linux-aarch64")
-    use("org.jogamp.jogl:jogl-all:$joglVersion:natives-linux-aarch64")
-    use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-windows-amd64")
-    use("org.jogamp.jogl:jogl-all:$joglVersion:natives-windows-amd64")
-    use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-macosx-universal")
-    use("org.jogamp.jogl:jogl-all:$joglVersion:natives-macosx-universal")
+    use("com.github.skydoves:colorpicker-compose:1.1.2")
+    use("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
+    chromium { use(it) }
 
     var i = 0
     transitiveInclude.resolvedConfiguration.resolvedArtifacts.forEach {
@@ -138,5 +128,24 @@ compose.desktop {
             packageName = "AscendiumJvmComposeApp"
             packageVersion = "1.0.0"
         }
+    }
+}
+
+private fun chromium(use: (String) -> Unit) {
+    val joglVersion = "2.5.0"
+    val platforms = listOf(
+        "linux-amd64",
+        "linux-aarch64",
+        "windows-amd64",
+        "macosx-universal"
+    )
+
+    use("dev.datlag:kcef:2025.03.23")
+    use("org.jogamp.gluegen:gluegen-rt-main:$joglVersion")
+    use("org.jogamp.jogl:jogl-all-main:$joglVersion")
+
+    platforms.forEach { platform ->
+        use("org.jogamp.gluegen:gluegen-rt:$joglVersion:natives-$platform")
+        use("org.jogamp.jogl:jogl-all:$joglVersion:natives-$platform")
     }
 }
