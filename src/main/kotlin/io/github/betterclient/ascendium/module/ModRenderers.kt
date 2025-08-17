@@ -118,19 +118,27 @@ class Renderable(val mod: HUDModule, private val renderer: ModRenderer) {
     }
 
     fun renderRect(x: Int, y: Int, width: Int, height: Int, color: Int = mod.backgroundColor.value) {
-        renderer.renderRect(mod.x + x, mod.y + y, width, height, color)
-        this.width = max(x + width, this.width)
-        this.height = max(y + height, this.height)
+        renderer.renderRect(mod.x + (x * mod.scale).toInt(), mod.y + (y * mod.scale).toInt(), ((width * mod.scale).toInt()), ((height * mod.scale).toInt()), color)
+        this.width = max((x * mod.scale).toInt() + (width * mod.scale), this.width.toDouble()).toInt()
+        this.height = max((y * mod.scale).toInt() + (height * mod.scale), this.height.toDouble()).toInt()
     }
 
     fun getSize(text: String): IntSize {
         return nullRenderer.renderText(text, 0, 0, -1)
     }
 
-    fun renderTextWithBG(text: String, x: Int, y: Int, width: Int, height: Int) {
+    fun renderTextWithBG(text: String, x: Int, y: Int, width: Int, height: Int, bgColor: Int = mod.backgroundColor.value) {
         val size = getSize(text)
-        renderRect(x, y, width, height, mod.backgroundColor.value)
-        renderText(text, x + (width - size.width) / 2, y + (height - size.height) / 2)
+        renderRect(
+            x, y,
+            width, height,
+            bgColor
+        )
+        renderText(
+            text,
+            (x * mod.scale).toInt() + (((width * mod.scale).toInt()) - size.width) / 2,
+            (y * mod.scale).toInt() + (((height * mod.scale).toInt()) - size.height) / 2
+        )
     }
 
     fun renderBG(nullRenderer: Renderable) {

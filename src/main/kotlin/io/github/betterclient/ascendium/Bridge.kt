@@ -37,6 +37,19 @@ interface MouseBridge {
 
 interface OptionsBridge {
     fun addKeybinding(defaultKey: Int, name: String, category: String): KeybindHelper
+
+    val keyForward: KeybindingBridge
+    val keyBackward: KeybindingBridge
+    val keyLeft: KeybindingBridge
+    val keyRight: KeybindingBridge
+    val keyAttack: KeybindingBridge
+    val keyUse: KeybindingBridge
+    val keyJump: KeybindingBridge
+}
+
+interface KeybindingBridge {
+    val buttonPressed: Boolean
+    val getBoundKey: String
 }
 
 interface KeybindHelper {

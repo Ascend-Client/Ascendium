@@ -49,7 +49,7 @@ open class Module(val name: String, val description: String) {
 object enabled
 object disabled
 
-abstract class HUDModule(name: String, description: String, hasBackground: Boolean = true) : Module(name, description) {
+abstract class HUDModule(name: String, description: String, val hasBackground: Boolean = true) : Module(name, description) {
     var x = 100
     var y = 100
     val textColor by color("Text Color", -1)
@@ -90,13 +90,13 @@ abstract class HUDModule(name: String, description: String, hasBackground: Boole
 
         if (minecraftRenderer) {
             val renderer = Renderable(this, Renderer(scale.toFloat(), context, null))
-            renderer.renderBG(nullR)
+            if (this.hasBackground) renderer.renderBG(nullR)
 
             render(renderer)
         } else {
             SkiaRenderer.withSkia {
                 val renderer = Renderable(this, Renderer(scale.toFloat(), null, it))
-                renderer.renderBG(nullR)
+                if (this.hasBackground) renderer.renderBG(nullR)
                 render(renderer)
             }
         }
