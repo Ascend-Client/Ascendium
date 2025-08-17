@@ -6,6 +6,7 @@ import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
+import io.github.betterclient.ascendium.ui.chrome.OffscreenBrowser
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import org.slf4j.LoggerFactory
 

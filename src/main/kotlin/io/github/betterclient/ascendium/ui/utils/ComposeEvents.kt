@@ -93,7 +93,7 @@ fun Modifier.detectInsideEvent(component: Component, func: (mouseX: Int, mouseY:
 
             func(
                 (x - position!!.left).toInt(),
-                (y - position!!.top).toInt(),
+                (y - position!!.top - 50f).toInt(),
                 translateMouseEvent(component, position!!.left.toInt(), position!!.top.toInt(), event)
             )
             return@addMouseEventHandler false
