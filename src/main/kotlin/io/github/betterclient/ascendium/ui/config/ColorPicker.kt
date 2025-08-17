@@ -9,18 +9,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.github.skydoves.colorpicker.compose.*
 import io.github.betterclient.ascendium.ui.utils.detectOutsideClick
@@ -46,10 +40,11 @@ fun ColorPicker(initial: Color, default: Color, onChange: (Color) -> Unit) {
             Box(
                 modifier = Modifier
                     .size(size)
-                    .background(color)
-                    .clip(CircleShape)
+                    .background(color, CircleShape)
                     .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                    .clickable { enabled = !enabled }
+                    .clickable {
+                        enabled = !enabled
+                    }
             )
         }
 
@@ -59,7 +54,9 @@ fun ColorPicker(initial: Color, default: Color, onChange: (Color) -> Unit) {
             exit = fadeOut() + shrinkVertically()
         ) {
             Surface(
-                modifier = Modifier.padding(top = 8.dp).detectOutsideClick { enabled = false },
+                modifier = Modifier.padding(top = 8.dp).detectOutsideClick {
+                    enabled = false
+                },
                 shape = MaterialTheme.shapes.medium,
                 shadowElevation = 4.dp,
                 color = MaterialTheme.colorScheme.surfaceVariant,
@@ -147,7 +144,15 @@ private fun ColorPickerSliders(controller: ColorPickerController) {
             OutlinedTextField(
                 value = (fn(value).second * 255).toInt().toString(),
                 onValueChange = { input ->
-                    input.toFloatOrNull()?.let { controller.selectByColor(fn(it).first, true) }
+                    if (input.isBlank()) {
+                        //auto generate a 0 when all is deleted
+                        controller.selectByColor(fn(0f).first, true)
+                    } else if (fn(0f).second == 0f) {
+                        //remove auto generated 0 when user types
+                        input.replaceFirst("0", "").toIntOrNull()?.let { controller.selectByColor(fn(it.div(255f).coerceIn(0f, 1f)).first, true) }
+                    } else {
+                        input.toIntOrNull()?.let { controller.selectByColor(fn(it.div(255f).coerceIn(0f, 1f)).first, true) }
+                    }
                 },
                 modifier = Modifier.weight(1f),
                 singleLine = true

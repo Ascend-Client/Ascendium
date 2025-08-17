@@ -26,8 +26,15 @@ fun Modifier.detectOutsideClick(
     onOutsideClick: () -> Unit
 ): Modifier {
     var position by remember { mutableStateOf<Rect?>(null) }
+    var voidedLast by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         fun handler(composeCoords: Offset, mcMouse: Offset, button: Int, clicked: Boolean): Boolean {
+            if (voidedLast && button == 0 && !clicked) {
+                ComposeUI.current.removeMouseHandler(::handler)
+                return true
+            }
+
+            voidedLast = false
             if (position == null) return false
             if (button != 0) return false
             if (!clicked) return false
@@ -35,7 +42,7 @@ fun Modifier.detectOutsideClick(
             if (composeCoords.x < position!!.left || composeCoords.x > position!!.right ||
                 composeCoords.y < position!!.top || composeCoords.y > position!!.bottom) {
                 onOutsideClick()
-                ComposeUI.current.removeMouseHandler(::handler)
+                voidedLast = true
                 return true
             }
 
