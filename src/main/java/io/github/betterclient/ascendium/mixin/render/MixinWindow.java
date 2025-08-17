@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.mixin;
+package io.github.betterclient.ascendium.mixin.render;
 
 import io.github.betterclient.ascendium.WindowBridge;
 import net.minecraft.client.MinecraftClient;

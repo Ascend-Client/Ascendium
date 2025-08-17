@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.mixin;
+package io.github.betterclient.ascendium.mixin.render;
 
 import io.github.betterclient.ascendium.TextRendererBridge;
 import net.minecraft.client.font.TextRenderer;

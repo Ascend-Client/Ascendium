@@ -1,6 +1,7 @@
 package io.github.betterclient.ascendium
 
 import net.minecraft.client.MinecraftClient
+import kotlin.math.sqrt
 
 object Bridge {
     val client: MinecraftBridge
@@ -8,12 +9,62 @@ object Bridge {
 }
 
 interface MinecraftBridge {
+    val server: String
+    val ping: Int
     val fps: Int
     val textRenderer: TextRendererBridge
     val mouse: MouseBridge
     val gameOptions: OptionsBridge
     val window: WindowBridge
+    val player: EntityBridge
+
     fun openScreen(screen: BridgeScreen)
+    fun raycast(entityBridge: EntityBridge, camera: Pos3D, possibleHits: Pos3D, box: BoundingBox, id: Int, d3: Double): RaycastResultBridge?
+}
+
+class RaycastResultBridge(val pos: Pos3D, val entity: EntityBridge?)
+
+interface EntityBridge {
+    fun getPos(): Pos3D
+    fun getBox(): BoundingBox
+    fun getID(): Int
+    fun getCameraPosVec(i: Int): Pos3D
+    fun getRotationVec(i: Int): Pos3D
+}
+
+class Pos3D(val x: Double, val y: Double, val z: Double) {
+    fun add(x: Double, y: Double, z: Double) = Pos3D(x + this.x, y + this.y, z + this.z)
+    fun distanceTo(other: Pos3D): Double {
+        val dx = x - other.x
+        val dy = y - other.y
+        val dz = z - other.z
+        return sqrt(dx * dx + dy * dy + dz * dz)
+    }
+
+    fun multiply(d: Double) = Pos3D(x * d, y * d, z * d)
+}
+
+class BoundingBox(val start: Pos3D, val end: Pos3D) {
+    fun stretch(by: Pos3D): BoundingBox {
+        val newStart = Pos3D(
+            start.x + minOf(by.x, 0.0),
+            start.y + minOf(by.y, 0.0),
+            start.z + minOf(by.z, 0.0)
+        )
+        val newEnd = Pos3D(
+            end.x + maxOf(by.x, 0.0),
+            end.y + maxOf(by.y, 0.0),
+            end.z + maxOf(by.z, 0.0)
+        )
+        return BoundingBox(newStart, newEnd)
+    }
+
+    fun expand(x: Double, y: Double, z: Double): BoundingBox {
+        return BoundingBox(
+            Pos3D(start.x - x, start.y - y, start.z - z),
+            Pos3D(end.x + x, end.y + y, end.z + z)
+        )
+    }
 }
 
 interface WindowBridge {

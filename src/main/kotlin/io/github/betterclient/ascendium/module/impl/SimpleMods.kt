@@ -1,0 +1,41 @@
+package io.github.betterclient.ascendium.module.impl
+
+import io.github.betterclient.ascendium.event.EntityHitEvent
+import io.github.betterclient.ascendium.event.EventTarget
+import io.github.betterclient.ascendium.module.TextModule
+
+object FPSMod : TextModule("FPS", "Display your frames per second.") {
+    val template by string("Template", "%FPS% fps")
+    override fun render() = template.replace("%FPS%", client.fps.toString(), true)
+}
+
+object PingMod : TextModule("Ping", "Display your ping") {
+    val template by string("Template", "%PING%ms")
+    override fun render() = template.replace("%PING%", client.ping.toString(), true)
+}
+
+object ServerDisplayMod : TextModule("Server Display", "Display the IP of the current server") {
+    val template by string("Template", "%IP%")
+    override fun render() = template.replace("%IP%", client.server, true)
+}
+
+object ReachDisplayMod : TextModule("Reach Display", "Display ") {
+    val template by string("Template", "%REACH% blocks")
+    val template0 by string("No hits template", "No hits")
+
+    var lastTick = 0L
+    var lastTickReach: Double = 0.0
+
+    override fun render() =
+        if (lastTick + 2000 > System.currentTimeMillis()) {
+            template.replace("%REACH%", lastTickReach.toString().take(3), true)
+        } else {
+            template0
+        }
+
+    @EventTarget
+    fun onHit(ev: EntityHitEvent) {
+        lastTick = System.currentTimeMillis()
+        lastTickReach = ev.distance
+    }
+}

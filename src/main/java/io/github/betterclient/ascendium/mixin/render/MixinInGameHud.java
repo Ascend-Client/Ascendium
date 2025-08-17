@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.mixin;
+package io.github.betterclient.ascendium.mixin.render;
 
 import io.github.betterclient.ascendium.event.RenderHudEvent;
 import io.github.betterclient.ascendium.util.Renderer;

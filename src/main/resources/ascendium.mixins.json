@@ -4,16 +4,17 @@
   "package": "io.github.betterclient.ascendium.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "MixinEntity"
   ],
   "client": [
-    "MixinInGameHud",
-    "MixinKeybinding",
     "MixinMain",
     "MixinMinecraftClient",
     "MixinMouse",
-    "MixinOptions",
-    "MixinTextRenderer",
-    "MixinWindow"
+    "options.MixinKeybinding",
+    "options.MixinOptions",
+    "render.MixinInGameHud",
+    "render.MixinTextRenderer",
+    "render.MixinWindow"
   ],
   "injectors": {
     "defaultRequire": 1

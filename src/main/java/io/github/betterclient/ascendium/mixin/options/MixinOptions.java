@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.mixin;
+package io.github.betterclient.ascendium.mixin.options;
 
 import io.github.betterclient.ascendium.KeybindHelper;
 import io.github.betterclient.ascendium.KeybindingBridge;
