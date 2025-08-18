@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.module.ModManager
-import io.github.betterclient.ascendium.ui.chrome.ComposeChrome
-import io.github.betterclient.ascendium.ui.chrome.OffscreenBrowser
+import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
+import io.github.betterclient.ascendium.ui.chrome.EasterEggUI
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
@@ -69,9 +69,9 @@ fun ModsUI(smallen: Boolean) {
 
                 Row(modifier = Modifier.align(Alignment.TopEnd), verticalAlignment = Alignment.CenterVertically) {
                     Button(onClick = {
-                        if (OffscreenBrowser.CHROME == null) return@Button
+                        if (!ChromiumDownloader.chromiumDownloaded) return@Button
                         ComposeUI.current.switchTo {
-                            ComposeChrome()
+                            EasterEggUI()
                         }
                     }, colors = ButtonDefaults.buttonColors()) {
                         Text("Ascendium", fontSize = 18.sp, color = rainbowAsState().value)

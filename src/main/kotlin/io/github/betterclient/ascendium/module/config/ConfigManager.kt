@@ -14,25 +14,27 @@ object ConfigManager {
     init {
         //generate directory ".ascendium" if it does not exist
         val dir = File(".ascendium")
-        if (!dir.exists()) {
+        val dir2 = File(dir, "configs")
+        if (!dir.exists() || !dir2.exists()) {
             dir.mkdirs()
+            dir2.mkdirs()
 
-            val configFile = File(dir, "activeConfig.json")
+            val configFile = File(dir2, "activeConfig.json")
             configFile.createNewFile()
             configFile.writeText("""{"name": "main"}""")
 
-            val configDir = File(dir, "main")
+            val configDir = File(dir2, "main")
             configDir.mkdirs()
         }
 
-        val configFile = File(dir, "activeConfig.json")
+        val configFile = File(dir2, "activeConfig.json")
         val activeConfig = json.decodeFromString<ActiveConfigFile>(configFile.readText())
 
         loadConfig(activeConfig.name)
     }
 
     fun loadConfig(name: String) {
-        val configDir = File(".ascendium", name)
+        val configDir = File(".ascendium/configs", name)
 
         for (module in ModManager.modules) {
             val modConfigFile = File(configDir, "${module.name}.json")
@@ -92,12 +94,12 @@ object ConfigManager {
         }
 
         activeConfig = name
-        val activeConfigFile = File(".ascendium", "activeConfig.json")
+        val activeConfigFile = File(".ascendium/configs", "activeConfig.json")
         activeConfigFile.writeText(json.encodeToString(ActiveConfigFile(name)))
     }
 
     fun saveConfig() {
-        val configDir = File(".ascendium", activeConfig)
+        val configDir = File(".ascendium/configs", activeConfig)
         if (!configDir.exists()) configDir.mkdirs()
 
         for (module in ModManager.modules) {
