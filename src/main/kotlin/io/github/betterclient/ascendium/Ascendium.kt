@@ -8,11 +8,15 @@ import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.setMain
 import org.slf4j.LoggerFactory
 
 object Ascendium {
     val settings = ClientSettings()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun start() {
         Logger.info("Starting!")
         ConfigManager
@@ -27,6 +31,9 @@ object Ascendium {
 
         //commenting this will also disable easter egg
         ChromiumDownloader.download()
+
+        //colorpicker crash
+        Dispatchers.setMain(Dispatchers.Default)
     }
 }
 
