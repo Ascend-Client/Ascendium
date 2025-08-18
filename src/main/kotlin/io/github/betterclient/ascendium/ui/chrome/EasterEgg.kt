@@ -49,7 +49,7 @@ fun EasterEggUI() {
             }
 
             Button(onClick = {
-                ComposeUI.current.switchTo { ModsUI(false) }
+                ComposeUI.current.switchTo { ModsUI(true) }
             }) { Text("Back") }
         }
     }
@@ -66,7 +66,8 @@ private fun RowScope.Navigation() {
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back"
+            contentDescription = "Back",
+            tint = MaterialTheme.colorScheme.onBackground
         )
     }
 
@@ -76,7 +77,8 @@ private fun RowScope.Navigation() {
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = "Forward"
+            contentDescription = "Forward",
+            tint = MaterialTheme.colorScheme.onBackground
         )
     }
 
@@ -97,7 +99,8 @@ private fun RowScope.Navigation() {
     }) {
         Icon(
             imageVector = Icons.Default.Home,
-            contentDescription = null
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onBackground
         )
     }
 }
