@@ -1,28 +1,103 @@
 package io.github.betterclient.ascendium.ui.chrome
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.ui.mods.ModsUI
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+
+val browser = Browser(ChromiumDownloader.client!!, "https://google.com/")
 
 @Composable
 fun EasterEggUI() {
-    Box(Modifier.fillMaxSize()) {
-        BrowserView(
-            remember { Browser(ChromiumDownloader.client!!, "https://google.com/") },
-            modifier = Modifier.size(800.dp, 600.dp).align(Alignment.Center)
-        )
+    AscendiumTheme {
+        Box(Modifier.fillMaxSize()) {
+            Column(Modifier.align(Alignment.Center)) {
+                Row(
+                    Modifier
+                        .size(800.dp, 100.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
+                            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Navigation()
+                }
 
-        Button(onClick = {
-            ComposeUI.current.switchTo { ModsUI(false) }
-        }) { Text("Back") }
+                BrowserView(
+                    browser,
+                    modifier = Modifier.size(800.dp, 600.dp),
+                    shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+                )
+            }
+
+            Button(onClick = {
+                ComposeUI.current.switchTo { ModsUI(false) }
+            }) { Text("Back") }
+        }
+    }
+}
+
+@Composable
+private fun RowScope.Navigation() {
+    var textFieldValue by remember(browser.myURL) { mutableStateOf(browser.myURL) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    IconButton(
+        onClick = { browser.back() },
+        enabled = browser.canGoBack
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back"
+        )
+    }
+
+    IconButton(
+        onClick = { browser.forward() },
+        enabled = browser.canGoForward
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = "Forward"
+        )
+    }
+
+    TextField(
+        value = textFieldValue,
+        onValueChange = { textFieldValue = it },
+        modifier = Modifier.weight(1f),
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+        keyboardActions = KeyboardActions(onGo = {
+            browser.setUrl(textFieldValue)
+            keyboardController?.hide()
+        })
+    )
+
+    IconButton(onClick = {
+        browser.setUrl("https://www.google.com")
+    }) {
+        Icon(
+            imageVector = Icons.Default.Home,
+            contentDescription = null
+        )
     }
 }

@@ -7,9 +7,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import org.cef.CefClient
 import org.cef.browser.CefBrowser
+import org.cef.browser.CefFrame
 import org.cef.browser.CefRendering
+import org.cef.handler.CefDisplayHandler
+import org.cef.handler.CefLoadHandler
 import org.cef.handler.CefNativeRenderHandler
 import org.cef.handler.CefScreenInfo
+import org.cef.network.CefRequest
 import java.awt.Component
 import java.awt.Point
 import java.awt.Rectangle
@@ -25,7 +29,7 @@ class Browser(
     private val client: CefClient,
     private val url: String,
     private val transparent: Boolean = false
-) : CefNativeRenderHandler {
+) : CefNativeRenderHandler, CefLoadHandler, CefDisplayHandler {
     private var cefBrowser: CefBrowser? = null
     private var browserImage: BufferedImage? = null
     private var browserBitmap: ImageBitmap? = null
@@ -33,6 +37,13 @@ class Browser(
     var screenPosition by mutableStateOf(Point(0, 0))
 
     var bitmap: ImageBitmap? by mutableStateOf(null)
+        private set
+
+    var myURL by mutableStateOf(url)
+        private set
+    var canGoBack by mutableStateOf(false)
+        private set
+    var canGoForward by mutableStateOf(false)
         private set
 
     fun createBrowser(component: Component) {
@@ -43,9 +54,21 @@ class Browser(
         cefBrowser?.createImmediately()
     }
 
+    init {
+        client.addLoadHandler(this)
+        client.addDisplayHandler(this)
+    }
+
     fun close() {
         cefBrowser?.close(true)
     }
+
+    fun canBack() = cefBrowser!!.canGoBack()
+    fun back() = cefBrowser!!.goBack()
+    fun canForward() = cefBrowser!!.canGoForward()
+    fun forward() = cefBrowser!!.goForward()
+    fun url() = cefBrowser!!.url!!
+    fun setUrl(url: String) = cefBrowser!!.loadURL(url)
 
     override fun getViewRect(browser: CefBrowser?): Rectangle {
         return browserComponent?.bounds ?: Rectangle(0, 0, 1, 1)
@@ -143,4 +166,29 @@ class Browser(
     ): Boolean = false
     override fun updateDragCursor(browser: CefBrowser?, operation: Int) {}
     override fun disposeNativeResources() { }
+
+    override fun onLoadingStateChange(
+        browser: CefBrowser?,
+        isLoading: Boolean,
+        canGoBack: Boolean,
+        canGoForward: Boolean
+    ) {
+        this.canGoBack = canGoBack
+        this.canGoForward = canGoForward
+    }
+
+    override fun onAddressChange(browser: CefBrowser?, frame: CefFrame?, url: String?) {
+        if (url != null) {
+            this.myURL = url
+        }
+    }
+
+    override fun onTitleChange(browser: CefBrowser?, title: String?) {}
+    override fun onLoadStart(browser: CefBrowser?, frame: CefFrame?, transitionType: CefRequest.TransitionType?) {}
+    override fun onLoadEnd(browser: CefBrowser?, frame: CefFrame?, httpStatusCode: Int) {}
+    override fun onLoadError(browser: CefBrowser?, frame: CefFrame?, errorCode: CefLoadHandler.ErrorCode?, errorText: String?, failedUrl: String?) {}
+    override fun onFullscreenModeChange(browser: CefBrowser?, fullscreen: Boolean) {}
+    override fun onTooltip(browser: CefBrowser?, text: String?): Boolean = false
+    override fun onStatusMessage(browser: CefBrowser?, value: String?) {}
+    override fun onConsoleMessage(browser: CefBrowser?, level: org.cef.CefSettings.LogSeverity?, message: String?, source: String?, line: Int): Boolean = false
 }

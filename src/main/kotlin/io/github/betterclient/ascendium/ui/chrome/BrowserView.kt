@@ -1,23 +1,31 @@
 package io.github.betterclient.ascendium.ui.chrome
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Bridge
 import org.cef.CefApp
 import org.lwjgl.glfw.GLFW.glfwGetWindowPos
@@ -34,7 +42,7 @@ private const val SCROLL_MULTIPLIER = 30f
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BrowserView(browser: Browser, modifier: Modifier = Modifier) {
+fun BrowserView(browser: Browser, modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(16.dp)) {
     CefApp.getInstance().doMessageLoopWork(1)
 
     val focusRequester = remember { FocusRequester() }
@@ -46,80 +54,27 @@ fun BrowserView(browser: Browser, modifier: Modifier = Modifier) {
         }
     }
 
-    Canvas(
-        modifier = modifier
-            .onGloballyPositioned { coordinates ->
-                MemoryStack.stackPush().use { stack ->
-                    val xPos = stack.mallocInt(1)
-                    val yPos = stack.mallocInt(1)
-                    glfwGetWindowPos(Bridge.client.window.windowHandle, xPos, yPos)
-                    val windowX = xPos.get(0)
-                    val windowY = yPos.get(0)
-
-                    val canvasPos = coordinates.positionInWindow()
-                    browser.screenPosition = Point(
-                        windowX + canvasPos.x.toInt(),
-                        windowY + canvasPos.y.toInt()
-                    )
-                }
-            }
-            .onSizeChanged { size ->
-                dummyComponent.setSize(size.width, size.height)
-                browser.wasResized(size.width, size.height)
-            }
-            .onPointerEvent(
-                eventType = PointerEventType.Move,
-                onEvent = { event ->
-                    val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_MOVED, dummyComponent)
-                    browser.sendMouseEvent(awtEvent)
-                }
+    browser.bitmap?.let {
+        Image(
+            modifier = modifier
+                .clip(shape)
+                .chromiumModifier(dummyComponent, focusRequester),
+            contentDescription = null,
+            bitmap = it
+        )
+    }
+    if (browser.bitmap == null) {
+        Box(
+            modifier = modifier
+                .clip(shape)
+                .background(Color.DarkGray),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.width(64.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
-            .onPointerEvent(
-                eventType = PointerEventType.Press,
-                onEvent = { event ->
-                    val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_PRESSED, dummyComponent)
-                    browser.sendMouseEvent(awtEvent)
-                    focusRequester.requestFocus()
-                }
-            )
-            .onPointerEvent(
-                eventType = PointerEventType.Release,
-                onEvent = { event ->
-                    val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_RELEASED, dummyComponent)
-                    browser.sendMouseEvent(awtEvent)
-                }
-            )
-            .onPointerEvent(
-                eventType = PointerEventType.Scroll,
-                onEvent = { event ->
-                    val change = event.changes.first()
-                    val awtEvent = MouseWheelEvent(
-                        dummyComponent,
-                        MouseWheelEvent.MOUSE_WHEEL,
-                        System.currentTimeMillis(),
-                        0,
-                        change.position.x.toInt(),
-                        change.position.y.toInt(),
-                        0,
-                        false,
-                        MouseWheelEvent.WHEEL_UNIT_SCROLL,
-                        1,
-                        (-change.scrollDelta.y * SCROLL_MULTIPLIER).toInt()
-                    )
-                    browser.sendMouseWheelEvent(awtEvent)
-                }
-            )
-            .onKeyEvent { keyEvent ->
-                val awtEvent = keyEvent.toAwtKeyEvent(dummyComponent)
-                browser.sendKeyEvent(awtEvent)
-                true
-            }
-            .focusRequester(focusRequester)
-            .onFocusChanged { focusState -> browser.setFocus(focusState.isFocused) }
-            .focusable()
-    ) {
-        browser.bitmap?.let {
-            drawIntoCanvas { canvas -> canvas.drawImage(it, Offset(0f, 0f), Paint()) }
         }
     }
 
@@ -128,6 +83,78 @@ fun BrowserView(browser: Browser, modifier: Modifier = Modifier) {
         onDispose { }
     }
 }
+
+@OptIn(ExperimentalComposeUiApi::class)
+private fun Modifier.chromiumModifier(dummyComponent: Component, focusRequester: FocusRequester) = this
+    .onGloballyPositioned { coordinates ->
+    MemoryStack.stackPush().use { stack ->
+        val xPos = stack.mallocInt(1)
+        val yPos = stack.mallocInt(1)
+        glfwGetWindowPos(Bridge.client.window.windowHandle, xPos, yPos)
+        val windowX = xPos.get(0)
+        val windowY = yPos.get(0)
+
+        val canvasPos = coordinates.positionInWindow()
+        browser.screenPosition = Point(
+            windowX + canvasPos.x.toInt(),
+            windowY + canvasPos.y.toInt()
+        )
+    }
+}
+    .onSizeChanged { size ->
+        dummyComponent.setSize(size.width, size.height)
+        browser.wasResized(size.width, size.height)
+    }
+    .onPointerEvent(
+        eventType = PointerEventType.Move,
+        onEvent = { event ->
+            val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_MOVED, dummyComponent)
+            browser.sendMouseEvent(awtEvent)
+        }
+    )
+    .onPointerEvent(
+        eventType = PointerEventType.Press,
+        onEvent = { event ->
+            val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_PRESSED, dummyComponent)
+            browser.sendMouseEvent(awtEvent)
+            focusRequester.requestFocus()
+        }
+    )
+    .onPointerEvent(
+        eventType = PointerEventType.Release,
+        onEvent = { event ->
+            val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_RELEASED, dummyComponent)
+            browser.sendMouseEvent(awtEvent)
+        }
+    )
+    .onPointerEvent(
+        eventType = PointerEventType.Scroll,
+        onEvent = { event ->
+            val change = event.changes.first()
+            val awtEvent = MouseWheelEvent(
+                dummyComponent,
+                MouseWheelEvent.MOUSE_WHEEL,
+                System.currentTimeMillis(),
+                0,
+                change.position.x.toInt(),
+                change.position.y.toInt(),
+                0,
+                false,
+                MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                1,
+                (-change.scrollDelta.y * SCROLL_MULTIPLIER).toInt()
+            )
+            browser.sendMouseWheelEvent(awtEvent)
+        }
+    )
+    .onKeyEvent { keyEvent ->
+        val awtEvent = keyEvent.toAwtKeyEvent(dummyComponent)
+        browser.sendKeyEvent(awtEvent)
+        true
+    }
+    .focusRequester(focusRequester)
+    .onFocusChanged { focusState -> browser.setFocus(focusState.isFocused) }
+    .focusable()
 
 @OptIn(ExperimentalComposeUiApi::class)
 private fun PointerEvent.toAwtMouseEvent(
@@ -164,8 +191,8 @@ private fun PointerButton.toAwtButton(): Int {
 
 private fun PointerButtons.toAwtButton(): Int {
     if (isPrimaryPressed) return MouseEvent.BUTTON1
-    if (isSecondaryPressed) return MouseEvent.BUTTON3
-    if (isTertiaryPressed) return MouseEvent.BUTTON2
+    if (isSecondaryPressed) return MouseEvent.BUTTON2
+    if (isTertiaryPressed) return MouseEvent.BUTTON3
     return MouseEvent.NOBUTTON
 }
 

@@ -4,6 +4,9 @@ import dev.datlag.kcef.KCEF
 import kotlinx.coroutines.runBlocking
 import org.cef.CefApp
 import org.cef.CefClient
+import org.cef.browser.CefBrowser
+import org.cef.browser.CefFrame
+import org.cef.handler.CefLifeSpanHandlerAdapter
 import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -48,6 +51,7 @@ object ChromiumDownloader {
                             client = app!!.createClient()
                             chromiumDownloaded = true
                             continuation.resume(Unit)
+                            addPopupPrevention(client!!)
                         }
                     }
                 }
@@ -60,4 +64,17 @@ object ChromiumDownloader {
 
         return@runBlocking
     } }.start()
+}
+
+private fun addPopupPrevention(client: CefClient) {
+    client.addLifeSpanHandler(object : CefLifeSpanHandlerAdapter() {
+        override fun onBeforePopup(
+            browser: CefBrowser,
+            frame: CefFrame,
+            target_url: String,
+            target_frame_name: String
+        ): Boolean {
+            return true
+        }
+    })
 }
