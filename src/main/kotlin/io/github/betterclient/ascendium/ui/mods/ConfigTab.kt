@@ -33,7 +33,7 @@ fun ConfigTab() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val configs = remember { mutableStateOf(
-                File(".ascendium").listFiles()?.filter { it.isDirectory }?.map { it.name }?: //list directories
+                File(".ascendium/configs").listFiles()?.filter { it.isDirectory }?.map { it.name }?: //list directories
                 ConfigManager.saveConfig().let { listOf(ConfigManager.activeConfig) } //this should create a config (none were found) (hack, should only happen if the user deletes the folders)
             ) }
             ConfigList(configs)
@@ -81,7 +81,7 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
                                 showCreate = false
 
                                 //force recompose
-                                configs1.value = File(".ascendium").listFiles()?.filter { it.isDirectory }?.map { it.name }?:
+                                configs1.value = File(".ascendium/configs").listFiles()?.filter { it.isDirectory }?.map { it.name }?:
                                         ConfigManager.saveConfig().let { listOf(ConfigManager.activeConfig) } //this should create a config
                             }
                         }
@@ -174,10 +174,10 @@ private fun ConfigList(configs0: MutableState<List<String>>) {
                                 showToast("You must have at least one config")
                                 return@IconButton
                             }
-                            val file = File(".ascendium", config)
+                            val file = File(".ascendium/configs", config)
                             file.deleteRecursively()
 
-                            configs = File(".ascendium").listFiles()?.filter { it.isDirectory }?.map { it.name }?:
+                            configs = File(".ascendium/configs").listFiles()?.filter { it.isDirectory }?.map { it.name }?:
                                     ConfigManager.saveConfig().let { listOf(ConfigManager.activeConfig) } //this should create a config
 
                             if (config == active) {

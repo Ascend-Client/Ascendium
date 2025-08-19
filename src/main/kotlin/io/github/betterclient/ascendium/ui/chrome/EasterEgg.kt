@@ -47,10 +47,6 @@ fun EasterEggUI() {
                     shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
                 )
             }
-
-            Button(onClick = {
-                ComposeUI.current.switchTo { ModsUI(true) }
-            }) { Text("Back") }
         }
     }
 }
@@ -59,6 +55,12 @@ fun EasterEggUI() {
 private fun RowScope.Navigation() {
     var textFieldValue by remember(browser.myURL) { mutableStateOf(browser.myURL) }
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    Spacer(Modifier.width(2.dp))
+
+    Button(onClick = {
+        ComposeUI.current.switchTo { ModsUI(true) }
+    }) { Text("Back") }
 
     IconButton(
         onClick = { browser.back() },
@@ -103,4 +105,6 @@ private fun RowScope.Navigation() {
             tint = MaterialTheme.colorScheme.onBackground
         )
     }
+
+    Spacer(Modifier.width(2.dp))
 }

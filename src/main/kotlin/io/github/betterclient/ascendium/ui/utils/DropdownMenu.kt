@@ -49,9 +49,11 @@ fun DropdownMenu(
     var curOption by remember { mutableStateOf(selectedOption) }
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.detectOutsideClick {
-        expanded = false
-    }) {
+    Box(modifier = modifier.then(
+        if(expanded) {
+            Modifier.detectOutsideClick { expanded = false }
+        } else Modifier
+    )) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
