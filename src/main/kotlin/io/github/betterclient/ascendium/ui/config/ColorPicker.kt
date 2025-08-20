@@ -21,7 +21,8 @@ import io.github.betterclient.ascendium.ui.utils.detectOutsideClick
 
 @Composable
 fun ColorPicker(initial: Color, default: Color, onChange: (Color) -> Unit) {
-    var enabled by remember { mutableStateOf(false) }
+    val enabled0 = remember { mutableStateOf(false) }
+    var enabled by enabled0
     var color by remember { mutableStateOf(initial) }
 
     Column {
@@ -54,7 +55,7 @@ fun ColorPicker(initial: Color, default: Color, onChange: (Color) -> Unit) {
             exit = fadeOut() + shrinkVertically()
         ) {
             Surface(
-                modifier = Modifier.padding(top = 8.dp).detectOutsideClick {
+                modifier = Modifier.padding(top = 8.dp).detectOutsideClick(enabled0) {
                     enabled = false
                 },
                 shape = MaterialTheme.shapes.medium,

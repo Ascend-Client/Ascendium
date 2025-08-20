@@ -25,7 +25,8 @@ fun showToast(text: String) {
     ComposeUI.current.toast {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val no = false
-            var yes by remember { mutableStateOf(no) }
+            val yes0 = remember { mutableStateOf(no) }
+            var yes by yes0
             LaunchedEffect(Unit) {
                 yes = true
             }
@@ -35,7 +36,7 @@ fun showToast(text: String) {
             ) {
                 Column(
                     Modifier
-                        .detectOutsideClick {
+                        .detectOutsideClick(yes0) {
                             yes = no //hehe
                             Thread {
                                 Thread.sleep(300)

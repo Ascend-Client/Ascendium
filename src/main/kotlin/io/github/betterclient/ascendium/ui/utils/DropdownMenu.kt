@@ -47,13 +47,10 @@ fun DropdownMenu(
     name: String
 ) {
     var curOption by remember { mutableStateOf(selectedOption) }
-    var expanded by remember { mutableStateOf(false) }
+    val expanded0 = remember { mutableStateOf(false) }
+    var expanded by expanded0
 
-    Box(modifier = modifier.then(
-        if(expanded) {
-            Modifier.detectOutsideClick { expanded = false }
-        } else Modifier
-    )) {
+    Box(modifier = modifier.detectOutsideClick(expanded0) { expanded = false }) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()

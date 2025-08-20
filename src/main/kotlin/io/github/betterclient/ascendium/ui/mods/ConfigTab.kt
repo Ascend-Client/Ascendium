@@ -44,7 +44,8 @@ fun ConfigTab() {
 
 @Composable
 private fun NewConfigButton(configs1: MutableState<List<String>>) {
-    var showCreate by remember { mutableStateOf(false) }
+    val showCreate0 = remember { mutableStateOf(false) }
+    var showCreate by showCreate0
     val corner by animateDpAsState(targetValue = if (showCreate) 16.dp else 0.dp)
     AnimatedContent(
         showCreate
@@ -53,7 +54,7 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
             Column(
                 Modifier
                     .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(corner))
-                    .size(300.dp, 120.dp).detectOutsideClick { showCreate = false },
+                    .size(300.dp, 120.dp).detectOutsideClick(showCreate0) { showCreate = false },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(Modifier.height(8.dp))

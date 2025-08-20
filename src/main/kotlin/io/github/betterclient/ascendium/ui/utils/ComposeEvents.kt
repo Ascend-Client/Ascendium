@@ -23,14 +23,18 @@ import java.awt.event.MouseWheelEvent
 
 @Composable
 fun Modifier.detectOutsideClick(
+    enabled0: State<Boolean>,
     onOutsideClick: () -> Unit
 ): Modifier {
     var position by remember { mutableStateOf<Rect?>(null) }
     var voidedLast by remember { mutableStateOf(false) }
+    val enabled by enabled0
     LaunchedEffect(Unit) {
         fun handler(composeCoords: Offset, mcMouse: Offset, button: Int, clicked: Boolean): Boolean {
+            if (!enabled) return false
+
             if (voidedLast && button == 0 && !clicked) {
-                ComposeUI.current.removeMouseHandler(::handler)
+                onOutsideClick()
                 return true
             }
 
@@ -41,7 +45,6 @@ fun Modifier.detectOutsideClick(
 
             if (composeCoords.x < position!!.left || composeCoords.x > position!!.right ||
                 composeCoords.y < position!!.top || composeCoords.y > position!!.bottom) {
-                onOutsideClick()
                 voidedLast = true
                 return true
             }
