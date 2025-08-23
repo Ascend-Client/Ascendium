@@ -72,11 +72,11 @@ const val HEIGHT = 120
 @Composable
 private fun ModuleView(module: Module) {
     var enabled by remember { mutableStateOf(module.enabled) }
-    val theme = MaterialTheme.colorScheme
-
     val cornerRadius by animateDpAsState(
         targetValue = if (enabled) 32.dp else 16.dp
     )
+
+    val theme = MaterialTheme.colorScheme
     val backgroundColor by animateColorAsState(
         targetValue = if (enabled) theme.primaryContainer else theme.surfaceContainer
     )

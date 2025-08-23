@@ -1,10 +1,6 @@
 package io.github.betterclient.ascendium.module
 
 import io.github.betterclient.ascendium.Bridge
-import io.github.betterclient.ascendium.BridgeRenderer
-import io.github.betterclient.ascendium.compose.SkiaRenderer
-import io.github.betterclient.ascendium.event.EventTarget
-import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.module.config.*
 
@@ -29,99 +25,22 @@ open class Module(val name: String, val description: String) {
     open fun onDisable() {}
 
     fun boolean(name: String, value: Boolean) =
-        BooleanSetting(name, value).apply { this@Module.settings.add(this) }::value
+        BooleanSetting(name, value).apply { this@Module.settings.add(this) }.state
 
     fun number(name: String, value: Double, min: Double = Double.NEGATIVE_INFINITY, max: Double = Double.POSITIVE_INFINITY) =
-        NumberSetting(name, value, min, max).apply { this@Module.settings.add(this) }::value
+        NumberSetting(name, value, min, max).apply { this@Module.settings.add(this) }.state
 
     fun string(name: String, value: String) =
-        StringSetting(name, value).apply { this@Module.settings.add(this) }::value
+        StringSetting(name, value).apply { this@Module.settings.add(this) }.state
 
     fun dropdown(name: String, value: String, vararg options: String) =
-        DropdownSetting(name, value, options.toList()).apply { this@Module.settings.add(this) }::value
+        DropdownSetting(name, value, options.toList()).apply { this@Module.settings.add(this) }.state
 
     fun color(name: String, value: Int) =
-        ColorSetting(name, value).apply { this@Module.settings.add(this) }::value
+        ColorSetting(name, value).apply { this@Module.settings.add(this) }.state
 
     infix fun `is`(@Suppress("UNUSED_PARAMETER") state: enabled) = this.enabled
     infix fun `is`(@Suppress("UNUSED_PARAMETER") state: disabled) = !this.enabled
 }
 object enabled
 object disabled
-
-abstract class HUDModule(name: String, description: String, val hasBackground: Boolean = true) : Module(name, description) {
-    var x = 100
-    var y = 100
-    val textColor by color("Text Color", -1)
-    val backgroundColor = ColorSetting("Background Color", 0x51000000)
-    val minecraftRenderer by boolean("Use Minecraft Renderer", true)
-    var scale by number("Scale", 1.0, 0.25, 3.0)
-
-    val width: Int
-        get() {
-            val renderable = Renderable(this, NullRenderer(scale.toFloat(), minecraftRenderer))
-            render(renderable)
-            return renderable.width
-        }
-    val height: Int
-        get() {
-            val renderable = Renderable(this, NullRenderer(scale.toFloat(), minecraftRenderer))
-            render(renderable)
-            return renderable.height
-        }
-
-    init {
-        if (hasBackground) {
-            settings.add(backgroundColor)
-        }
-    }
-
-    abstract fun render(renderer: Renderable)
-
-    @EventTarget
-    @Suppress("Unused")
-    fun _render(hudRenderHudEvent: RenderHudEvent) {
-        render(hudRenderHudEvent.renderer)
-    }
-
-    fun render(context: BridgeRenderer) {
-        val nullR = Renderable(this, NullRenderer(scale.toFloat(), minecraftRenderer))
-        render(nullR)
-
-        if (minecraftRenderer) {
-            val renderer = Renderable(this, Renderer(scale.toFloat(), context, null))
-            if (this.hasBackground) renderer.renderBG(nullR)
-
-            render(renderer)
-        } else {
-            SkiaRenderer.withSkia {
-                val renderer = Renderable(this, Renderer(scale.toFloat(), null, it))
-                if (this.hasBackground) renderer.renderBG(nullR)
-                render(renderer)
-            }
-        }
-    }
-
-    fun renderAt(x: Int, y: Int, scale: Double, context: BridgeRenderer) {
-        val xo = this.x
-        val yo = this.y
-        val so = this.scale
-        this.x = x
-        this.y = y
-        this.scale = scale
-
-        render(context)
-
-        this.x = xo
-        this.y = yo
-        this.scale = so
-    }
-}
-
-abstract class TextModule(name: String, description: String) : HUDModule(name, description, true) {
-    override fun render(renderer: Renderable) {
-        renderer.renderText(render(), 0, 0)
-    }
-
-    abstract fun render(): String
-}

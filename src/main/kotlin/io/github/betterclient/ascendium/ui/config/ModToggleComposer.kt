@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.module.HUDModule
+import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 
@@ -27,7 +27,7 @@ fun ModToggle(mod: Module) {
             enabled = it
             if (mod.enabled != it) mod.toggle()
         })
-        if (mod is HUDModule) {
+        if (mod is ComposableHUDModule) {
             Spacer(Modifier.width(4.dp))
             Button(onClick = {
                 ComposeUI.current.switchTo { MoveModuleUI(listOf(mod), true) }

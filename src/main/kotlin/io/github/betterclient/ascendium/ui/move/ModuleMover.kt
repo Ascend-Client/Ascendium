@@ -2,16 +2,16 @@ package io.github.betterclient.ascendium.ui.move
 
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.module.HUDModule
+import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import org.jetbrains.skia.Rect
 
-class ModuleMover(val mods: List<HUDModule>) {
+class ModuleMover(val mods: List<ComposableHUDModule>) {
     val current = ComposeUI.current
     var isDragging = false
     var dragStartX = 0
     var dragStartY = 0
-    var draggingModule: HUDModule? = null
+    var draggingModule: ComposableHUDModule? = null
 
     fun register() {
         current.addRenderHandler { renderer, mouseX, mouseY ->
@@ -28,7 +28,7 @@ class ModuleMover(val mods: List<HUDModule>) {
 
     private fun handleClick(x: Float, y: Float): Boolean {
         mods.forEach {
-            val modRect = Rect(it.x.toFloat() - 3, it.y.toFloat() - 3, (it.x + it.width + 6).toFloat(), (it.y + it.height + 6).toFloat())
+            val modRect = Rect(it.x.toFloat() - 3, it.y.toFloat() - 3, (it.x + it.width + 3).toFloat(), (it.y + it.height + 3).toFloat())
             if (x >= modRect.left && x <= modRect.right &&
                 y >= modRect.top && y <= modRect.bottom) {
                 isDragging = true
@@ -49,7 +49,7 @@ class ModuleMover(val mods: List<HUDModule>) {
         }
 
         mods.forEach {
-            it.render(renderer)
+            it.render()
         }
     }
 }

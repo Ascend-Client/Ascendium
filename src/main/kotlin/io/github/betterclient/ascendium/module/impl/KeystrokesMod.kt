@@ -1,14 +1,21 @@
 package io.github.betterclient.ascendium.module.impl
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.KeybindingBridge
+import io.github.betterclient.ascendium.event.EventTarget
+import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.module.HUDModule
-import io.github.betterclient.ascendium.module.Renderable
-import kotlin.math.floor
-import kotlin.math.roundToInt
 
 object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing", hasBackground = false) {
-    val keySize by number("Key size", 15.0, 10.0, 30.0)
     val pressedColor by color("Pressed Color", 0x71000000)
     val unPressedColor by color("Unpressed Color", 0x51000000)
     val mouseKeys by boolean("Show mouse keys", true)
@@ -21,44 +28,83 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
     private val keyAttack = Bridge.client.gameOptions.keyAttack
     private val keyUse = Bridge.client.gameOptions.keyUse
     private val keyJump = Bridge.client.gameOptions.keyJump
+    private val allKeys = listOf(keyForward, keyBackward, keyLeft, keyRight, keyAttack, keyUse, keyJump)
 
-    override fun render(renderer: Renderable) {
-        val size = keySize
-        val spacing = 2.0
+    @Composable
+    override fun Render() {
+        Column(
+            modifier = Modifier.width(IntrinsicSize.Max),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            RenderKey(keyForward, modifier = Modifier.fillMaxWidth(1/3f).aspectRatio(1f))
 
-        val totalWidth = size * 3 + spacing * 2
-        renderKey(renderer, keyForward, size + spacing, 0.0, size)
-        renderKey(renderer, keyLeft, 0.0, size + spacing, size)
-        renderKey(renderer, keyBackward, size + spacing, size + spacing, size)
-        renderKey(renderer, keyRight, size * 2 + spacing * 2, size + spacing, size)
-
-        if (mouseKeys) {
-            val yPos = size * 2 + spacing * 2
-            val lmbWidth = floor((totalWidth - spacing) / 2.0)
-            val rmbWidth = totalWidth - lmbWidth - spacing
-
-            renderKey(renderer, keyAttack, 0.0, yPos, lmbWidth, size, "LMB")
-            renderKey(renderer, keyUse, lmbWidth + spacing, yPos, rmbWidth, size, "RMB")
-        }
-
-        if (spaceBar) {
-            val wide = totalWidth
-
-            val baseY = if (mouseKeys) {
-                (size * 2 + spacing * 2) + size + spacing
-            } else {
-                (size + spacing) + size + spacing
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(1.dp)
+            ) {
+                RenderKeyRow(keyLeft, forceSquare = true)
+                RenderKeyRow(keyBackward, forceSquare = true)
+                RenderKeyRow(keyRight, forceSquare = true)
             }
-            renderKey(renderer, keyJump, 0.0, baseY, wide, size)
+
+            if (mouseKeys) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(1.dp)
+                ) {
+                    RenderKeyRow(keyAttack, label = "LMB")
+                    RenderKeyRow(keyUse, label = "RMB")
+                }
+            }
+
+            if (spaceBar) {
+                RenderKey(keyJump, modifier = Modifier.fillMaxWidth())
+            }
         }
     }
 
-    private fun renderKey(renderer: Renderable, key: KeybindingBridge, x: Double, y: Double, sizeW: Double, sizeH: Double = sizeW, label: String = key.getBoundKey) {
-        renderer.renderTextWithBG(
-            label,
-            x.roundToInt(), y.roundToInt(),
-            sizeW.roundToInt(), sizeH.roundToInt(),
-            if (key.buttonPressed) pressedColor else unPressedColor
-        )
+    @Composable
+    fun RenderKey(key: KeybindingBridge, label: String = key.getBoundKey, modifier: Modifier = Modifier) {
+        Box(
+            modifier = modifier
+                .background(
+                    Color(if (key.pressed) pressedColor else unPressedColor),
+                    RoundedCornerShape(8.dp)
+                )
+                .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(label)
+        }
     }
+
+    @Composable
+    fun RowScope.RenderKeyRow(key: KeybindingBridge, label: String = key.getBoundKey, forceSquare: Boolean = false) {
+        Box(
+            modifier = Modifier
+                .background(
+                    Color(if (key.pressed) pressedColor else unPressedColor),
+                    RoundedCornerShape(8.dp)
+                )
+                .weight(1f)
+                .then(if (forceSquare) Modifier.aspectRatio(1f) else Modifier)
+                .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(label)
+        }
+    }
+
+    @EventTarget
+    fun onRender(renderHudEvent: RenderHudEvent) {
+        for (bridge in allKeys) {
+            bridge.pressed = bridge.buttonPressed
+        }
+    }
+
+    val pressedMap = mutableMapOf<KeybindingBridge, MutableState<Boolean>>()
+    var KeybindingBridge.pressed: Boolean
+        get() = pressedMap.getOrPut(this) { mutableStateOf(false) }.value
+        set(value) { pressedMap.getOrPut(this) { mutableStateOf(false) }.value = value }
 }

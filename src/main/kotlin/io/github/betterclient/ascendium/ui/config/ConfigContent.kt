@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.BridgeRenderer
-import io.github.betterclient.ascendium.module.HUDModule
+import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.ui.utils.renderWithMC
 import org.jetbrains.skia.IRect
@@ -65,7 +65,7 @@ fun ConfigContent(preview: Boolean, mod: Module) {
 
         VerticalScrollbar(rememberScrollbarAdapter(state), modifier = Modifier.align(Alignment.CenterEnd))
 
-        if (mod is HUDModule) {
+        if (mod is ComposableHUDModule) {
             val previewState = remember { mutableStateOf(false) }
             LaunchedEffect(preview) { previewState.value = preview }
 
@@ -87,7 +87,7 @@ fun ConfigContent(preview: Boolean, mod: Module) {
 }
 
 @Composable
-fun RenderPreview(mod: HUDModule, corner: Dp) {
+fun RenderPreview(mod: ComposableHUDModule, corner: Dp) {
     Image(
         bitmap = remember { Ascendium::class.java.getResourceAsStream("/assets/ascendium/preview.png")!!.readAllBytes().decodeToImageBitmap() },
         contentDescription = "Preview image",
@@ -101,7 +101,7 @@ fun RenderPreview(mod: HUDModule, corner: Dp) {
 fun renderModInMiddle(
     context: BridgeRenderer,
     rect: IRect,
-    mod: HUDModule
+    mod: ComposableHUDModule
 ) {
     val rectWidth = rect.right - rect.left
     val rectHeight = rect.bottom - rect.top
@@ -120,5 +120,5 @@ fun renderModInMiddle(
     val left = rect.left + ((rectWidth - drawWidth) / 2).toInt()
     val top = rect.top + ((rectHeight - drawHeight) / 2).toInt()
 
-    mod.renderAt(left, top, targetScale, context)
+    mod.renderAt(left, top, targetScale)
 }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -22,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.module.HUDModule
+import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
@@ -59,7 +58,7 @@ fun ConfigUI(mod: Module, fromMods: Boolean) {
 
                         Text(mod.name, color = MaterialTheme.colorScheme.onBackground)
 
-                        if (mod !is HUDModule) return@Box //don't make preview button if not renderable
+                        if (mod !is ComposableHUDModule) return@Box //don't make preview button if not renderable
                         Row(modifier = Modifier.align(Alignment.CenterEnd)) {
                             Button(onClick = {
                                 preview = !preview

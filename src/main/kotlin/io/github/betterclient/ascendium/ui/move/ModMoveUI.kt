@@ -19,18 +19,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.module.HUDModule
+import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.ui.config.ConfigUI
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
 
-class MoveModuleUI(val mods: List<HUDModule>) : ComposeUI({
+class MoveModuleUI(val mods: List<ComposableHUDModule>) : ComposeUI({
     MoveModuleUI(mods, null)
 })
 
 @Composable
-fun MoveModuleUI(mods: List<HUDModule>, backToConfig: Boolean?) {
+fun MoveModuleUI(mods: List<ComposableHUDModule>, backToConfig: Boolean?) {
     AscendiumTheme {
         if (backToConfig != null) {
             var start by remember { mutableStateOf(false) }

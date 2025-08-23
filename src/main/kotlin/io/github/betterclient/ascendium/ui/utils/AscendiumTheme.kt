@@ -16,35 +16,9 @@ import io.github.betterclient.ascendium.Ascendium
 @Composable
 fun AscendiumTheme(content: @Composable () -> Unit) {
     val colorScheme = colorScheme()
-    val font = FontFamily(Font(
-        "Minecraft",
-        Ascendium::class.java.getResourceAsStream("/assets/ascendium/Minecraft.ttf")!!.use { it.readAllBytes() },
-        FontWeight.Medium
-    ))
-
-    @Composable
-    fun TextStyle.MCFont(): TextStyle {
-        return if (Ascendium.settings.mcFontState) this.copy(fontFamily = font, fontSize = this.fontSize * 1.3) else this
+    val t = Typography().MCFont().ModifyAll {
+        it.copy(color = colorScheme.onBackground)
     }
-
-    val bt = androidx.compose.material3.Typography()
-    val t = Typography(
-        displayLarge = bt.displayLarge.copy(color = colorScheme.onBackground).MCFont(),
-        displayMedium = bt.displayMedium.copy(color = colorScheme.onBackground).MCFont(),
-        displaySmall = bt.displaySmall.copy(color = colorScheme.onBackground).MCFont(),
-        headlineLarge = bt.headlineLarge.copy(color = colorScheme.onBackground).MCFont(),
-        headlineMedium = bt.headlineMedium.copy(color = colorScheme.onBackground).MCFont(),
-        headlineSmall = bt.headlineSmall.copy(color = colorScheme.onBackground).MCFont(),
-        titleLarge = bt.titleLarge.copy(color = colorScheme.onBackground).MCFont(),
-        titleMedium = bt.titleMedium.copy(color = colorScheme.onBackground).MCFont(),
-        titleSmall = bt.titleSmall.copy(color = colorScheme.onBackground).MCFont(),
-        bodyLarge = bt.bodyLarge.copy(color = colorScheme.onBackground).MCFont(),
-        bodyMedium = bt.bodyMedium.copy(color = colorScheme.onBackground).MCFont(),
-        bodySmall = bt.bodySmall.copy(color = colorScheme.onBackground).MCFont(),
-        labelLarge = bt.labelLarge.copy(color = colorScheme.onBackground).MCFont(),
-        labelMedium = bt.labelMedium.copy(color = colorScheme.onBackground).MCFont(),
-        labelSmall = bt.labelSmall.copy(color = colorScheme.onBackground).MCFont(),
-    )
 
     MaterialTheme(
         colorScheme = colorScheme,

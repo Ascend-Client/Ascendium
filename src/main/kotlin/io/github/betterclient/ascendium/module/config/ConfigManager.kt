@@ -2,7 +2,7 @@ package io.github.betterclient.ascendium.module.config
 
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.Logger
-import io.github.betterclient.ascendium.module.HUDModule
+import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.ModManager
 import kotlinx.serialization.Serializable
 import java.io.File
@@ -62,7 +62,7 @@ object ConfigManager {
                     }
             }
 
-            if (module is HUDModule) {
+            if (module is ComposableHUDModule) {
                 val xSetting = modConfig.settings.find { it.name == "x" } as? NumberSetting
                 val ySetting = modConfig.settings.find { it.name == "y" } as? NumberSetting
                 if (xSetting != null && ySetting != null) {
@@ -108,7 +108,7 @@ object ConfigManager {
                 enabled = module.enabled,
                 settings = module.settings
             )
-            if (module is HUDModule) {
+            if (module is ComposableHUDModule) {
                 modConfig.settings = modConfig.settings.toMutableList().also {
                     it.add(NumberSetting("x", module.x.toDouble()))
                     it.add(NumberSetting("y", module.y.toDouble()))

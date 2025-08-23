@@ -1,5 +1,6 @@
 package io.github.betterclient.ascendium.module.impl
 
+import androidx.compose.runtime.getValue
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.MouseClickEvent
 import io.github.betterclient.ascendium.module.TextModule
@@ -20,7 +21,7 @@ object CPSMod : TextModule("CPS", "Shows how many times you click per second") {
         }
     val _rmb = mutableListOf<Long>()
     
-    override fun render() = 
+    override fun renderModule() =
         template
             .replace("%LMB%", lmb.toString(), true)
             .replace("%RMB%", rmb.toString(), true)
