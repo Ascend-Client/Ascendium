@@ -29,7 +29,3 @@ abstract class TextModule(name: String, description: String) : ComposableHUDModu
 
     abstract fun renderModule(): String
 }
-
-abstract class MinecraftHUDModule(name: String, description: String, hasBackground: Boolean = true) : ComposableHUDModule(name, description, hasBackground) {
-    override val minecraftFont: Boolean = true
-}

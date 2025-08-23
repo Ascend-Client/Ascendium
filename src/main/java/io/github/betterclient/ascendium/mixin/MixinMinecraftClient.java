@@ -14,6 +14,9 @@ import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.Window;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.resource.ReloadableResourceManagerImpl;
+import net.minecraft.resource.Resource;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
@@ -27,6 +30,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
 
 @Mixin(MinecraftClient.class)
 public abstract class MixinMinecraftClient implements MinecraftBridge {
@@ -47,6 +54,8 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Shadow @Nullable public ClientPlayerEntity player;
 
     @Shadow @Nullable public HitResult crosshairTarget;
+
+    @Shadow @Final private ReloadableResourceManagerImpl resourceManager;
 
     @Override
     public @NotNull OptionsBridge getGameOptions() {
@@ -99,8 +108,8 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     }
 
     @Override
-    public @NotNull @Nullable EntityBridge getPlayer() {
-        return (EntityBridge) this.player;
+    public @NotNull @Nullable PlayerBridge getPlayer() {
+        return (PlayerBridge) this.player;
     }
 
     @Override
@@ -117,5 +126,22 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
                 new Pos3D(hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z),
                 (EntityBridge) hitResult.getEntity()
         );
+    }
+
+    @Override
+    public byte @Nullable [] loadResource(@NotNull IdentifierBridge identifier) {
+        Optional<Resource> resource = this.resourceManager.getResource(Identifier.of(identifier.getNamespace(), identifier.getPath()));
+        if (resource.isEmpty()) {
+            return null;
+        } else {
+            try {
+                InputStream inputStream = resource.get().getInputStream();
+                byte[] bytes = inputStream.readAllBytes();
+                inputStream.close();
+                return bytes;
+            } catch (IOException e) {
+                return null;
+            }
+        }
     }
 }

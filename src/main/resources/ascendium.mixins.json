@@ -4,7 +4,9 @@
   "package": "io.github.betterclient.ascendium.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "MixinEntity"
+    "common.MixinEntity",
+    "common.MixinItemStack",
+    "common.MixinPlayerEntity"
   ],
   "client": [
     "MixinMain",

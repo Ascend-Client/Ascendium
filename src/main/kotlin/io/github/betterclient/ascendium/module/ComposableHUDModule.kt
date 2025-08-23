@@ -47,6 +47,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
     val backgroundColor = ColorSetting("Background Color", 0x51000000)
     abstract val minecraftFont: Boolean
     var scale by number("Scale", 1.0, 0.25, 3.0)
+    open val renderBackground = true
 
     private var _width: Int = 0
     private var _height: Int = 0
@@ -85,22 +86,23 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
                         it.copy(color = colorScheme.onBackground)
                     }
         ) {
-            Box(
-                Modifier
-                    .offset(xDp, yDp)
-                    .then(
-                        if (hasBackground) Modifier.background(
-                            color = Color(bg),
-                            shape = RoundedCornerShape(8.dp)
-                        ) else Modifier
-                    )
-                    .padding(4.dp)
-                    .onGloballyPositioned {
-                        _width = it.size.width.getScaled().toInt()
-                        _height = it.size.height.getScaled().toInt()
-                    }
-            ) {
-                Render()
+            Box(Modifier.onGloballyPositioned {
+                _width = it.size.width.getScaled().toInt()
+                _height = it.size.height.getScaled().toInt()
+            }) {
+                Box(
+                    Modifier
+                        .offset(xDp, yDp)
+                        .then(
+                            if (hasBackground && renderBackground) Modifier.background(
+                                color = Color(bg),
+                                shape = RoundedCornerShape(8.dp)
+                            ) else Modifier
+                        )
+                        .padding(4.dp)
+                ) {
+                    Render()
+                }
             }
         }
     }

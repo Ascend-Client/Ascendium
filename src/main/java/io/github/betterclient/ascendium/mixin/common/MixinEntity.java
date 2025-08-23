@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.mixin;
+package io.github.betterclient.ascendium.mixin.common;
 
 import io.github.betterclient.ascendium.BoundingBox;
 import io.github.betterclient.ascendium.EntityBridge;

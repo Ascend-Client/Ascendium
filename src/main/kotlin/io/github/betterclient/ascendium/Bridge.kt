@@ -16,10 +16,11 @@ interface MinecraftBridge {
     val mouse: MouseBridge
     val gameOptions: OptionsBridge
     val window: WindowBridge
-    val player: EntityBridge
+    val player: PlayerBridge
 
     fun openScreen(screen: BridgeScreen)
     fun raycast(entityBridge: EntityBridge, camera: Pos3D, possibleHits: Pos3D, box: BoundingBox, id: Int, d3: Double): RaycastResultBridge?
+    fun loadResource(identifier: IdentifierBridge): ByteArray?
 }
 
 class RaycastResultBridge(val pos: Pos3D, val entity: EntityBridge?)
@@ -31,6 +32,18 @@ interface EntityBridge {
     fun getCameraPosVec(i: Int): Pos3D
     fun getRotationVec(i: Int): Pos3D
 }
+
+interface PlayerBridge : EntityBridge {
+    fun getArmor(i: Int): ItemStackBridge
+}
+
+interface ItemStackBridge {
+    val itemCount: Int
+    val itemIdentifier: IdentifierBridge
+    val durability: Float //0..1
+}
+
+data class IdentifierBridge(val namespace: String, val path: String)
 
 class Pos3D(val x: Double, val y: Double, val z: Double) {
     fun add(x: Double, y: Double, z: Double) = Pos3D(x + this.x, y + this.y, z + this.z)
