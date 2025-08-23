@@ -35,6 +35,7 @@ interface EntityBridge {
 
 interface PlayerBridge : EntityBridge {
     fun getArmor(i: Int): ItemStackBridge
+    fun getMainHandItem(): ItemStackBridge
 }
 
 interface ItemStackBridge {

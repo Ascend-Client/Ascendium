@@ -18,4 +18,9 @@ public abstract class MixinPlayerEntity implements PlayerBridge {
     public @NotNull ItemStackBridge getArmor(int i) {
         return (ItemStackBridge) (Object) this.inventory.armor.get(i);
     }
+
+    @Override
+    public @NotNull ItemStackBridge getMainHandItem() {
+        return (ItemStackBridge) (Object) this.inventory.getMainHandStack();
+    }
 }
