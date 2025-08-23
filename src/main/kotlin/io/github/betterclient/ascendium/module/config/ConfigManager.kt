@@ -52,6 +52,8 @@ object ConfigManager {
             }
 
             for (setting in modConfig.settings) {
+                if (setting is InfoSetting) continue
+
                 module
                     .settings
                     .find { setting.name == it.name }
@@ -110,6 +112,7 @@ object ConfigManager {
             )
             if (module is ComposableHUDModule) {
                 modConfig.settings = modConfig.settings.toMutableList().also {
+                    it.removeIf { set -> set is InfoSetting }
                     it.add(NumberSetting("x", module.x.toDouble()))
                     it.add(NumberSetting("y", module.y.toDouble()))
                 }

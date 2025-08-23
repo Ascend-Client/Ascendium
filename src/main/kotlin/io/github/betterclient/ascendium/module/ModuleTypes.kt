@@ -39,6 +39,8 @@ open class Module(val name: String, val description: String) {
     fun color(name: String, value: Int) =
         ColorSetting(name, value).apply { this@Module.settings.add(this) }.state
 
+    fun info(str: String) = InfoSetting(str).apply { this@Module.settings.add(this) }
+
     infix fun `is`(@Suppress("UNUSED_PARAMETER") state: enabled) = this.enabled
     infix fun `is`(@Suppress("UNUSED_PARAMETER") state: disabled) = !this.enabled
 }

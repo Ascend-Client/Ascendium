@@ -5,6 +5,7 @@ import io.github.betterclient.ascendium.module.impl.CPSMod
 import io.github.betterclient.ascendium.module.impl.FPSMod
 import io.github.betterclient.ascendium.module.impl.KeystrokesMod
 import io.github.betterclient.ascendium.module.impl.PingMod
+import io.github.betterclient.ascendium.module.impl.PositionDisplayMod
 import io.github.betterclient.ascendium.module.impl.ReachDisplayMod
 import io.github.betterclient.ascendium.module.impl.ServerDisplayMod
 
@@ -16,7 +17,8 @@ object ModManager {
         PingMod,
         ServerDisplayMod,
         ReachDisplayMod,
-        ArmorDisplayMod
+        ArmorDisplayMod,
+        PositionDisplayMod
     )
 
     fun getHUDModules() = modules.filterIsInstance<ComposableHUDModule>().filter { it `is` enabled }

@@ -26,6 +26,7 @@ import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ColorSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.DropdownSetting
+import io.github.betterclient.ascendium.module.config.InfoSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.module.config.Setting
 import io.github.betterclient.ascendium.module.config.StringSetting
@@ -92,6 +93,7 @@ fun SettingEditor(setting: Setting) {
                     name = setting.name
                 )
             }
+            is InfoSetting -> {} //name already rendered, we dont't have to do anything
         }
         Spacer(Modifier.width(32.dp))
     }

@@ -36,6 +36,8 @@ interface EntityBridge {
 interface PlayerBridge : EntityBridge {
     fun getArmor(i: Int): ItemStackBridge
     fun getMainHandItem(): ItemStackBridge
+    val biome: String
+    val facing: String
 }
 
 interface ItemStackBridge {

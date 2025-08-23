@@ -195,3 +195,8 @@ class ColorSetting(
         value = _defaultValue
     }
 }
+
+class InfoSetting(val info: String, override val name: String = info) : Setting() {
+    override fun setFromString(json: Setting) { }
+    override fun _reset() { }
+}
