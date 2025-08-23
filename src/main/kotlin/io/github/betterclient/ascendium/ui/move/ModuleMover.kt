@@ -48,8 +48,6 @@ class ModuleMover(val mods: List<ComposableHUDModule>) {
             draggingModule!!.y = mouseY - dragStartY
         }
 
-        mods.forEach {
-            it.render()
-        }
+        ComposableHUDModule.renderAll(mods)
     }
 }
