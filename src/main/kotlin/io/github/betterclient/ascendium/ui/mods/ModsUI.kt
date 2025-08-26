@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,7 +49,7 @@ fun ModsUI(smallen: Boolean) {
 
             Box(Modifier
                 .size(animatedWidth, animatedHeight)
-                .background(MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()), RoundedCornerShape(32.dp))
+                .background(AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()), RoundedCornerShape(32.dp))
                 .safeContentPadding()
                 .clip(RoundedCornerShape(32.dp))
             ) {

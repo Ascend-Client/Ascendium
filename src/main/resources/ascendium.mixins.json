@@ -16,6 +16,7 @@
     "options.MixinOptions",
     "render.MixinInGameHud",
     "render.MixinTextRenderer",
+    "render.MixinTitleScreen",
     "render.MixinWindow"
   ],
   "injectors": {

@@ -13,10 +13,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.github.skydoves.colorpicker.compose.*
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.detectOutsideClick
 
 @Composable
@@ -42,7 +42,7 @@ fun ColorPicker(initial: Color, default: Color, onChange: (Color) -> Unit) {
                 modifier = Modifier
                     .size(size)
                     .background(color, CircleShape)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    .border(1.dp, AscendiumTheme.colorScheme.outline, CircleShape)
                     .clickable {
                         enabled = !enabled
                     }
@@ -58,10 +58,10 @@ fun ColorPicker(initial: Color, default: Color, onChange: (Color) -> Unit) {
                 modifier = Modifier.padding(top = 8.dp).detectOutsideClick(enabled0) {
                     enabled = false
                 },
-                shape = MaterialTheme.shapes.medium,
+                shape = AscendiumTheme.shapes.medium,
                 shadowElevation = 4.dp,
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                color = AscendiumTheme.colorScheme.surfaceVariant,
+                border = BorderStroke(1.dp, AscendiumTheme.colorScheme.outline)
             ) {
                 ColorPickerWindow(
                     initial = color,
@@ -107,7 +107,7 @@ private fun ColorPickerWindow(initial: Color, onChange: (Color) -> Unit) {
             controller =controller,
             borderRadius = 8.dp,
             borderSize = 2.dp,
-            borderColor = MaterialTheme.colorScheme.outline
+            borderColor = AscendiumTheme.colorScheme.outline
         )
 
         AlphaSlider(
@@ -117,7 +117,7 @@ private fun ColorPickerWindow(initial: Color, onChange: (Color) -> Unit) {
             controller = controller,
             borderRadius = 8.dp,
             borderSize = 2.dp,
-            borderColor = MaterialTheme.colorScheme.outline
+            borderColor = AscendiumTheme.colorScheme.outline
         )
     }
 }
@@ -162,7 +162,7 @@ private fun ColorPickerSliders(controller: ColorPickerController) {
             Box(
                 Modifier
                     .weight(1f)
-                    .border(2.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
+                    .border(2.dp, AscendiumTheme.colorScheme.outline, RoundedCornerShape(2.dp))
                     .padding(4.dp),
                 contentAlignment = Alignment.Center
             ) {

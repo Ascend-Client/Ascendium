@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -27,6 +26,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Bridge
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import org.cef.CefApp
 import org.lwjgl.glfw.GLFW.glfwGetWindowPos
 import org.lwjgl.system.MemoryStack
@@ -72,8 +72,8 @@ fun BrowserView(browser: Browser, modifier: Modifier = Modifier, shape: Shape = 
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.width(64.dp),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                color = AscendiumTheme.colorScheme.secondary,
+                trackColor = AscendiumTheme.colorScheme.surfaceVariant,
             )
         }
     }

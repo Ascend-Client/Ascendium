@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.module.impl
+package io.github.betterclient.ascendium.module.impl.hud
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

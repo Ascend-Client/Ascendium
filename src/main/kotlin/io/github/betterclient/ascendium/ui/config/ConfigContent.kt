@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +38,7 @@ import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.renderWithMC
 import org.jetbrains.skia.IRect
 
@@ -51,8 +51,8 @@ fun ConfigContent(preview: Boolean, mod: Module) {
             Row { Spacer(Modifier.width(32.dp)); Text(
                 text = mod.description,
                 fontSize = 24.sp,
-                fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
-                color = MaterialTheme.colorScheme.onBackground
+                fontFamily = AscendiumTheme.typography.headlineSmall.fontFamily,
+                color = AscendiumTheme.colorScheme.onBackground
             ) }
             Spacer(Modifier.height(4.dp))
             ModToggle(mod)

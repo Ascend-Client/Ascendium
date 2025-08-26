@@ -1,7 +1,6 @@
 package io.github.betterclient.ascendium.ui.config
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -9,27 +8,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.betterclient.ascendium.module.config.BooleanSetting
-import io.github.betterclient.ascendium.module.config.ColorSetting
-import io.github.betterclient.ascendium.module.config.ConfigManager
-import io.github.betterclient.ascendium.module.config.DropdownSetting
-import io.github.betterclient.ascendium.module.config.InfoSetting
-import io.github.betterclient.ascendium.module.config.NumberSetting
-import io.github.betterclient.ascendium.module.config.Setting
-import io.github.betterclient.ascendium.module.config.StringSetting
+import io.github.betterclient.ascendium.module.config.*
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.DropdownMenu
 
 @Composable
@@ -89,7 +76,7 @@ fun SettingEditor(setting: Setting) {
                         setting.value = it
                         ConfigManager.saveConfig()
                     },
-                    theme = MaterialTheme.colorScheme,
+                    theme = AscendiumTheme.colorScheme,
                     name = setting.name
                 )
             }
@@ -104,7 +91,7 @@ fun ResetButton(onClick: () -> Unit) {
     IconButton(onClick = {
         onClick()
     }) { Icon(imageVector = Icons.Default.Replay, contentDescription = null, modifier = Modifier.background(
-        MaterialTheme.colorScheme.primary,
+        AscendiumTheme.colorScheme.primary,
         RoundedCornerShape(4.dp)
     ).size(20.dp)) }
     Spacer(Modifier.width(4.dp))

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,7 +42,7 @@ fun ConfigUI(mod: Module, fromMods: Boolean) {
             Box(
                 Modifier
                     .size(boxWidth, boxHeight)
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
+                    .background(AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
                         RoundedCornerShape(32.dp)
                     )
             ) {
@@ -53,10 +52,10 @@ fun ConfigUI(mod: Module, fromMods: Boolean) {
                             Spacer(Modifier.width(8.dp))
                             Button(onClick = {
                                 ComposeUI.current.switchTo { ModsUI(true) }
-                            }) { Text("Back", color = MaterialTheme.colorScheme.onBackground) }
+                            }) { Text("Back", color = AscendiumTheme.colorScheme.onBackground) }
                         }
 
-                        Text(mod.name, color = MaterialTheme.colorScheme.onBackground)
+                        Text(mod.name, color = AscendiumTheme.colorScheme.onBackground)
 
                         if (mod !is ComposableHUDModule) return@Box //don't make preview button if not renderable
                         Row(modifier = Modifier.align(Alignment.CenterEnd)) {
@@ -69,7 +68,7 @@ fun ConfigUI(mod: Module, fromMods: Boolean) {
                                     } else {
                                         "Enable preview"
                                     },
-                                    color = MaterialTheme.colorScheme.onBackground) }
+                                    color = AscendiumTheme.colorScheme.onBackground) }
                             Spacer(Modifier.width(8.dp))
                         }
                     }

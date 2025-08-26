@@ -32,7 +32,7 @@ fun EasterEggUI() {
                     Modifier
                         .size(800.dp, 100.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
+                            color = AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
                             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
                         ),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -69,7 +69,7 @@ private fun RowScope.Navigation() {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Back",
-            tint = MaterialTheme.colorScheme.onBackground
+            tint = AscendiumTheme.colorScheme.onBackground
         )
     }
 
@@ -80,7 +80,7 @@ private fun RowScope.Navigation() {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
             contentDescription = "Forward",
-            tint = MaterialTheme.colorScheme.onBackground
+            tint = AscendiumTheme.colorScheme.onBackground
         )
     }
 
@@ -102,7 +102,7 @@ private fun RowScope.Navigation() {
         Icon(
             imageVector = Icons.Default.Home,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onBackground
+            tint = AscendiumTheme.colorScheme.onBackground
         )
     }
 

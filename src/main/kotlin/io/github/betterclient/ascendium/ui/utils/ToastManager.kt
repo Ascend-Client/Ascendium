@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.LaunchedEffect
@@ -48,7 +47,7 @@ fun showToast(text: String) {
                 ) {
                     Text(
                         text = text,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = AscendiumTheme.colorScheme.onBackground
                     )
 
                     Button(

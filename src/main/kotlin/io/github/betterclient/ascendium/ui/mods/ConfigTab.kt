@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.module.config.ConfigManager
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
 import io.github.betterclient.ascendium.ui.utils.detectOutsideClick
 import io.github.betterclient.ascendium.ui.utils.showToast
@@ -53,7 +54,7 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
         if (showCreate) {
             Column(
                 Modifier
-                    .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(corner))
+                    .background(AscendiumTheme.colorScheme.secondaryContainer, RoundedCornerShape(corner))
                     .size(300.dp, 120.dp).detectOutsideClick(showCreate0) { showCreate = false },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -67,9 +68,9 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
                     colors = OutlinedTextFieldDefaults
                         .colors()
                         .copy(
-                            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                            focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer //make the container visible while unfocused
+                            unfocusedTextColor = AscendiumTheme.colorScheme.onBackground,
+                            focusedTextColor = AscendiumTheme.colorScheme.onBackground,
+                            unfocusedContainerColor = AscendiumTheme.colorScheme.primaryContainer //make the container visible while unfocused
                         )
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -137,7 +138,7 @@ private fun ConfigList(configs0: MutableState<List<String>>) {
     val state = rememberScrollState()
     Column(Modifier
         .background(
-            MaterialTheme.colorScheme.surfaceContainer,
+            AscendiumTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp)
         )
         .requiredHeightIn(max = 300.dp)
@@ -165,7 +166,7 @@ private fun ConfigList(configs0: MutableState<List<String>>) {
                         color = if (config == active) {
                             Color.Green
                         } else {
-                            MaterialTheme.colorScheme.onBackground
+                            AscendiumTheme.colorScheme.onBackground
                         }
                     )
 

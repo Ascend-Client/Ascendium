@@ -1,13 +1,13 @@
 package io.github.betterclient.ascendium.module
 
-import io.github.betterclient.ascendium.module.impl.ArmorDisplayMod
-import io.github.betterclient.ascendium.module.impl.CPSMod
-import io.github.betterclient.ascendium.module.impl.FPSMod
-import io.github.betterclient.ascendium.module.impl.KeystrokesMod
-import io.github.betterclient.ascendium.module.impl.PingMod
-import io.github.betterclient.ascendium.module.impl.PositionDisplayMod
-import io.github.betterclient.ascendium.module.impl.ReachDisplayMod
-import io.github.betterclient.ascendium.module.impl.ServerDisplayMod
+import io.github.betterclient.ascendium.module.impl.hud.ArmorDisplayMod
+import io.github.betterclient.ascendium.module.impl.hud.CPSMod
+import io.github.betterclient.ascendium.module.impl.hud.FPSMod
+import io.github.betterclient.ascendium.module.impl.hud.KeystrokesMod
+import io.github.betterclient.ascendium.module.impl.hud.PingMod
+import io.github.betterclient.ascendium.module.impl.hud.PositionDisplayMod
+import io.github.betterclient.ascendium.module.impl.hud.ReachDisplayMod
+import io.github.betterclient.ascendium.module.impl.hud.ServerDisplayMod
 
 object ModManager {
     val modules = listOf<Module>(

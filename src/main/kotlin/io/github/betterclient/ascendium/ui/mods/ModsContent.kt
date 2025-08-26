@@ -10,8 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.Ascendium
-import io.github.betterclient.ascendium.ui.config.SettingEditor
+import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,7 +20,7 @@ fun ModsContent() {
     Surface(
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 4.dp,
-        color = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
+        color = AscendiumTheme.colorScheme.background.copy(alpha = 0.4f),
         modifier = Modifier.fillMaxWidth(0.5f),
     ) {
         PrimaryTabRow(
