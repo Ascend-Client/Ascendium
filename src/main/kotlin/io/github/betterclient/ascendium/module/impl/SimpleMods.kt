@@ -7,7 +7,22 @@ import io.github.betterclient.ascendium.module.TextModule
 
 object FPSMod : TextModule("FPS", "Display your frames per second.") {
     val template by string("Template", "%FPS% fps")
-    override fun renderModule() = template.replace("%FPS%", client.fps.toString(), true)
+    val smooth by boolean("Smooth", true)
+    val smoothFPS: Int
+        get() {
+            _smoothFPS.removeIf { it + 1000 < System.currentTimeMillis() }
+            return _smoothFPS.size
+        }
+    val _smoothFPS = mutableListOf<Long>()
+
+    override fun renderModule(): String {
+        return if (smooth) {
+            _smoothFPS.add(System.currentTimeMillis())
+            template.replace("%FPS%", smoothFPS.toString(), true)
+        } else {
+            template.replace("%FPS%", client.fps.toString(), true)
+        }
+    }
 }
 
 object PingMod : TextModule("Ping", "Display your ping") {
