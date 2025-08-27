@@ -24,9 +24,9 @@ java {
 
 repositories {
     mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    maven("https://maven.google.com/")
+    jetbrainsCompose
     google()
+    maven("https://maven.google.com/")
     maven("https://api.modrinth.com/maven")
     maven("https://jogamp.org/deployment/maven")
 }
@@ -70,7 +70,7 @@ dependencies {
     use(compose.desktop.windows_arm64)
     use(compose.desktop.windows_x64)
 
-    use(compose.material3)
+    use(compose.material3.replace("1.8.2", "1.9.0-beta03"))
     use(compose.uiTooling)
     use(compose.animation)
     use(compose.materialIconsExtended)

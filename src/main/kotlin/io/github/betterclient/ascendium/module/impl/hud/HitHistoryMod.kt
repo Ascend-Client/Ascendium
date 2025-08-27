@@ -24,7 +24,6 @@ object HitHistoryMod : HUDModule("Hit history", "Show your last X hits") {
     val time by number("Time shown", 5.0, 1.0, 20.0)
     val showItem by boolean("Show item", true)
     val showDistance by boolean("Show distance", true)
-
     val realHitList = mutableStateMapOf<Long, RememberedHit>()
 
     @Composable
