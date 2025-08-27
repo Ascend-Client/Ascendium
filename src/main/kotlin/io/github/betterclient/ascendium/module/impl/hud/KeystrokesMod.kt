@@ -35,6 +35,7 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
 
     @Composable
     override fun Render() {
+        previewHeight = 300
         Column(
             modifier = Modifier.width(IntrinsicSize.Max),
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -73,7 +73,7 @@ fun RenderPreview(mod: ComposableHUDModule, corner: Dp) {
         Modifier
             .size(
                 300.dp,
-                300.dp
+                animateDpAsState(mod.previewHeight.dp).value
             )
             .clip(RoundedCornerShape(corner)),
         contentAlignment = Alignment.Center

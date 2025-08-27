@@ -6,7 +6,7 @@ import io.github.betterclient.ascendium.event.MouseClickEvent
 import io.github.betterclient.ascendium.module.TextModule
 
 object CPSMod : TextModule("CPS", "Shows how many times you click per second") {
-    val template by string("template", "%LMB% | %RMB%")
+    val template by string("Template", "%LMB% | %RMB%")
     val lmb: Int
         get() {
             _lmb.removeIf { it + 1000 < System.currentTimeMillis() }

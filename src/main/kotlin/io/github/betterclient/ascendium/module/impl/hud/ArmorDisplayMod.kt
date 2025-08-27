@@ -47,10 +47,12 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
     @Composable
     override fun Render() {
         if (orientation == "Horizontal") {
+            previewHeight = 150
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 RenderItems()
             }
         } else {
+            previewHeight = 300
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 RenderItems()
             }
@@ -60,10 +62,12 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
     @Composable
     override fun RenderPreview() {
         if (orientation == "Horizontal") {
+            previewHeight = 150
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 RenderItemPreview()
             }
         } else {
+            previewHeight = 300
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 RenderItemPreview()
             }

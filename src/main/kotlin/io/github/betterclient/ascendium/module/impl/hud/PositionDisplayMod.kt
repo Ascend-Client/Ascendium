@@ -28,6 +28,7 @@ object PositionDisplayMod : HUDModule("Position Display", "Display your position
 
     @Composable
     override fun Render() {
+        previewHeight = 300
         Column {
             if (xl.isNotEmpty()) Text(xl)
             if (yl.isNotEmpty()) Text(yl)
@@ -39,6 +40,7 @@ object PositionDisplayMod : HUDModule("Position Display", "Display your position
 
     @Composable
     override fun RenderPreview() {
+        previewHeight = 300
         Column {
             if (xLine.isNotEmpty()) Text(xLine.positionTemplatePreview())
             if (yLine.isNotEmpty()) Text(yLine.positionTemplatePreview())

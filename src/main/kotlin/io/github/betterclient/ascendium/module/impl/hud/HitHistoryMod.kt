@@ -28,6 +28,7 @@ object HitHistoryMod : HUDModule("Hit history", "Show your last X hits") {
 
     @Composable
     override fun Render() {
+        previewHeight = 300
         Column {
             for (hit in realHitList.values.take(amount.toInt())) {
                 RenderHit(hit)
@@ -49,6 +50,7 @@ object HitHistoryMod : HUDModule("Hit history", "Show your last X hits") {
 
     @Composable
     override fun RenderPreview() {
+        previewHeight = 300
         Column {
             for (hit in previewList.take(amount.toInt())) {
                 RenderHit(hit)

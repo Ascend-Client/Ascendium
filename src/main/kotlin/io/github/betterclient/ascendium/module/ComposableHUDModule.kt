@@ -38,6 +38,7 @@ import io.github.betterclient.ascendium.ui.utils.MCFont
 import io.github.betterclient.ascendium.ui.utils.ModifyAll
 
 abstract class ComposableHUDModule(name: String, description: String, val hasBackground: Boolean = true) : Module(name, description) {
+    var previewHeight by mutableStateOf(150)
     var x by mutableStateOf(100)
     var y by mutableStateOf(100)
     val textColor by color("Text Color", -1)
