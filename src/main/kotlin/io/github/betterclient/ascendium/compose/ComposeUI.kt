@@ -80,19 +80,18 @@ open class ComposeUI(
             handler(renderer, mouseX, mouseY)
         }
 
-        val client = minecraft
         val event = AWTUtils.MouseEvent(
-            client.mouse.xPos,
-            client.mouse.yPos,
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
             AWTUtils.getAwtMods(handle),
             0, //NO BUTTON
             MouseEvent.MOUSE_MOVED
         )
         mouseEventHandlers.forEach {
-            it(client.mouse.xPos, client.mouse.yPos, event) //this event is going out no matter what, sorry.
+            it(minecraft.mouse.xPos, minecraft.mouse.yPos, event) //this event is going out no matter what, sorry.
         }
         scene.sendPointerEvent(
-            position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
+            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
             eventType = PointerEventType.Move,
             nativeEvent = event
         )

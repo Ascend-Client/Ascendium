@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.mixin;
+package io.github.betterclient.ascendium.mixin.util;
 
 import io.github.betterclient.ascendium.MouseBridge;
 import io.github.betterclient.ascendium.event.MouseClickEvent;

@@ -1,6 +1,9 @@
 package io.github.betterclient.ascendium.ui.minecraft
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -11,6 +14,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -26,7 +30,10 @@ import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import kotlinx.coroutines.delay
 import kotlin.system.exitProcess
+
+private var didAnim by mutableStateOf(false)
 
 object CustomMainMenu : ComposeUI({
     AscendiumTheme {
@@ -37,10 +44,37 @@ object CustomMainMenu : ComposeUI({
             }
             CornerButtons()
         }
+
+        if (!didAnim) {
+            EntranceAnimation {
+                didAnim = true //never run again
+            }
+        }
     }
 }) {
     override fun shouldRenderBackground() = false
     override fun shouldCloseOnEsc() = false
+}
+
+@Composable
+private fun EntranceAnimation(onFinish: () -> Unit) {
+    var a by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(200); a = true }
+
+    val animFrac by animateFloatAsState(
+        targetValue = if (a) 0.0f else 1.0f,
+        animationSpec = tween(durationMillis = 500),
+        finishedListener = {
+            onFinish()
+        }
+    )
+
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(animFrac)
+            .background(Color.Gray)
+    )
 }
 
 @Composable

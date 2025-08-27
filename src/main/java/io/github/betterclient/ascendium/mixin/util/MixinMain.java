@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.mixin;
+package io.github.betterclient.ascendium.mixin.util;
 
 import net.minecraft.client.main.Main;
 import org.spongepowered.asm.mixin.Mixin;

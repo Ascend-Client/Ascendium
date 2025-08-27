@@ -9,15 +9,19 @@
     "common.MixinPlayerEntity"
   ],
   "client": [
-    "MixinMain",
     "MixinMinecraftClient",
-    "MixinMouse",
     "options.MixinKeybinding",
     "options.MixinOptions",
+    "reload.MixinSoundEngine",
+    "reload.MixinSpriteAtlasTexture",
+    "reload.MixinUnihexFont",
     "render.MixinInGameHud",
+    "render.MixinSplashOverlay",
     "render.MixinTextRenderer",
     "render.MixinTitleScreen",
-    "render.MixinWindow"
+    "render.MixinWindow",
+    "util.MixinMain",
+    "util.MixinMouse"
   ],
   "injectors": {
     "defaultRequire": 1
