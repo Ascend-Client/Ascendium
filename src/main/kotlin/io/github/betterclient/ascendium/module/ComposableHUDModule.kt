@@ -2,7 +2,7 @@ package io.github.betterclient.ascendium.module
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,17 +10,14 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.scene.CanvasLayersComposeScene
@@ -29,13 +26,13 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.compose.SkiaRenderer
 import io.github.betterclient.ascendium.compose.getScaled
 import io.github.betterclient.ascendium.compose.getUnscaled
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.module.config.ColorSetting
 import io.github.betterclient.ascendium.ui.utils.MCFont
 import io.github.betterclient.ascendium.ui.utils.ModifyAll
@@ -97,10 +94,16 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
                     Modifier
                         .offset(xDp, yDp)
                         .then(
-                            if (hasBackground && renderBackground) Modifier.background(
-                                color = Color(bg),
-                                shape = RoundedCornerShape(8.dp)
-                            ) else Modifier
+                            if (hasBackground && renderBackground) {
+                                Modifier
+                                    .dropShadow(
+                                        shape = RoundedCornerShape(8.dp),
+                                        shadow = Shadow(color = Color(bg), radius = 16.dp)
+                                    )
+                                    .background(Color(bg), RoundedCornerShape(8.dp))
+                            } else {
+                                Modifier
+                            }
                         )
                         .padding(4.dp)
                 ) {
@@ -210,7 +213,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
 
         @Composable
         fun RenderModules(modules: List<ComposableHUDModule>) {
-            Box(Modifier.fillMaxWidth()) {
+            Box(Modifier.fillMaxSize()) {
                 for (module in modules) {
                     CompositionLocalProvider(LocalDensity provides Density(module.scale.toFloat())) {
                         module.RenderComposable()

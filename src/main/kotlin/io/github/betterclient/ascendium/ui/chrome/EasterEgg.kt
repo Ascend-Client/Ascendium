@@ -13,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -28,11 +30,17 @@ fun EasterEggUI() {
     AscendiumTheme {
         Box(Modifier.fillMaxSize()) {
             Column(Modifier.align(Alignment.Center)) {
+                val color =
+                    AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat())
                 Row(
                     Modifier
                         .size(800.dp, 100.dp)
+                        .dropShadow(
+                            RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                            Shadow(8.dp, color)
+                        )
                         .background(
-                            color = AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
+                            color = color,
                             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
                         ),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),

@@ -1,8 +1,5 @@
 package io.github.betterclient.ascendium.ui.minecraft
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateOffsetAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -70,7 +67,7 @@ private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
             Text("Ascendium", fontSize = 72.sp)
         }
 
-        val alpha = Ascendium.settings.backgroundOpacityState.toFloat()
+        val alpha = 0.7f //this should probably not be configurable
         Spacer(Modifier.height(128.dp))
         Button(
             onClick = {

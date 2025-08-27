@@ -11,6 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,11 +55,15 @@ fun ModsUI(smallen: Boolean) {
                 expanded = true
             }
 
+            val bgColor = AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat())
             Box(Modifier
                 .size(animatedWidth, animatedHeight)
-                .background(AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()), RoundedCornerShape(32.dp))
+                .dropShadow(
+                    RoundedCornerShape(32.dp),
+                    Shadow(8.dp, bgColor)
+                )
+                .background(bgColor, RoundedCornerShape(32.dp))
                 .safeContentPadding()
-                .clip(RoundedCornerShape(32.dp))
             ) {
                 Row(modifier = Modifier.align(Alignment.TopStart)) {
                     Spacer(Modifier.width(8.dp))

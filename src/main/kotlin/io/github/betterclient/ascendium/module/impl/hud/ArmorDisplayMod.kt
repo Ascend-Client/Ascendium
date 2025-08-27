@@ -10,9 +10,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -137,6 +139,10 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
             Modifier
                 .then(if (renderBackground) Modifier else {
                     Modifier
+                        .dropShadow(
+                            shape = RoundedCornerShape(8.dp),
+                            shadow = Shadow(color = Color(backgroundColor.state.value), radius = 16.dp)
+                        )
                         .background(
                             Color(backgroundColor.state.value),
                             RoundedCornerShape(8.dp)

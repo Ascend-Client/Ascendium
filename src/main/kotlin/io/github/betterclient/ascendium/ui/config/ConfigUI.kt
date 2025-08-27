@@ -16,7 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
@@ -44,10 +46,17 @@ fun ConfigUI(mod: Module, fromMods: Boolean) {
                 if (fromMods) 512.dp else 48.dp
             })
             var preview by remember { mutableStateOf(false) }
+            val bgColor =
+                AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat())
             Box(
                 Modifier
                     .size(boxWidth, boxHeight)
-                    .background(AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
+                    .dropShadow(
+                        RoundedCornerShape(32.dp),
+                        Shadow(8.dp, bgColor)
+                    )
+                    .background(
+                        bgColor,
                         RoundedCornerShape(32.dp)
                     )
             ) {

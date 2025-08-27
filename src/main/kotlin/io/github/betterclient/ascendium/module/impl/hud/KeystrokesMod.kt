@@ -7,7 +7,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.KeybindingBridge
 import io.github.betterclient.ascendium.minecraft
@@ -73,6 +76,10 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
     fun RenderKey(key: KeybindingBridge, label: String = key.getBoundKey, modifier: Modifier = Modifier) {
         Box(
             modifier = modifier
+                .dropShadow(
+                    shape = RoundedCornerShape(8.dp),
+                    shadow = Shadow(color = Color(if (key.pressed) pressedColor else unPressedColor), radius = 16.dp)
+                )
                 .background(
                     Color(if (key.pressed) pressedColor else unPressedColor),
                     RoundedCornerShape(8.dp)
@@ -88,6 +95,10 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
     fun RowScope.RenderKeyRow(key: KeybindingBridge, label: String = key.getBoundKey, forceSquare: Boolean = false) {
         Box(
             modifier = Modifier
+                .dropShadow(
+                    shape = RoundedCornerShape(8.dp),
+                    shadow = Shadow(color = Color(if (key.pressed) pressedColor else unPressedColor), radius = 16.dp)
+                )
                 .background(
                     Color(if (key.pressed) pressedColor else unPressedColor),
                     RoundedCornerShape(8.dp)

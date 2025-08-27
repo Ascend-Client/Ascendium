@@ -13,6 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.compose.ComposeUI
@@ -67,6 +69,10 @@ private fun ModuleView(module: Module) {
 
     Box(Modifier
         .size(WIDTH.dp, HEIGHT.dp)
+        .dropShadow(
+            RoundedCornerShape(cornerRadius),
+            Shadow(8.dp, backgroundColor)
+        )
         .background(
             backgroundColor,
             RoundedCornerShape(cornerRadius)
