@@ -1,13 +1,6 @@
 package io.github.betterclient.ascendium.module
 
-import io.github.betterclient.ascendium.module.impl.hud.ArmorDisplayMod
-import io.github.betterclient.ascendium.module.impl.hud.CPSMod
-import io.github.betterclient.ascendium.module.impl.hud.FPSMod
-import io.github.betterclient.ascendium.module.impl.hud.KeystrokesMod
-import io.github.betterclient.ascendium.module.impl.hud.PingMod
-import io.github.betterclient.ascendium.module.impl.hud.PositionDisplayMod
-import io.github.betterclient.ascendium.module.impl.hud.ReachDisplayMod
-import io.github.betterclient.ascendium.module.impl.hud.ServerDisplayMod
+import io.github.betterclient.ascendium.module.impl.hud.*
 
 object ModManager {
     val modules = listOf<Module>(
@@ -18,7 +11,8 @@ object ModManager {
         ServerDisplayMod,
         ReachDisplayMod,
         ArmorDisplayMod,
-        PositionDisplayMod
+        PositionDisplayMod,
+        HitHistoryMod
     )
 
     fun getHUDModules() = modules.filterIsInstance<ComposableHUDModule>().filter { it `is` enabled }

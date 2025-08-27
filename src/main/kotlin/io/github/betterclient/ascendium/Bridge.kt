@@ -39,6 +39,7 @@ interface EntityBridge {
     fun getID(): Int
     fun getCameraPosVec(i: Int): Pos3D
     fun getRotationVec(i: Int): Pos3D
+    val name: String
 }
 
 interface PlayerBridge : EntityBridge {

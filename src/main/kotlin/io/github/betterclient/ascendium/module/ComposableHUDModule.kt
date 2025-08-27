@@ -67,7 +67,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
 
     private var isPreview by mutableStateOf(false)
     @Composable
-    private fun RenderComposable() {
+    fun RenderComposable(overridePreview: Boolean = false) {
         val density = LocalDensity.current
         val xDp: Dp = remember(x, scale) { with(density) { x.getUnscaled().toDp() } }
         val yDp: Dp = remember(y, scale) { with(density) { y.getUnscaled().toDp() } }
@@ -92,7 +92,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
             }) {
                 Box(
                     Modifier
-                        .offset(xDp, yDp)
+                        .then(if (!overridePreview) Modifier.offset(xDp, yDp) else Modifier)
                         .then(
                             if (hasBackground && renderBackground) {
                                 Modifier
@@ -107,7 +107,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
                         )
                         .padding(4.dp)
                 ) {
-                    if (isPreview) {
+                    if (isPreview || overridePreview) {
                         RenderPreview()
                     } else {
                         Render()
@@ -125,7 +125,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
         this.y = y
         this.scale = scale
 
-        renderAll(listOf(this))
+        renderAll(listOf(this), false)
 
         this.x = xo
         this.y = yo
@@ -171,13 +171,13 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
         @EventTarget
         @Suppress("Unused")
         fun _render(hudRenderHudEvent: RenderHudEvent) {
-            renderAll()
+            renderAll(hud = true)
         }
 
         @OptIn(InternalComposeUiApi::class)
-        fun renderAll(modules: List<ComposableHUDModule> = ModManager.getHUDModules()) {
+        fun renderAll(modules: List<ComposableHUDModule> = ModManager.getHUDModules(), hud: Boolean) {
             SkiaRenderer.withSkia {
-                tryInitCompose(modules)
+                tryInitCompose(modules, hud)
                 scene.render(it.asComposeCanvas(), System.nanoTime())
             }
         }
@@ -187,9 +187,9 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
         private var modulesLast: List<ComposableHUDModule> = listOf()
 
         @OptIn(InternalComposeUiApi::class)
-        private fun tryInitCompose(modules: List<ComposableHUDModule> = ModManager.getHUDModules()) {
+        private fun tryInitCompose(modules: List<ComposableHUDModule> = ModManager.getHUDModules(), hud: Boolean) {
             val window = minecraft.window
-            modules.forEach { it.isPreview = minecraft.isWorldNull }
+            modules.forEach { it.isPreview = (minecraft.isWorldNull || !hud) }
             if (!::scene.isInitialized) {
                 val density = Density(1f)
                 scene = CanvasLayersComposeScene(

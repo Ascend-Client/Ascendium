@@ -54,4 +54,9 @@ public abstract class MixinEntity implements EntityBridge {
         Vec3d vec = this.getRotationVec((float) i);
         return new Pos3D(vec.x, vec.y, vec.z);
     }
+
+    @Override
+    public @NotNull String getName() {
+        return ((Entity) (Object) this).getName().getString();
+    }
 }

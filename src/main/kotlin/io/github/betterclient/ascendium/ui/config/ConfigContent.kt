@@ -1,45 +1,29 @@
 package io.github.betterclient.ascendium.ui.config
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.decodeToImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
+import io.github.betterclient.ascendium.compose.getUnscaled
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
-import io.github.betterclient.ascendium.ui.utils.renderWithMC
-import org.jetbrains.skia.IRect
 
 @Composable
 fun ConfigContent(preview: Boolean, mod: Module) {
@@ -72,10 +56,7 @@ fun ConfigContent(preview: Boolean, mod: Module) {
             AnimatedVisibility(
                 visible = preview,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .renderWithMC(previewState) { context, rect ->
-                        renderModInMiddle(rect, mod)
-                    },
+                    .align(Alignment.TopEnd),
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
@@ -87,36 +68,42 @@ fun ConfigContent(preview: Boolean, mod: Module) {
 
 @Composable
 fun RenderPreview(mod: ComposableHUDModule, corner: Dp) {
-    Image(
-        bitmap = remember { Ascendium::class.java.getResourceAsStream("/assets/ascendium/preview.png")!!.readAllBytes().decodeToImageBitmap() },
-        contentDescription = "Preview image",
-        modifier = Modifier
-            .size(300.dp, if (mod.width > mod.height) 150.dp else 300.dp)
+    var modSize by remember { mutableStateOf(Offset.Zero) }
+    Box(
+        Modifier
+            .size(
+                300.dp,
+                300.dp
+            )
             .clip(RoundedCornerShape(corner)),
-        contentScale = ContentScale.Crop
-    )
-}
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            bitmap = remember {
+                Ascendium::class.java.getResourceAsStream("/assets/ascendium/preview.png")!!
+                    .readAllBytes().decodeToImageBitmap()
+            },
+            contentDescription = "Preview image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
 
-fun renderModInMiddle(
-    rect: IRect,
-    mod: ComposableHUDModule
-) {
-    val rectWidth = rect.right - rect.left
-    val rectHeight = rect.bottom - rect.top
-    val usableWidth = rectWidth * 0.9
-    val usableHeight = rectHeight * 0.9
-
-    val baseWidth = mod.width / mod.scale
-    val baseHeight = mod.height / mod.scale
-
-    val scaleX = usableWidth / baseWidth
-    val scaleY = usableHeight / baseHeight
-    val targetScale = minOf(scaleX, scaleY).coerceIn(0.25, 3.0)
-
-    val drawWidth = baseWidth * targetScale
-    val drawHeight = baseHeight * targetScale
-    val left = rect.left + ((rectWidth - drawWidth) / 2).toInt()
-    val top = rect.top + ((rectHeight - drawHeight) / 2).toInt()
-
-    mod.renderAt(left, top, targetScale)
+        Box(
+            Modifier
+                .fillMaxSize()
+                .onGloballyPositioned {
+                    modSize = Offset(it.size.width.toFloat(), it.size.height.toFloat())
+                }
+                .graphicsLayer {
+                    val scaleX0 = this.size.width / modSize.x
+                    val scaleY0 = this.size.height / modSize.y
+                    val scale = minOf(scaleX0, scaleY0, 3f)
+                    scaleX = scale
+                    scaleY = scale
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            mod.RenderComposable(true)
+        }
+    }
 }
