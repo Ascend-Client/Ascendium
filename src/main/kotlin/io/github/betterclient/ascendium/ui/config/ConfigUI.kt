@@ -20,14 +20,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
+import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
 
 @Composable
 fun ConfigUI(mod: Module, fromMods: Boolean) {
+    if (minecraft.isWorldNull) {
+        ParallaxBackground()
+    }
     AscendiumTheme {
         Center {
             var animate by remember { mutableStateOf(false) }

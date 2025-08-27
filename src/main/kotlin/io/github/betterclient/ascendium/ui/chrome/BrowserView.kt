@@ -25,7 +25,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.Bridge
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import org.cef.CefApp
 import org.lwjgl.glfw.GLFW.glfwGetWindowPos
@@ -90,7 +90,7 @@ private fun Modifier.chromiumModifier(dummyComponent: Component, focusRequester:
     MemoryStack.stackPush().use { stack ->
         val xPos = stack.mallocInt(1)
         val yPos = stack.mallocInt(1)
-        glfwGetWindowPos(Bridge.client.window.windowHandle, xPos, yPos)
+        glfwGetWindowPos(minecraft.window.windowHandle, xPos, yPos)
         val windowX = xPos.get(0)
         val windowY = yPos.get(0)
 

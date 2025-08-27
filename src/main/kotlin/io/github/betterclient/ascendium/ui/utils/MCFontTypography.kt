@@ -21,7 +21,7 @@ fun Typography.MCFont(): Typography {
     return this.ModifyAll { it.MCFont() }
 }
 
-fun Typography.ModifyAll(textStyleModifier: (TextStyle) -> TextStyle = { it }): Typography {
+inline fun Typography.ModifyAll(textStyleModifier: (TextStyle) -> TextStyle = { it }): Typography {
     return this.copy(
         displayLarge = textStyleModifier(this.displayLarge),
         displayMedium = textStyleModifier(this.displayMedium),

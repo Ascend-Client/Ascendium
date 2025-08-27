@@ -25,7 +25,11 @@ object CPSMod : TextModule("CPS", "Shows how many times you click per second") {
         template
             .replace("%LMB%", lmb.toString(), true)
             .replace("%RMB%", rmb.toString(), true)
-    
+
+    override fun renderPreview() = template
+        .replace("%LMB%", "6")
+        .replace("%RMB%", "5")
+
     @EventTarget
     fun onMouseClick(mouseClick: MouseClickEvent) {
         if (!(mouseClick.pressed)) return

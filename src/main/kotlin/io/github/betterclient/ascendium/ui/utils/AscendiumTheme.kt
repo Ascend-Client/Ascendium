@@ -1,18 +1,9 @@
 package io.github.betterclient.ascendium.ui.utils
 
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Shapes
-import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.platform.Font
 import io.github.betterclient.ascendium.Ascendium
 
 object AscendiumTheme {
@@ -28,9 +19,10 @@ object AscendiumTheme {
 @Composable
 fun AscendiumTheme(content: @Composable () -> Unit) {
     val colorScheme = colorScheme()
-    val t = Typography().MCFont().ModifyAll {
+    var t = Typography().ModifyAll {
         it.copy(color = colorScheme.onBackground)
     }
+    if (Ascendium.settings.mcFontState) t = t.MCFont()
 
     MaterialTheme(
         colorScheme = colorScheme,

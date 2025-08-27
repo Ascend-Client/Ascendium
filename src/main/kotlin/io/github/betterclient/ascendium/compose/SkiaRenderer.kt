@@ -1,6 +1,6 @@
 package io.github.betterclient.ascendium.compose
 
-import io.github.betterclient.ascendium.Bridge
+import io.github.betterclient.ascendium.minecraft
 import org.jetbrains.skia.*
 import org.lwjgl.opengl.GL33C
 
@@ -35,7 +35,7 @@ object SkiaRenderer {
     }
 
     fun init() {
-        val window = Bridge.client.window
+        val window = minecraft.window
 
         if (vpW == vpH && vpW == 0) {
             renderTarget = BackendRenderTarget.makeGL(
@@ -84,12 +84,12 @@ object SkiaRenderer {
     }
 
     fun <T : Number> getUnscaled(i: T): Float {
-        val scaleFactor = Bridge.client.window.scale
+        val scaleFactor = minecraft.window.scale
         return ((i.toDouble() * scaleFactor).toFloat())
     }
 
     fun <T : Number> getScaled(i: T): Float {
-        val scaleFactor = Bridge.client.window.scale
+        val scaleFactor = minecraft.window.scale
         return ((i.toDouble() / scaleFactor).toFloat())
     }
 }

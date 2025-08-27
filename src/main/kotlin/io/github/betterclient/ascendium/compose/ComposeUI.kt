@@ -13,12 +13,11 @@ import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.BridgeScreen
+import io.github.betterclient.ascendium.minecraft
 import java.awt.event.MouseEvent
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.math.min
 import kotlin.properties.Delegates
 import java.awt.event.KeyEvent as AwtKeyEvent
 
@@ -39,11 +38,11 @@ open class ComposeUI(
     }
 
     override fun init() {
-        handle = Bridge.client.window.windowHandle
+        handle = minecraft.window.windowHandle
         if (!::scene.isInitialized) {
             //scene should be created at init, once
-            val window = Bridge.client.window
-            val density = Density(min(window.scale.toFloat().div(2), 1f))
+            val window = minecraft.window
+            val density = Density(window.scale.toFloat().div(2f))
             scene = CanvasLayersComposeScene(
                 density = density,
                 size = IntSize(window.fbWidth, window.fbHeight),
@@ -65,8 +64,8 @@ open class ComposeUI(
             }
         } else {
             //scene already initalized, just update size
-            val window = Bridge.client.window
-            val density = Density(min(window.scale.toFloat().div(2), 1f))
+            val window = minecraft.window
+            val density = Density(window.scale.toFloat().div(2f))
             scene.size = IntSize(window.fbWidth, window.fbHeight)
             scene.density = density
         }
@@ -81,7 +80,7 @@ open class ComposeUI(
             handler(renderer, mouseX, mouseY)
         }
 
-        val client = Bridge.client
+        val client = minecraft
         val event = AWTUtils.MouseEvent(
             client.mouse.xPos,
             client.mouse.yPos,
@@ -102,14 +101,14 @@ open class ComposeUI(
     //awt events
     override fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {
         mouseHandlers.forEach { handler ->
-            val composeMouse = Offset(Bridge.client.mouse.xPos.toFloat(), Bridge.client.mouse.yPos.toFloat())
+            val composeMouse = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat())
             val mcMouse = Offset(mouseX.toFloat(), mouseY.toFloat())
             if (handler(composeMouse, mcMouse, button, true)) {
                 return@forEach //this handler demands that we don't talk about this when talking to compose, ok!
             }
         }
 
-        val client = Bridge.client
+        val client = minecraft
         val event = AWTUtils.MouseEvent(
             client.mouse.xPos,
             client.mouse.yPos,
@@ -133,13 +132,13 @@ open class ComposeUI(
 
     override fun mouseReleased(mouseX: Int, mouseY: Int, button: Int) {
         mouseHandlers.forEach { handler ->
-            val composeMouse = Offset(Bridge.client.mouse.xPos.toFloat(), Bridge.client.mouse.yPos.toFloat())
+            val composeMouse = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat())
             val mcMouse = Offset(mouseX.toFloat(), mouseY.toFloat())
             if (handler(composeMouse, mcMouse, button, false)) {
                 return //this handler demands that we don't talk about this when talking to compose, ok! (can you notice that I copied and pasted it?)
             }
         }
-        val client = Bridge.client
+        val client = minecraft
         val event = AWTUtils.MouseEvent(
             client.mouse.xPos,
             client.mouse.yPos,
@@ -171,7 +170,7 @@ open class ComposeUI(
     }
 
     override fun mouseScrolled(mouseX: Int, mouseY: Int, scrollX: Double, scrollY: Double) {
-        val client = Bridge.client
+        val client = minecraft
         val event = AWTUtils.MouseWheelEvent(
             client.mouse.xPos,
             client.mouse.yPos,

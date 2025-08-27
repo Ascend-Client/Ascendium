@@ -22,10 +22,16 @@ abstract class TextModule(name: String, description: String) : ComposableHUDModu
         Text(text)
     }
 
+    @Composable
+    override fun RenderPreview() {
+        Text(renderPreview())
+    }
+
     @EventTarget
     fun __render(event: RenderHudEvent) {
         text = renderModule()
     }
 
     abstract fun renderModule(): String
+    abstract fun renderPreview(): String
 }

@@ -1,6 +1,7 @@
 package io.github.betterclient.ascendium.module.impl.hud
 
 import androidx.compose.runtime.getValue
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.event.EntityHitEvent
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.module.TextModule
@@ -20,19 +21,23 @@ object FPSMod : TextModule("FPS", "Display your frames per second.") {
             _smoothFPS.add(System.currentTimeMillis())
             template.replace("%FPS%", smoothFPS.toString(), true)
         } else {
-            template.replace("%FPS%", client.fps.toString(), true)
+            template.replace("%FPS%", minecraft.fps.toString(), true)
         }
     }
+
+    override fun renderPreview() = template.replace("%FPS%", "9999", true)
 }
 
 object PingMod : TextModule("Ping", "Display your ping") {
     val template by string("Template", "%PING%ms")
-    override fun renderModule() = template.replace("%PING%", client.ping.toString(), true)
+    override fun renderModule() = template.replace("%PING%", minecraft.ping.toString(), true)
+    override fun renderPreview() = template.replace("%PING%", "-1", true)
 }
 
 object ServerDisplayMod : TextModule("Server Display", "Display the IP of the current server") {
     val template by string("Template", "%IP%")
-    override fun renderModule() = template.replace("%IP%", client.server, true)
+    override fun renderModule() = template.replace("%IP%", minecraft.server, true)
+    override fun renderPreview() = template.replace("%IP%", "Preview", true)
 }
 
 object ReachDisplayMod : TextModule("Reach Display", "Display ") {
@@ -48,6 +53,8 @@ object ReachDisplayMod : TextModule("Reach Display", "Display ") {
         } else {
             template0
         }
+
+    override fun renderPreview() = renderModule()
 
     @EventTarget
     fun onHit(ev: EntityHitEvent) {

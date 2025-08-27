@@ -20,7 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
-import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
@@ -75,7 +74,7 @@ fun ConfigContent(preview: Boolean, mod: Module) {
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .renderWithMC(previewState) { context, rect ->
-                        renderModInMiddle(context, rect, mod)
+                        renderModInMiddle(rect, mod)
                     },
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
@@ -99,7 +98,6 @@ fun RenderPreview(mod: ComposableHUDModule, corner: Dp) {
 }
 
 fun renderModInMiddle(
-    context: BridgeRenderer,
     rect: IRect,
     mod: ComposableHUDModule
 ) {

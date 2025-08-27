@@ -21,12 +21,12 @@ object Ascendium {
         Logger.info("Starting!")
         ConfigManager
 
-        Bridge.client.gameOptions.addKeybinding(
+        minecraft.gameOptions.addKeybinding(
             defaultKey = 344,
             name = "Open GUI",
             category = "Ascendium"
         ).onPressed {
-            Bridge.client.openScreen(MoveModuleUI(ModManager.getHUDModules()))
+            minecraft.openScreen(MoveModuleUI(ModManager.getHUDModules()))
         }
 
         //commenting this will also disable easter egg

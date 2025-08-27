@@ -1,14 +1,11 @@
 package io.github.betterclient.ascendium.module
 
-import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.module.config.*
 
 open class Module(val name: String, val description: String) {
     var enabled: Boolean = false
     val settings: MutableList<Setting> = mutableListOf()
-    val client
-        get() = Bridge.client
 
     open fun toggle() {
         enabled = !enabled

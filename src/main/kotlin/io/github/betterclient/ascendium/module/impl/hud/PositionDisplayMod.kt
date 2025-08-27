@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import io.github.betterclient.ascendium.Bridge
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.module.HUDModule
@@ -37,6 +37,17 @@ object PositionDisplayMod : HUDModule("Position Display", "Display your position
         }
     }
 
+    @Composable
+    override fun RenderPreview() {
+        Column {
+            if (xLine.isNotEmpty()) Text(xLine.positionTemplatePreview())
+            if (yLine.isNotEmpty()) Text(yLine.positionTemplatePreview())
+            if (zLine.isNotEmpty()) Text(zLine.positionTemplatePreview())
+            if (biomeLine.isNotEmpty()) Text(biomeLine.positionTemplatePreview())
+            if (facingLine.isNotEmpty()) Text(facingLine.positionTemplatePreview())
+        }
+    }
+
     @EventTarget
     fun update(onUpdate: RenderHudEvent) {
         xl = xLine.positionTemplate()
@@ -47,7 +58,7 @@ object PositionDisplayMod : HUDModule("Position Display", "Display your position
     }
 
     fun String.positionTemplate(): String {
-        val player = Bridge.client.player
+        val player = minecraft.player
         val pos = player.getPos()
         return this
             .replace("%X%", pos.x.toInt().toString(), ignoreCase = true)
@@ -61,5 +72,18 @@ object PositionDisplayMod : HUDModule("Position Display", "Display your position
                 ignoreCase = true
             )
             .replace("%F%", player.facing, ignoreCase = true)
+    }
+
+    fun String.positionTemplatePreview(): String {
+        return this
+            .replace("%X%", "5", ignoreCase = true)
+            .replace("%Y%", "-4", ignoreCase = true)
+            .replace("%Z%", "66", ignoreCase = true)
+            .replace(
+                "%B%",
+                "Plains",
+                ignoreCase = true
+            )
+            .replace("%F%", "North", ignoreCase = true)
     }
 }

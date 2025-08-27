@@ -1,9 +1,9 @@
 package io.github.betterclient.ascendium.event
 
-import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.EntityBridge
 import io.github.betterclient.ascendium.Pos3D
+import io.github.betterclient.ascendium.minecraft
 import java.util.concurrent.atomic.AtomicReference
 
 
@@ -30,8 +30,7 @@ class EntityHitEvent(val attacker: EntityBridge, val receiver: EntityBridge) : E
         val possibleHits = camera.add(rotation.x * d, rotation.y * d, rotation.z * d)
         val box = attacker.getBox().stretch(rotation.multiply(d)).expand(1.0, 1.0, 1.0)
 
-        val raycast = Bridge
-            .client
+        val raycast = minecraft
             .raycast(attacker, camera, possibleHits, box, receiver.getID(), d)
         if (raycast == null || raycast.entity == null) {
             return -1.0

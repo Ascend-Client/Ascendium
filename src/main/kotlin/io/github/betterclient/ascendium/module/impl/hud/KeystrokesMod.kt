@@ -9,8 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.Bridge
 import io.github.betterclient.ascendium.KeybindingBridge
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.module.HUDModule
@@ -21,13 +21,13 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
     val mouseKeys by boolean("Show mouse keys", true)
     val spaceBar by boolean("Show space bar", false)
 
-    private val keyForward = Bridge.client.gameOptions.keyForward
-    private val keyBackward = Bridge.client.gameOptions.keyBackward
-    private val keyLeft = Bridge.client.gameOptions.keyLeft
-    private val keyRight = Bridge.client.gameOptions.keyRight
-    private val keyAttack = Bridge.client.gameOptions.keyAttack
-    private val keyUse = Bridge.client.gameOptions.keyUse
-    private val keyJump = Bridge.client.gameOptions.keyJump
+    private val keyForward = minecraft.gameOptions.keyForward
+    private val keyBackward = minecraft.gameOptions.keyBackward
+    private val keyLeft = minecraft.gameOptions.keyLeft
+    private val keyRight = minecraft.gameOptions.keyRight
+    private val keyAttack = minecraft.gameOptions.keyAttack
+    private val keyUse = minecraft.gameOptions.keyUse
+    private val keyJump = minecraft.gameOptions.keyJump
     private val allKeys = listOf(keyForward, keyBackward, keyLeft, keyRight, keyAttack, keyUse, keyJump)
 
     @Composable
@@ -62,6 +62,11 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
                 RenderKey(keyJump, modifier = Modifier.fillMaxWidth())
             }
         }
+    }
+
+    @Composable
+    override fun RenderPreview() {
+        Render()
     }
 
     @Composable

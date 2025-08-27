@@ -16,8 +16,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.betterclient.ascendium.Bridge
+import io.github.betterclient.ascendium.IdentifierBridge
 import io.github.betterclient.ascendium.ItemStackBridge
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.module.HUDModule
@@ -55,6 +56,19 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
     }
 
     @Composable
+    override fun RenderPreview() {
+        if (orientation == "Horizontal") {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                RenderItemPreview()
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                RenderItemPreview()
+            }
+        }
+    }
+
+    @Composable
     private fun RenderItems() {
         RenderItem(helmet)
         RenderItem(chestplate)
@@ -64,10 +78,29 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
     }
 
     @Composable
+    private fun RenderItemPreview() {
+        RenderItem(minecraft.createItemStack(
+            IdentifierBridge("minecraft", "textures/item/netherite_helmet.png"), 1, 1f
+        ))
+        RenderItem(minecraft.createItemStack(
+            IdentifierBridge("minecraft", "textures/item/netherite_chestplate.png"), 1, 0.9f
+        ))
+        RenderItem(minecraft.createItemStack(
+            IdentifierBridge("minecraft", "textures/item/netherite_leggings.png"), 1, 0.6f
+        ))
+        RenderItem(minecraft.createItemStack(
+            IdentifierBridge("minecraft", "textures/item/netherite_boots.png"), 1, 0.2f
+        ))
+        RenderItem(minecraft.createItemStack(
+            IdentifierBridge("minecraft", "textures/item/golden_apple.png"), 64, 1f
+        ))
+    }
+
+    @Composable
     private fun RenderItem(item: ItemStackBridge?) {
         remember(item?.itemIdentifier) {
             item?.itemIdentifier?.let { id ->
-                Bridge.client.loadResource(id)?.let {
+                minecraft.loadResource(id)?.let {
                     ImageIO.read(ByteArrayInputStream(it)).toComposeImageBitmap()
                 }
             }
@@ -172,10 +205,10 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
 
     @EventTarget
     fun onRender(render: RenderHudEvent) {
-        helmet = Bridge.client.player.getArmor(3)
-        chestplate = Bridge.client.player.getArmor(2)
-        leggings = Bridge.client.player.getArmor(1)
-        boots = Bridge.client.player.getArmor(0)
-        heldItem = Bridge.client.player.getMainHandItem()
+        helmet = minecraft.player.getArmor(3)
+        chestplate = minecraft.player.getArmor(2)
+        leggings = minecraft.player.getArmor(1)
+        boots = minecraft.player.getArmor(0)
+        heldItem = minecraft.player.getMainHandItem()
     }
 }

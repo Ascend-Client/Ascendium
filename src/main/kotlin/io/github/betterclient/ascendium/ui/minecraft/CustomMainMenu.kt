@@ -1,18 +1,156 @@
 package io.github.betterclient.ascendium.ui.minecraft
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.decodeToImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.github.betterclient.ascendium.Ascendium
+import io.github.betterclient.ascendium.MCScreen
 import io.github.betterclient.ascendium.compose.ComposeUI
+import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.module.ModManager
+import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import kotlin.system.exitProcess
 
 object CustomMainMenu : ComposeUI({
     AscendiumTheme {
-        Box(Modifier.fillMaxSize().background(AscendiumTheme.colorScheme.background)) {
-
+        ParallaxBackground()
+        Box(Modifier.fillMaxSize()) {
+            ModeButtons {
+                minecraft.openScreen(MoveModuleUI(ModManager.getHUDModules()))
+            }
+            CornerButtons()
         }
     }
 }) {
     override fun shouldRenderBackground() = false
+    override fun shouldCloseOnEsc() = false
+}
+
+@Composable
+private fun BoxScope.CornerButtons() {
+    Row(Modifier.align(Alignment.TopEnd), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        TextButton(onClick = {
+            minecraft.setScreen(MCScreen.OPTIONS_SCREEN)
+        }) {
+            Text("Options")
+        }
+
+        TextButton(onClick = {
+            exitProcess(0)
+        }) {
+            Text("Quit")
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
+    Column(Modifier.align(Alignment.Center), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        TextButton(onAscend, modifier = Modifier.width(512.dp)) {
+            Text("Ascendium", fontSize = 72.sp)
+        }
+
+        val alpha = Ascendium.settings.backgroundOpacityState.toFloat()
+        Spacer(Modifier.height(128.dp))
+        Button(
+            onClick = {
+                minecraft.setScreen(MCScreen.SELECT_WORLD_SCREEN)
+            },
+            modifier = Modifier
+                .width(512.dp)
+                .alpha(alpha)
+        ) {
+            Text("Singleplayer", fontSize = 24.sp)
+        }
+
+        Button(
+            onClick = {
+                minecraft.setScreen(MCScreen.MULTIPLAYER_SCREEN)
+            },
+            modifier = Modifier
+                .width(512.dp)
+                .alpha(alpha)
+        ) {
+            Text("Multiplayer", fontSize = 24.sp)
+        }
+
+        Button(
+            onClick = {
+                minecraft.setScreen(MCScreen.REALMS_MAIN_SCREEN)
+            },
+            modifier = Modifier
+                .width(512.dp)
+                .alpha(alpha)
+        ) {
+            Text("Realms", fontSize = 24.sp)
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun ParallaxBackground(
+    modifier: Modifier = Modifier.fillMaxSize(),
+    zoom: Float = 1.2f,
+    maxOffset: Dp = 40.dp
+) {
+    val stopAmt = 4f
+    var pointerOffset by remember { mutableStateOf(Offset.Zero) }
+    var constraints0 by remember { mutableStateOf(Constraints()) }
+    var targetOffset by remember { mutableStateOf(Offset.Zero) }
+
+    BoxWithConstraints(
+        modifier = modifier.pointerInput(Unit) {
+            while (true) {
+                val event = awaitPointerEventScope { awaitPointerEvent() }
+                pointerOffset = event.changes.first().position
+                val normalizedX = (pointerOffset.x / constraints0.maxWidth - 0.5f) * 2f
+                val normalizedY = (pointerOffset.y / constraints0.maxHeight - 0.5f) * 2f
+                val target = Offset(
+                    (normalizedX * maxOffset.toPx()) / stopAmt,
+                    (normalizedY * maxOffset.toPx()) / stopAmt
+                )
+                targetOffset = target
+            }
+        }
+    ) {
+        val imageModifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                translationX = targetOffset.x
+                translationY = targetOffset.y
+                scaleX = zoom
+                scaleY = zoom
+            }
+        LaunchedEffect(constraints) {
+            constraints0 = constraints
+        }
+
+        Image(
+            bitmap = Ascendium::class.java.getResourceAsStream("/assets/ascendium/bg0.png")!!.use { it.readAllBytes() }.decodeToImageBitmap(),
+            contentDescription = null,
+            modifier = imageModifier,
+            contentScale = ContentScale.Crop
+        )
+    }
 }

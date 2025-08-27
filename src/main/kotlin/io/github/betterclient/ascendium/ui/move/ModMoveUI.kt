@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.ui.config.ConfigUI
+import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
@@ -30,6 +32,9 @@ class MoveModuleUI(val mods: List<ComposableHUDModule>) : ComposeUI({
 
 @Composable
 fun MoveModuleUI(mods: List<ComposableHUDModule>, backToConfig: Boolean?) {
+    if (minecraft.isWorldNull) {
+        ParallaxBackground()
+    }
     AscendiumTheme {
         if (backToConfig != null) {
             var start by remember { mutableStateOf(false) }

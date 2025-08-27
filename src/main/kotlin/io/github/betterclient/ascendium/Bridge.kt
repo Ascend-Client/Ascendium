@@ -3,12 +3,12 @@ package io.github.betterclient.ascendium
 import net.minecraft.client.MinecraftClient
 import kotlin.math.sqrt
 
-object Bridge {
-    val client: MinecraftBridge
-        get() = MinecraftClient.getInstance() as MinecraftBridge
-}
+//globally accessible client!
+inline val minecraft: MinecraftBridge
+    get() = MinecraftClient.getInstance() as MinecraftBridge
 
 interface MinecraftBridge {
+    val isWorldNull: Boolean
     val server: String
     val ping: Int
     val fps: Int
@@ -19,11 +19,19 @@ interface MinecraftBridge {
     val player: PlayerBridge
 
     fun openScreen(screen: BridgeScreen)
+    fun setScreen(mcScreen: MCScreen)
     fun raycast(entityBridge: EntityBridge, camera: Pos3D, possibleHits: Pos3D, box: BoundingBox, id: Int, d3: Double): RaycastResultBridge?
     fun loadResource(identifier: IdentifierBridge): ByteArray?
+    fun createItemStack(item: IdentifierBridge, count: Int, durability: Float): ItemStackBridge
 }
 
 class RaycastResultBridge(val pos: Pos3D, val entity: EntityBridge?)
+enum class MCScreen {
+    SELECT_WORLD_SCREEN,
+    MULTIPLAYER_SCREEN,
+    REALMS_MAIN_SCREEN,
+    OPTIONS_SCREEN
+}
 
 interface EntityBridge {
     fun getPos(): Pos3D

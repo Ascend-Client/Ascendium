@@ -4,7 +4,7 @@ import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
-import io.github.betterclient.ascendium.Bridge
+import io.github.betterclient.ascendium.minecraft
 import org.lwjgl.glfw.GLFW.*
 import java.awt.Component
 import java.awt.event.InputEvent
@@ -76,7 +76,7 @@ internal object AWTUtils {
     @OptIn(InternalComposeUiApi::class)
     //f*ck this method
     fun KeyEvent(awtId: Int, time: Long, awtMods: Int, key: Int, char: Char, location: Int): KeyEvent {
-        val handle = Bridge.client.window.windowHandle
+        val handle = minecraft.window.windowHandle
         return KeyEvent(
             key = Key(key, location),
             type = when (awtId) {

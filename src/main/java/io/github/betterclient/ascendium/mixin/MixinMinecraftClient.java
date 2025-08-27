@@ -3,17 +3,24 @@ package io.github.betterclient.ascendium.mixin;
 import io.github.betterclient.ascendium.*;
 import io.github.betterclient.ascendium.event.EntityHitEvent;
 import io.github.betterclient.ascendium.util.BridgedScreen;
+import io.github.betterclient.ascendium.util.FakeItemStackBridge;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.gui.screen.option.OptionsScreen;
+import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.realms.gui.screen.RealmsMainScreen;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ReloadableResourceManagerImpl;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
@@ -56,6 +63,10 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Shadow @Nullable public HitResult crosshairTarget;
 
     @Shadow @Final private ReloadableResourceManagerImpl resourceManager;
+
+    @Shadow @Nullable public Screen currentScreen;
+
+    @Shadow @Nullable public ClientWorld world;
 
     @Override
     public @NotNull OptionsBridge getGameOptions() {
@@ -143,5 +154,25 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
                 return null;
             }
         }
+    }
+
+    @Override
+    public void setScreen(@NotNull MCScreen mcScreen) {
+        this.setScreen(switch (mcScreen) {
+            case SELECT_WORLD_SCREEN -> new SelectWorldScreen(this.currentScreen);
+            case MULTIPLAYER_SCREEN -> new MultiplayerScreen(this.currentScreen);
+            case REALMS_MAIN_SCREEN -> new RealmsMainScreen(this.currentScreen);
+            case OPTIONS_SCREEN -> new OptionsScreen(this.currentScreen, this.options);
+        });
+    }
+
+    @Override
+    public boolean isWorldNull() {
+        return this.world == null;
+    }
+
+    @Override
+    public @NotNull ItemStackBridge createItemStack(@NotNull IdentifierBridge item, int count, float durability) {
+        return new FakeItemStackBridge(count, durability, item);
     }
 }

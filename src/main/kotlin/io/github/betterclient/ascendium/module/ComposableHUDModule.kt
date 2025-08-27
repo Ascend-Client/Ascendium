@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.Bridge
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.compose.SkiaRenderer
 import io.github.betterclient.ascendium.compose.getScaled
 import io.github.betterclient.ascendium.compose.getUnscaled
@@ -64,8 +64,11 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
     }
 
     @Composable
-    abstract fun Render()
+    protected abstract fun Render()
+    @Composable
+    protected abstract fun RenderPreview()
 
+    private var isPreview by mutableStateOf(false)
     @Composable
     private fun RenderComposable() {
         val density = LocalDensity.current
@@ -101,7 +104,11 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
                         )
                         .padding(4.dp)
                 ) {
-                    Render()
+                    if (isPreview) {
+                        RenderPreview()
+                    } else {
+                        Render()
+                    }
                 }
             }
         }
@@ -178,7 +185,8 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
 
         @OptIn(InternalComposeUiApi::class)
         private fun tryInitCompose(modules: List<ComposableHUDModule> = ModManager.getHUDModules()) {
-            val window = Bridge.client.window
+            val window = minecraft.window
+            modules.forEach { it.isPreview = minecraft.isWorldNull }
             if (!::scene.isInitialized) {
                 val density = Density(1f)
                 scene = CanvasLayersComposeScene(

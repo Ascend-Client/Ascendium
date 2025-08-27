@@ -16,9 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
+import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
 import io.github.betterclient.ascendium.ui.chrome.EasterEggUI
+import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
@@ -26,6 +28,9 @@ import io.github.betterclient.ascendium.ui.utils.rainbowAsState
 
 @Composable
 fun ModsUI(smallen: Boolean) {
+    if (minecraft.isWorldNull) {
+        ParallaxBackground()
+    }
     AscendiumTheme {
         Center {
             var expanded by remember { mutableStateOf(false) }

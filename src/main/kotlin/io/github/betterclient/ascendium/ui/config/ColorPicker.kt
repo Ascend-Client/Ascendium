@@ -139,7 +139,7 @@ private fun ColorPickerSliders(controller: ColorPickerController) {
                 .fillMaxWidth()
         ) {
             val (label, fn) = slider
-            val (newColor, value) = fn(0f)
+            val (_, value) = fn(0f)
 
             Text(label)
             OutlinedTextField(
