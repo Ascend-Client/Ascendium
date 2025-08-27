@@ -33,7 +33,7 @@ import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import kotlinx.coroutines.delay
 import kotlin.system.exitProcess
 
-private var didAnim by mutableStateOf(false)
+private var didMenuAnim by mutableStateOf(false)
 
 object CustomMainMenu : ComposeUI({
     AscendiumTheme {
@@ -45,9 +45,9 @@ object CustomMainMenu : ComposeUI({
             CornerButtons()
         }
 
-        if (!didAnim) {
+        if (!didMenuAnim) {
             EntranceAnimation {
-                didAnim = true //never run again
+                didMenuAnim = true //never run again
             }
         }
     }

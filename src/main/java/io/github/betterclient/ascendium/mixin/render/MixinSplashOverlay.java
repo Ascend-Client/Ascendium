@@ -1,6 +1,7 @@
 package io.github.betterclient.ascendium.mixin.render;
 
 import io.github.betterclient.ascendium.ui.minecraft.CustomLoadingScreen;
+import io.github.betterclient.ascendium.ui.minecraft.CustomLoadingScreenKt;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.SplashOverlay;
@@ -36,7 +37,9 @@ public class MixinSplashOverlay {
 
     //hooks to disable vanilla loading screen
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;render(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
-    public void noRender(Screen instance, DrawContext context, int mouseX, int mouseY, float delta) { }
+    public void noRender(Screen instance, DrawContext context, int mouseX, int mouseY, float delta) {
+        if (CustomLoadingScreenKt.getDidAnim()) instance.render(context, mouseX, mouseY, delta);
+    }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIFFIIIIIII)V"))
     public void noRender(DrawContext instance, Function<Identifier, RenderLayer> renderLayers, Identifier sprite, int x, int y, float u, float v, int width, int height, int regionWidth, int regionHeight, int textureWidth, int textureHeight, int color) { }

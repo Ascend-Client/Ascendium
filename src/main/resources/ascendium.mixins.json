@@ -6,7 +6,8 @@
   "mixins": [
     "common.MixinEntity",
     "common.MixinItemStack",
-    "common.MixinPlayerEntity"
+    "common.MixinPlayerEntity",
+    "reload.MixinSimpleResourceReload"
   ],
   "client": [
     "MixinMinecraftClient",

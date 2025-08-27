@@ -28,6 +28,8 @@ import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import java.awt.event.MouseEvent
 
+var didAnim by mutableStateOf(false)
+
 @Composable
 private fun LoadingScreen() {
     AscendiumTheme {
@@ -56,15 +58,18 @@ private fun LoadingScreen() {
             }
         }
 
-        val animateTransition by remember(CustomLoadingScreen.progress) { mutableStateOf(CustomLoadingScreen.progress > 0.95f) }
-        val animateProgress by animateFloatAsState(
-            if (animateTransition) 1.0f else 0.0f,
-            animationSpec = tween(500),
-            finishedListener = {
-                CustomLoadingScreen.progressText = "Loading"
-            }
-        )
-        Box(Modifier.fillMaxWidth().fillMaxHeight(animateProgress).background(Color.Gray))
+        if (!didAnim) {
+            val animateTransition by remember(CustomLoadingScreen.progress) { mutableStateOf(CustomLoadingScreen.progress > 0.95f) }
+            val animateProgress by animateFloatAsState(
+                if (animateTransition) 1.0f else 0.0f,
+                animationSpec = tween(500),
+                finishedListener = {
+                    CustomLoadingScreen.progressText = "Loading"
+                    didAnim = true //never again
+                }
+            )
+            Box(Modifier.fillMaxWidth().fillMaxHeight(animateProgress).background(Color.Gray))
+        }
     }
 }
 
