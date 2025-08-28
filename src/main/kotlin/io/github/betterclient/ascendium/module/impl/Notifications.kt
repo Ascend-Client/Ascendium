@@ -9,12 +9,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,11 +31,13 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.SkiaRenderer
+import io.github.betterclient.ascendium.event.ChatEvent
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import kotlinx.coroutines.delay
 
 object Notifications : Module("Notifications", "Show notifications for in-game events on supported servers") {
     @OptIn(InternalComposeUiApi::class)
@@ -61,7 +64,7 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
             )
 
             scene.setContent {
-                RenderNotifications()
+                RenderNotificationsHud()
             }
         } else {
             if (window.fbWidth != scene.size!!.width || window.fbHeight != scene.size!!.height) {
@@ -69,33 +72,31 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
             }
         }
     }
+    val notifications = mutableStateMapOf<Long, Notification>()
 
     @Composable
-    private fun RenderNotifications() {
+    private fun RenderNotificationsHud() {
         AscendiumTheme {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
                 Column {
                     Spacer(Modifier.height(10.dp))
-                    RenderNotification(
-                        Notification(
-                            "Test!",
-                            "ples accetw",
-                            button1 = NotificationButton(
-                                "Accept",
-                                onClick = {
-                                    //accept lol
-                                },
-                                color = Color.Green.copy(alpha = 0.7f)
-                            ),
-                            button2 = NotificationButton(
-                                "Reject",
-                                onClick = {
-                                    //reject lol
-                                },
-                                color = Color.Red.copy(alpha = 0.7f)
-                            )
-                        )
-                    )
+                    var latest by remember {
+                        mutableStateOf(notifications
+                            .filterKeys { System.currentTimeMillis() - it < 5000 }
+                            .maxByOrNull { it.key }
+                            ?.value)
+                    }
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            latest = notifications
+                                .filterKeys { System.currentTimeMillis() - it < 5000 }
+                                .maxByOrNull { it.key }
+                                ?.value
+                            delay(500)
+                        }
+                    }
+
+                    latest?.let { RenderNotification(it) }
                 }
             }
         }
@@ -122,7 +123,7 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
         ) {
             IconButton(
                 onClick = {
-
+                    notifications.remove(notifications.filterValues { it == notification }.keys.min()) //ew hack
                 },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -154,7 +155,7 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
     }
 
     @Composable
-    private fun ColumnScope.NotificationButtons(notification: Notification) {
+    private fun NotificationButtons(notification: Notification) {
         if (notification.button1 != NotificationButton.None) {
             if (notification.button2 != NotificationButton.None) {
                 //combined button
@@ -197,6 +198,11 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
                 }
             }
         }
+    }
+
+    @EventTarget
+    fun onChat(chatEvent: ChatEvent) {
+        notifications[System.currentTimeMillis()] = Notification(chatEvent.text.text, chatEvent.text.style.toString())
     }
 }
 

@@ -157,3 +157,30 @@ interface BridgeRenderer {
     fun drawRect(x: Int, y: Int, width: Int, height: Int, color: Int)
     fun getTextWidth(text: String): Int
 }
+
+interface TextBridge {
+    val style: TextStyleBridge
+    val text: String
+    val bridgedSiblings: List<TextBridge> //crash
+}
+
+interface TextStyleBridge {
+    val color: Int
+    val bold: Boolean
+    val italic: Boolean
+    val clickEvent: ClickEventBridge
+}
+
+interface ClickEventBridge {
+    val action: ClickEventActionBridge
+    val bridgeValue: String
+}
+
+enum class ClickEventActionBridge {
+    OPEN_URL,
+    OPEN_FILE,
+    RUN_COMMAND,
+    SUGGEST_COMMAND,
+    CHANGE_PAGE,
+    COPY_TO_CLIPBOARD
+}
