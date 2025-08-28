@@ -1,24 +1,13 @@
 package io.github.betterclient.ascendium.module.impl
 
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -96,7 +85,16 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
                         }
                     }
 
-                    latest?.let { RenderNotification(it) }
+                    Box(Modifier.offset((-10).dp)) {
+                        AnimatedContent(
+                            targetState = latest,
+                            transitionSpec = {
+                                slideInHorizontally { -it * 4 } togetherWith slideOutHorizontally { it * 4 }
+                            }
+                        ) { notif ->
+                            notif?.let { RenderNotification(it) }
+                        }
+                    }
                 }
             }
         }
@@ -104,17 +102,8 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
 
     @Composable
     fun RenderNotification(notification: Notification) {
-        var a by remember { mutableStateOf(false) }
-        LaunchedEffect(notification, Unit) {
-            a = true
-        }
-        val offset by animateDpAsState(
-            if (a) (-10).dp else 260.dp
-        )
-
         Box(
             Modifier
-                .offset(offset)
                 .background(
                     AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
                     RoundedCornerShape(16.dp)
