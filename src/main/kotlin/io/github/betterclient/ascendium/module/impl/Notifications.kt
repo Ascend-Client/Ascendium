@@ -1,5 +1,6 @@
 package io.github.betterclient.ascendium.module.impl
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,11 +9,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
@@ -67,54 +76,143 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
                 Column {
                     Spacer(Modifier.height(10.dp))
-                    Box(
-                        Modifier
-                            //TODO: animate offset
-                            .offset((-10).dp)
-                            .background(
-                                AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
-                                RoundedCornerShape(16.dp)
+                    RenderNotification(
+                        Notification(
+                            "Test!",
+                            "ples accetw",
+                            button1 = NotificationButton(
+                                "Accept",
+                                onClick = {
+                                    //accept lol
+                                },
+                                color = Color.Green.copy(alpha = 0.7f)
+                            ),
+                            button2 = NotificationButton(
+                                "Reject",
+                                onClick = {
+                                    //reject lol
+                                },
+                                color = Color.Red.copy(alpha = 0.7f)
                             )
-                            .size(250.dp, 150.dp)
-                    ) {
-                        IconButton(
-                            onClick = {
-
-                            },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(8.dp)
-                        ) {
-                            Icon(Icons.Default.Close, contentDescription = "Close")
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Big Text",
-                                style = AscendiumTheme.typography.headlineMedium
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Small text below the big one",
-                                style = AscendiumTheme.typography.bodyMedium
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                            Button(
-                                onClick = { },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Bottom Button")
-                            }
-                        }
-                    }
+                        )
+                    )
                 }
             }
         }
+    }
+
+    @Composable
+    fun RenderNotification(notification: Notification) {
+        var a by remember { mutableStateOf(false) }
+        LaunchedEffect(notification, Unit) {
+            a = true
+        }
+        val offset by animateDpAsState(
+            if (a) (-10).dp else 260.dp
+        )
+
+        Box(
+            Modifier
+                .offset(offset)
+                .background(
+                    AscendiumTheme.colorScheme.background.copy(alpha = Ascendium.settings.backgroundOpacityState.toFloat()),
+                    RoundedCornerShape(16.dp)
+                )
+                .size(250.dp, 150.dp)
+        ) {
+            IconButton(
+                onClick = {
+
+                },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+            ) {
+                Icon(Icons.Default.Close, contentDescription = "Close")
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = notification.bigTitle,
+                    style = AscendiumTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = notification.smallText,
+                    style = AscendiumTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                NotificationButtons(notification)
+            }
+        }
+    }
+
+    @Composable
+    private fun ColumnScope.NotificationButtons(notification: Notification) {
+        if (notification.button1 != NotificationButton.None) {
+            if (notification.button2 != NotificationButton.None) {
+                //combined button
+                Row(Modifier.fillMaxWidth()) {
+                    Button(
+                        notification.button1.onClick,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = notification.button1.color),
+                        shape = RoundedCornerShape(
+                            topStartPercent = 50,
+                            bottomStartPercent = 50,
+                            topEndPercent = 10,
+                            bottomEndPercent = 10
+                        )
+                    ) {
+                        Text(notification.button1.text)
+                    }
+                    Spacer(Modifier.width(2.dp))
+                    Button(
+                        notification.button2.onClick,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = notification.button2.color),
+                        shape = RoundedCornerShape(
+                            topStartPercent = 10,
+                            bottomStartPercent = 10,
+                            topEndPercent = 50,
+                            bottomEndPercent = 50
+                        )
+                    ) {
+                        Text(notification.button2.text)
+                    }
+                }
+            } else {
+                Button(
+                    notification.button1.onClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = notification.button1.color)
+                ) {
+                    Text(notification.button1.text)
+                }
+            }
+        }
+    }
+}
+
+data class Notification(
+    val bigTitle: String,
+    val smallText: String,
+    val button1: NotificationButton = NotificationButton.None,
+    val button2: NotificationButton = NotificationButton.None
+)
+
+data class NotificationButton(
+    val text: String,
+    val onClick: () -> Unit,
+    val color: Color = Color.Unspecified,
+) {
+    companion object {
+        val None = NotificationButton("", {})
     }
 }
