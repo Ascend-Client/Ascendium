@@ -87,7 +87,6 @@ open class ComposeUI(
 
     override fun render(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) {
         SkiaRenderer.withSkia {
-            blur(it)
             scene.render(it.asComposeCanvas(), System.nanoTime())
         }
 
@@ -283,45 +282,5 @@ open class ComposeUI(
 
     fun addMouseEventHandler(function: (mouseX: Int, mouseY: Int, event: MouseEvent) -> Boolean) {
         mouseEventHandlers.add(function)
-    }
-
-    override fun shouldRenderBackground() = false
-    private fun blur(canvas: Canvas) {
-        val width = minecraft.window.fbWidth
-        val height = minecraft.window.fbHeight
-        val intBuffer = IntArray(width * height)
-
-        GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, intBuffer)
-
-        val rowBytes = width * 4
-        val flippedBytes = ByteArray(intBuffer.size * 4)
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                val srcIndex = (height - 1 - y) * width + x
-                val v = intBuffer[srcIndex]
-                val b = (v ushr 16 and 0xFF)
-                val g = (v ushr 8 and 0xFF)
-                val r = (v and 0xFF)
-                val a = (v ushr 24 and 0xFF)
-                // premultiply
-                flippedBytes[(y * width + x) * 4 + 0] = (r * a / 255).toByte()
-                flippedBytes[(y * width + x) * 4 + 1] = (g * a / 255).toByte()
-                flippedBytes[(y * width + x) * 4 + 2] = (b * a / 255).toByte()
-                flippedBytes[(y * width + x) * 4 + 3] = a.toByte()
-            }
-        }
-
-        val bitmap = Bitmap().apply {
-            allocPixels(ImageInfo(width, height, ColorType.RGBA_8888, ColorAlphaType.PREMUL))
-            installPixels(imageInfo, flippedBytes, rowBytes)
-        }
-
-        val img = Image.makeFromBitmap(bitmap)
-        val blurAmt = 2000
-        val paint = org.jetbrains.skia.Paint().apply {
-            imageFilter = ImageFilter.makeBlur(blurAmt.toFloat(), blurAmt.toFloat(), FilterTileMode.CLAMP)
-        }
-
-        canvas.drawImage(img, 0f, 0f, paint)
     }
 }
