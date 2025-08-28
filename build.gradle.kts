@@ -88,6 +88,7 @@ dependencies {
 
     modRuntimeOnly("maven.modrinth:sodium:mc1.21.4-0.6.13-fabric")
     modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:0.119.4+1.21.4")
+    modRuntimeOnly("maven.modrinth:in-game-account-switcher:GpMGjDlf")
 }
 
 tasks.processResources {

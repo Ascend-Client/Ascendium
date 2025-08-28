@@ -42,4 +42,9 @@ public class MixinWindow implements WindowBridge {
     public long getWindowHandle() {
         return this.handle;
     }
+
+    @Override
+    public int getFbId() {
+        return MinecraftClient.getInstance().getFramebuffer().getColorAttachment();
+    }
 }

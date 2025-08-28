@@ -93,6 +93,7 @@ class BoundingBox(val start: Pos3D, val end: Pos3D) {
 }
 
 interface WindowBridge {
+    val fbId: Int
     val windowHandle: Long
     val scale: Double
     val fbWidth: Int
