@@ -19,7 +19,7 @@ public class BridgedScreen extends Screen {
 
         this.screen.setWidth(width);
         this.screen.setHeight(height);
-        this.screen.render(new Renderer(context), mouseX, mouseY);
+        this.screen.render(mouseX, mouseY);
     }
 
     @Override

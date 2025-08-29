@@ -99,11 +99,6 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     }
 
     @Override
-    public @NotNull TextRendererBridge getTextRenderer() {
-        return (TextRendererBridge) this.textRenderer;
-    }
-
-    @Override
     public int getPing() {
         return getCurrentServerEntry() == null ? -1 : ((int) getCurrentServerEntry().ping);
     }
@@ -169,6 +164,11 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Override
     public boolean isWorldNull() {
         return this.world == null;
+    }
+
+    @Override
+    public boolean isScreenNull() {
+        return this.currentScreen == null;
     }
 
     @Override

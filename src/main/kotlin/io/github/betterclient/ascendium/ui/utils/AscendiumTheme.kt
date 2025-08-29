@@ -1,6 +1,7 @@
 package io.github.betterclient.ascendium.ui.utils
 
 import androidx.compose.material3.*
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
@@ -43,7 +44,7 @@ private fun colorScheme() = when(Ascendium.settings.themeState) {
 private fun ColorScheme.setButtonColors() = this.copy(primary = primaryContainer, onPrimary = onPrimaryContainer)
 
 private val mcColorScheme = ColorScheme(
-    primary = Color(0xFF6A9B54),
+    primary = Color(0xFF5A8A44),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFF456B37),
     onPrimaryContainer = Color(0xFFB3E0A3),
@@ -72,13 +73,25 @@ private val mcColorScheme = ColorScheme(
     outline = Color(0xFF8B9389),
     outlineVariant = Color(0xFF414940),
     scrim = Color(0x99000000),
-    surfaceDim = Color(0xFF121411),
     surfaceBright = Color(0xFF383A36),
-    surfaceContainerLowest = Color(0xFF151714),
-    surfaceContainerLow = Color(0xFF1A1C19),
+    surfaceDim = Color(0xFF121411),
     surfaceContainer = Color(0xFF1E201D),
     surfaceContainerHigh = Color(0xFF282B27),
     surfaceContainerHighest = Color(0xFF333632),
+    surfaceContainerLow = Color(0xFF1A1C19),
+    surfaceContainerLowest = Color(0xFF151714),
+    primaryFixed = Color(0xFFB3E0A3),
+    primaryFixedDim = Color(0xFF456B37),
+    onPrimaryFixed = Color(0xFF1E2122),
+    onPrimaryFixedVariant = Color(0xFFB3E0A3),
+    secondaryFixed = Color(0xFFDCE2E6),
+    secondaryFixedDim = Color(0xFF42474A),
+    onSecondaryFixed = Color(0xFF1E2122),
+    onSecondaryFixedVariant = Color(0xFFDCE2E6),
+    tertiaryFixed = Color(0xFFB9F2FF),
+    tertiaryFixedDim = Color(0xFF004D58),
+    onTertiaryFixed = Color(0xFF00252A),
+    onTertiaryFixedVariant = Color(0xFFB9F2FF),
 )
 
 private val diamondColorScheme = ColorScheme(
@@ -111,11 +124,23 @@ private val diamondColorScheme = ColorScheme(
     outline = Color(0xFF8C9198),
     outlineVariant = Color(0xFF42474C),
     scrim = Color(0x99000000),
-    surfaceDim = Color(0xFF111415),
     surfaceBright = Color(0xFF373A3C),
-    surfaceContainerLowest = Color(0xFF151718),
-    surfaceContainerLow = Color(0xFF1A1C1E),
+    surfaceDim = Color(0xFF111415),
     surfaceContainer = Color(0xFF1E2022),
     surfaceContainerHigh = Color(0xFF282A2C),
     surfaceContainerHighest = Color(0xFF333537),
+    surfaceContainerLow = Color(0xFF1A1C1E),
+    surfaceContainerLowest = Color(0xFF151718),
+    primaryFixed = Color(0xFFD9E2FF),
+    primaryFixedDim = Color(0xFF2E468A),
+    onPrimaryFixed = Color(0xFF001D53),
+    onPrimaryFixedVariant = Color(0xFFD9E2FF),
+    secondaryFixed = Color(0xFFDCE2E6),
+    secondaryFixedDim = Color(0xFF42474A),
+    onSecondaryFixed = Color(0xFF1E2122),
+    onSecondaryFixedVariant = Color(0xFFDCE2E6),
+    tertiaryFixed = Color(0xFFF0D9FF),
+    tertiaryFixedDim = Color(0xFF5C3A70),
+    onTertiaryFixed = Color(0xFF432258),
+    onTertiaryFixedVariant = Color(0xFFF0D9FF),
 )

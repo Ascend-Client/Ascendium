@@ -3,7 +3,9 @@ package io.github.betterclient.ascendium.module.impl
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -11,35 +13,32 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeCanvas
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.pointer.PointerButton
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
+import io.github.betterclient.ascendium.compose.AWTUtils
 import io.github.betterclient.ascendium.compose.SkiaRenderer
-import io.github.betterclient.ascendium.event.ChatEvent
-import io.github.betterclient.ascendium.event.EventTarget
-import io.github.betterclient.ascendium.event.RenderHudEvent
+import io.github.betterclient.ascendium.compose.glfwToAwtKeyCode
+import io.github.betterclient.ascendium.event.*
 import io.github.betterclient.ascendium.minecraft
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import kotlinx.coroutines.delay
+import java.awt.event.KeyEvent
+import java.awt.event.MouseEvent
 
 object Notifications : Module("Notifications", "Show notifications for in-game events on supported servers") {
     @OptIn(InternalComposeUiApi::class)
     lateinit var scene: ComposeScene
-
-    @OptIn(InternalComposeUiApi::class)
-    @EventTarget
-    fun onRender(event: RenderHudEvent) {
-        init()
-        SkiaRenderer.withSkia {
-            scene.render(it.asComposeCanvas(), System.nanoTime())
-        }
-    }
 
     @OptIn(InternalComposeUiApi::class)
     private fun init() {
@@ -62,37 +61,24 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
         }
     }
     val notifications = mutableStateMapOf<Long, Notification>()
+    var multipleNotifications by mutableStateOf(false)
 
     @Composable
     private fun RenderNotificationsHud() {
         AscendiumTheme {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
-                Column {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(Modifier.height(10.dp))
-                    var latest by remember {
-                        mutableStateOf(notifications
-                            .filterKeys { System.currentTimeMillis() - it < 5000 }
-                            .maxByOrNull { it.key }
-                            ?.value)
-                    }
-                    LaunchedEffect(Unit) {
-                        while (true) {
-                            latest = notifications
-                                .filterKeys { System.currentTimeMillis() - it < 5000 }
-                                .maxByOrNull { it.key }
-                                ?.value
-                            delay(500)
+                    AnimatedContent(
+                        targetState = multipleNotifications,
+                        transitionSpec = {
+                            expandVertically() + fadeIn() togetherWith shrinkVertically() + fadeOut()
                         }
-                    }
-
-                    Box(Modifier.offset((-10).dp)) {
-                        AnimatedContent(
-                            targetState = latest,
-                            transitionSpec = {
-                                slideInHorizontally { -it * 4 } togetherWith slideOutHorizontally { it * 4 }
-                            }
-                        ) { notif ->
-                            notif?.let { RenderNotification(it) }
+                    ) { it ->
+                        if (it) {
+                            MultipleNotifications()
+                        } else {
+                            SingleNotification()
                         }
                     }
                 }
@@ -101,7 +87,95 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
     }
 
     @Composable
-    fun RenderNotification(notification: Notification) {
+    private fun MultipleNotifications() = Column(Modifier.verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.End) {
+        var sortedNotifications by remember { mutableStateOf(
+            notifications.toList()
+                .sortedByDescending { it.first }
+                .map { it.second }
+        ) }
+        var update by remember { mutableStateOf(false) }
+        LaunchedEffect(update) {
+            sortedNotifications = notifications.toList()
+                .sortedByDescending { it.first }
+                .map { it.second }
+        }
+
+        if (sortedNotifications.isEmpty()) return@Column
+
+        var searchBar by remember { mutableStateOf("") }
+        Row(Modifier.width(IntrinsicSize.Min)) {
+            OutlinedTextField(
+                searchBar,
+                onValueChange = {
+                    searchBar = it
+                    if (searchBar.isNotEmpty()) {
+                        sortedNotifications = searchNotifications(searchBar)
+                    } else {
+                        update = !update
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(2.dp))
+            Button(onClick = {
+                notifications.clear()
+                sortedNotifications = notifications.toList()
+                    .sortedByDescending { it.first }
+                    .map { it.second }
+            }, modifier = Modifier.weight(1f)) {
+                Text("Clear All")
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+
+        sortedNotifications.forEach { notification ->
+            key(notification) {
+                RenderNotification(notification) {
+                    update = !update
+                }
+                Spacer(Modifier.height(10.dp))
+            }
+        }
+    }
+
+    private fun searchNotifications(query: String): List<Notification> {
+        return notifications.values
+            .filter { it.bigTitle.contains(query, ignoreCase = true) }
+            .sortedByDescending { notifications.entries.first { entry -> entry.value == it }.key }
+    }
+
+    @Composable
+    private fun SingleNotification() {
+        var latest by remember {
+            mutableStateOf(notifications
+                .filterKeys { System.currentTimeMillis() - it < 5000 }
+                .maxByOrNull { it.key }
+                ?.value)
+        }
+        LaunchedEffect(Unit) {
+            while (true) {
+                latest = notifications
+                    .filterKeys { System.currentTimeMillis() - it < 5000 }
+                    .maxByOrNull { it.key }
+                    ?.value
+                delay(500)
+            }
+        }
+
+        Box(Modifier.offset((-10).dp)) {
+            AnimatedContent(
+                targetState = latest,
+                transitionSpec = {
+                    slideInHorizontally { -it / 4 } togetherWith slideOutHorizontally { it * 4 }
+                }
+            ) { notif ->
+                notif?.let { RenderNotification(it) }
+            }
+        }
+    }
+
+    @Composable
+    private fun RenderNotification(notification: Notification, onDelete: () -> Unit = {}) {
         Box(
             Modifier
                 .background(
@@ -112,6 +186,7 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
         ) {
             IconButton(
                 onClick = {
+                    onDelete()
                     notifications.remove(notifications.filterValues { it == notification }.keys.min()) //ew hack
                 },
                 modifier = Modifier
@@ -189,9 +264,122 @@ object Notifications : Module("Notifications", "Show notifications for in-game e
         }
     }
 
+    @OptIn(InternalComposeUiApi::class)
+    @EventTarget
+    fun onRender(event: RenderHudEvent) {
+        multipleNotifications = minecraft.isScreenNull.not()
+        init()
+        SkiaRenderer.withSkia {
+            scene.render(it.asComposeCanvas(), System.nanoTime())
+        }
+    }
+
     @EventTarget
     fun onChat(chatEvent: ChatEvent) {
         notifications[System.currentTimeMillis()] = Notification(chatEvent.text.text, chatEvent.text.style.toString())
+    }
+
+    @OptIn(InternalComposeUiApi::class)
+    @EventTarget
+    fun onScreenRender(event: RenderScreenEvent) {
+        if (minecraft.isWorldNull) return
+        init()
+        SkiaRenderer.withSkia {
+            scene.render(it.asComposeCanvas(), System.nanoTime())
+        }
+
+        val event = AWTUtils.MouseEvent(
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
+            AWTUtils.getAwtMods(minecraft.window.windowHandle),
+            0, //NO BUTTON
+            MouseEvent.MOUSE_MOVED
+        )
+        scene.sendPointerEvent(
+            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+            eventType = PointerEventType.Move,
+            nativeEvent = event
+        )
+    }
+
+    @OptIn(InternalComposeUiApi::class)
+    @EventTarget
+    fun onScreenMouse(event: MouseScreenEvent) {
+        if (minecraft.isWorldNull) return
+        init()
+        val event0 = AWTUtils.MouseEvent(
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
+            AWTUtils.getAwtMods(minecraft.window.windowHandle),
+            event.button,
+            if (event.pressed) MouseEvent.MOUSE_PRESSED else MouseEvent.MOUSE_RELEASED
+        )
+
+        scene.sendPointerEvent(
+            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+            eventType = if (event.pressed) PointerEventType.Press else PointerEventType.Release,
+            nativeEvent = event0,
+            button = PointerButton(event.button)
+        )
+    }
+
+    @OptIn(InternalComposeUiApi::class)
+    @EventTarget
+    fun onScreenScroll(event: MouseScrollScreenEvent) {
+        if (minecraft.isWorldNull) return
+        init()
+        val event0 = AWTUtils.MouseWheelEvent(
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
+            event.scrollY,
+            AWTUtils.getAwtMods(minecraft.window.windowHandle),
+            MouseEvent.MOUSE_WHEEL
+        )
+
+        scene.sendPointerEvent(
+            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+            eventType = PointerEventType.Scroll,
+            scrollDelta = Offset(event.scrollX.toFloat(), -event.scrollY.toFloat()),
+            nativeEvent = event0
+        )
+    }
+
+    @OptIn(InternalComposeUiApi::class)
+    @EventTarget
+    fun onKeyboardScreen(event: KeyboardScreenEvent) {
+        if (minecraft.isWorldNull) return
+        init()
+        val awtKey = glfwToAwtKeyCode(event.key)
+        val time = System.nanoTime() / 1_000_000
+
+        scene.sendKeyEvent(
+            AWTUtils.KeyEvent(
+                if (event.pressed) KeyEvent.KEY_PRESSED else KeyEvent.KEY_RELEASED,
+                time,
+                AWTUtils.getAwtMods(minecraft.window.windowHandle),
+                awtKey,
+                0.toChar(),
+                KeyEvent.KEY_LOCATION_STANDARD
+            )
+        )
+    }
+
+    @OptIn(InternalComposeUiApi::class)
+    @EventTarget
+    fun onKeyboardChar(event: KeyboardCharScreenEvent) {
+        if (minecraft.isWorldNull) return
+        init()
+        val time = System.nanoTime() / 1_000_000
+        scene.sendKeyEvent(
+            AWTUtils.KeyEvent(
+                KeyEvent.KEY_TYPED,
+                time,
+                AWTUtils.getAwtMods(minecraft.window.windowHandle),
+                Key.Unknown.keyCode.toInt(),
+                event.char,
+                KeyEvent.KEY_LOCATION_UNKNOWN
+            )
+        )
     }
 }
 

@@ -13,7 +13,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.compose.getScaled
 import org.jetbrains.skia.IRect
@@ -67,15 +66,15 @@ private fun LayoutCoordinates.toRect() = Rect(
 )
 
 @Composable
-fun Modifier.renderWithMC(visible: State<Boolean>, block: (context: BridgeRenderer, coords: IRect) -> Unit): Modifier {
+fun Modifier.renderWithMC(visible: State<Boolean>, block: (coords: IRect) -> Unit): Modifier {
     var position by remember { mutableStateOf<Rect?>(null) }
 
     LaunchedEffect(Unit) {
-        ComposeUI.current.addRenderHandler { context, mouseX, mouseY ->
+        ComposeUI.current.addRenderHandler { mouseX, mouseY ->
             if (position == null) return@addRenderHandler
             if (!visible.value) return@addRenderHandler
 
-            block(context, IRect.makeLTRB(
+            block(IRect.makeLTRB(
                 position!!.left.getScaled().toInt(),
                 position!!.top.getScaled().toInt(),
                 position!!.right.getScaled().toInt(),

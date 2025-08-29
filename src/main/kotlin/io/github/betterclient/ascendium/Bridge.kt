@@ -9,10 +9,10 @@ inline val minecraft: MinecraftBridge
 
 interface MinecraftBridge {
     val isWorldNull: Boolean
+    val isScreenNull: Boolean
     val server: String
     val ping: Int
     val fps: Int
-    val textRenderer: TextRendererBridge
     val mouse: MouseBridge
     val gameOptions: OptionsBridge
     val window: WindowBridge
@@ -101,11 +101,6 @@ interface WindowBridge {
     val fbo: Int
 }
 
-interface TextRendererBridge {
-    fun getTextWidth(text: String): Int
-    fun getFontHeight(): Int
-}
-
 interface MouseBridge {
     //renamed to xPos to avoid conflict with Minecraft's Mouse class
     val xPos: Int
@@ -139,7 +134,7 @@ open class BridgeScreen {
     open var width: Int = 0
     open var height: Int = 0
 
-    open fun render(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) {}
+    open fun render(mouseX: Int, mouseY: Int) {}
     open fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {}
     open fun mouseReleased(mouseX: Int, mouseY: Int, button: Int) {}
     open fun mouseScrolled(mouseX: Int, mouseY: Int, scrollX: Double, scrollY: Double) {}
@@ -150,12 +145,6 @@ open class BridgeScreen {
     open fun init() {}
     open fun shouldCloseOnEsc() = true
     open fun shouldRenderBackground() = true
-}
-
-interface BridgeRenderer {
-    fun drawText(text: String, x: Int, y: Int, color: Int, scale: Float = 1.0f)
-    fun drawRect(x: Int, y: Int, width: Int, height: Int, color: Int)
-    fun getTextWidth(text: String): Int
 }
 
 interface TextBridge {

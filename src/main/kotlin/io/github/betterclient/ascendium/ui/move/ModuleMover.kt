@@ -1,6 +1,5 @@
 package io.github.betterclient.ascendium.ui.move
 
-import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.config.ConfigManager
@@ -14,8 +13,8 @@ class ModuleMover(val mods: List<ComposableHUDModule>) {
     var draggingModule: ComposableHUDModule? = null
 
     fun register() {
-        current.addRenderHandler { renderer, mouseX, mouseY ->
-            render(renderer, mouseX, mouseY)
+        current.addRenderHandler { mouseX, mouseY ->
+            render(mouseX, mouseY)
         }
 
         current.addMouseHandler { _, mcCoords, button, clicked ->
@@ -42,7 +41,7 @@ class ModuleMover(val mods: List<ComposableHUDModule>) {
         return false
     }
 
-    fun render(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) {
+    fun render(mouseX: Int, mouseY: Int) {
         if (isDragging && draggingModule != null) {
             draggingModule!!.x = mouseX - dragStartX
             draggingModule!!.y = mouseY - dragStartY

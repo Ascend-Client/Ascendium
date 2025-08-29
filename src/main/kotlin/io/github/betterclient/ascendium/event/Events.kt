@@ -1,16 +1,20 @@
 package io.github.betterclient.ascendium.event
 
-import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.EntityBridge
 import io.github.betterclient.ascendium.Pos3D
 import io.github.betterclient.ascendium.TextBridge
 import io.github.betterclient.ascendium.minecraft
 import java.util.concurrent.atomic.AtomicReference
 
-
-class RenderHudEvent(val renderer: BridgeRenderer) : Event()
+class RenderHudEvent() : Event()
 class MouseClickEvent(val button: Int, val pressed: Boolean) : Event()
 class ChatEvent(val text: TextBridge): Event()
+//im sorry for the names of these 5
+class RenderScreenEvent() : Event()
+class MouseScreenEvent(val pressed: Boolean, val button: Int) : Event()
+class MouseScrollScreenEvent(val scrollX: Double, val scrollY: Double) : Event()
+class KeyboardScreenEvent(val key: Int, val pressed: Boolean) : Event()
+class KeyboardCharScreenEvent(val char: Char): Event()
 class EntityHitEvent(val attacker: EntityBridge, val receiver: EntityBridge) : Event() {
     val distance = getAttackDistance()
 

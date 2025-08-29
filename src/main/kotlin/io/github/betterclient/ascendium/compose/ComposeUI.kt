@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.pointer.PointerButton
@@ -14,23 +13,9 @@ import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.min
-import io.github.betterclient.ascendium.BridgeRenderer
 import io.github.betterclient.ascendium.BridgeScreen
 import io.github.betterclient.ascendium.minecraft
-import org.jetbrains.skia.BackendTexture
-import org.jetbrains.skia.Bitmap
-import org.jetbrains.skia.Canvas
-import org.jetbrains.skia.ColorAlphaType
-import org.jetbrains.skia.ColorType
-import org.jetbrains.skia.FilterTileMode
-import org.jetbrains.skia.Image
-import org.jetbrains.skia.ImageFilter
-import org.jetbrains.skia.ImageInfo
-import org.jetbrains.skia.SurfaceOrigin
-import org.lwjgl.opengl.GL11
 import java.awt.event.MouseEvent
-import java.nio.IntBuffer
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.properties.Delegates
 import java.awt.event.KeyEvent as AwtKeyEvent
@@ -85,13 +70,13 @@ open class ComposeUI(
         }
     }
 
-    override fun render(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) {
+    override fun render(mouseX: Int, mouseY: Int) {
         SkiaRenderer.withSkia {
             scene.render(it.asComposeCanvas(), System.nanoTime())
         }
 
         renderHandlers.forEach { handler ->
-            handler(renderer, mouseX, mouseY)
+            handler(mouseX, mouseY)
         }
 
         val event = AWTUtils.MouseEvent(
@@ -121,22 +106,21 @@ open class ComposeUI(
             }
         }
 
-        val client = minecraft
         val event = AWTUtils.MouseEvent(
-            client.mouse.xPos,
-            client.mouse.yPos,
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
             AWTUtils.getAwtMods(handle),
             button,
             MouseEvent.MOUSE_PRESSED
         )
         mouseEventHandlers.forEach {
-            if (it(client.mouse.xPos, client.mouse.yPos, event)) {
+            if (it(minecraft.mouse.xPos, minecraft.mouse.yPos, event)) {
                 //no event for compose :(
                 return
             }
         }
         scene.sendPointerEvent(
-            position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
+            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
             eventType = PointerEventType.Press,
             nativeEvent = event,
             button = PointerButton(button)
@@ -183,27 +167,25 @@ open class ComposeUI(
     }
 
     override fun mouseScrolled(mouseX: Int, mouseY: Int, scrollX: Double, scrollY: Double) {
-        val client = minecraft
         val event = AWTUtils.MouseWheelEvent(
-            client.mouse.xPos,
-            client.mouse.yPos,
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
             scrollY,
             AWTUtils.getAwtMods(handle),
             MouseEvent.MOUSE_WHEEL
         )
         mouseEventHandlers.forEach {
-            if (it(client.mouse.xPos, client.mouse.yPos, event)) {
+            if (it(minecraft.mouse.xPos, minecraft.mouse.yPos, event)) {
                 return
             }
         }
 
         scene.sendPointerEvent(
-            position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
+            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
             eventType = PointerEventType.Scroll,
             scrollDelta = Offset(scrollX.toFloat(), -scrollY.toFloat()),
             nativeEvent = event
         )
-        super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int) {
@@ -261,7 +243,7 @@ open class ComposeUI(
     }
 
     private val mouseHandlers = CopyOnWriteArrayList<(composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean>()
-    private val renderHandlers = CopyOnWriteArrayList<(renderer: BridgeRenderer, mouseX: Int, mouseY: Int) -> Unit>()
+    private val renderHandlers = CopyOnWriteArrayList<(mouseX: Int, mouseY: Int) -> Unit>()
     private val mouseEventHandlers = CopyOnWriteArrayList<(mouseX: Int, mouseY: Int, event: MouseEvent) -> Boolean>()
 
     fun addMouseHandler(handler: (composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean) {
@@ -276,7 +258,7 @@ open class ComposeUI(
         _toast.value = content
     }
 
-    fun addRenderHandler(function: (renderer: BridgeRenderer, mouseX: Int, mouseY: Int) -> Unit) {
+    fun addRenderHandler(function: (mouseX: Int, mouseY: Int) -> Unit) {
         renderHandlers.add(function)
     }
 
