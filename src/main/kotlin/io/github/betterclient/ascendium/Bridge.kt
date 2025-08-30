@@ -8,8 +8,8 @@ inline val minecraft: MinecraftBridge
     get() = MinecraftClient.getInstance() as MinecraftBridge
 
 interface MinecraftBridge {
+    val screen: MCScreen?
     val isWorldNull: Boolean
-    val isScreenNull: Boolean
     val server: String
     val ping: Int
     val fps: Int
@@ -30,7 +30,9 @@ enum class MCScreen {
     SELECT_WORLD_SCREEN,
     MULTIPLAYER_SCREEN,
     REALMS_MAIN_SCREEN,
-    OPTIONS_SCREEN
+    OPTIONS_SCREEN,
+    CHAT_SCREEN,
+    OTHER_SCREEN
 }
 
 interface EntityBridge {

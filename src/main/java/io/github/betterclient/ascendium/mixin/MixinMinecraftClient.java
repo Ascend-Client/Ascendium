@@ -8,6 +8,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
@@ -158,6 +159,8 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
             case MULTIPLAYER_SCREEN -> new MultiplayerScreen(this.currentScreen);
             case REALMS_MAIN_SCREEN -> new RealmsMainScreen(this.currentScreen);
             case OPTIONS_SCREEN -> new OptionsScreen(this.currentScreen, this.options);
+            case CHAT_SCREEN -> new ChatScreen("");
+            case OTHER_SCREEN -> null;
         });
     }
 
@@ -167,12 +170,20 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     }
 
     @Override
-    public boolean isScreenNull() {
-        return this.currentScreen == null;
+    public @NotNull ItemStackBridge createItemStack(@NotNull IdentifierBridge item, int count, float durability) {
+        return new FakeItemStackBridge(count, durability, item);
     }
 
     @Override
-    public @NotNull ItemStackBridge createItemStack(@NotNull IdentifierBridge item, int count, float durability) {
-        return new FakeItemStackBridge(count, durability, item);
+    public @Nullable MCScreen getScreen() {
+        return switch (this.currentScreen) {
+            case SelectWorldScreen ignored -> MCScreen.SELECT_WORLD_SCREEN;
+            case MultiplayerScreen ignored -> MCScreen.MULTIPLAYER_SCREEN;
+            case RealmsMainScreen ignored -> MCScreen.REALMS_MAIN_SCREEN;
+            case OptionsScreen ignored -> MCScreen.OPTIONS_SCREEN;
+            case ChatScreen ignored -> MCScreen.CHAT_SCREEN;
+            case null -> null;
+            default -> MCScreen.OTHER_SCREEN;
+        };
     }
 }

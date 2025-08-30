@@ -1,6 +1,6 @@
 package io.github.betterclient.ascendium.module
 
-import io.github.betterclient.ascendium.module.impl.Notifications
+import io.github.betterclient.ascendium.module.impl.notifications.Notifications
 import io.github.betterclient.ascendium.module.impl.hud.*
 
 object ModManager {

@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Mixin(SimpleResourceReload.class)
+@SuppressWarnings("all")
 public class MixinSimpleResourceReload {
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
     public <E> boolean onListAdd(List<E> instance, E ee) {
