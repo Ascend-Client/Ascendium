@@ -1,10 +1,9 @@
 package io.github.betterclient.ascendium.module
 
-import io.github.betterclient.ascendium.module.impl.notifications.Notifications
 import io.github.betterclient.ascendium.module.impl.hud.*
 
 object ModManager {
-    val modules = listOf(
+    val modules = listOf<Module>(
         FPSMod,
         CPSMod,
         KeystrokesMod,
@@ -14,7 +13,7 @@ object ModManager {
         ArmorDisplayMod,
         PositionDisplayMod,
         HitHistoryMod,
-        Notifications
+        //Notifications //remove notifications for now since we don't have any server specific notifications
     )
 
     fun getHUDModules() = modules.filterIsInstance<ComposableHUDModule>().filter { it `is` enabled }

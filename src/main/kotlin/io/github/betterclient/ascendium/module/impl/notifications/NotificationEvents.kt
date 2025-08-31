@@ -29,9 +29,7 @@ object NotificationEvents {
 
     @EventTarget
     fun onChat(chatEvent: ChatEvent) {
-        Notifications.addNotification(
-            Notification(chatEvent.text.text, chatEvent.text.style.toString())
-        )
+        //TODO: server notifications
     }
 
     @OptIn(InternalComposeUiApi::class)
