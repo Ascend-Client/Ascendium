@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.compose.AWTUtils
 import io.github.betterclient.ascendium.compose.SkiaRenderer
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import java.awt.event.MouseEvent
 
@@ -100,23 +100,29 @@ object CustomLoadingScreen {
         }
     }
 
+    val myRenderer = SkiaRenderer()
     fun render(progress: Float) {
-        init() //loading screen doesn't send init's correctly?
-
+        myRenderer.task {
+            init() //loading screen doesn't send init's correctly?
+        }
         this.progress = progress
-        SkiaRenderer.withSkia {
+        val awtMods = AWTUtils.getAwtMods(minecraft.window.windowHandle)
+        myRenderer.withSkia {
             scene.render(it.asComposeCanvas(), System.nanoTime())
         }
-        scene.sendPointerEvent(
-            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
-            eventType = PointerEventType.Move,
-            nativeEvent = AWTUtils.MouseEvent(
-                minecraft.mouse.xPos,
-                minecraft.mouse.yPos,
-                AWTUtils.getAwtMods(minecraft.window.windowHandle),
-                0, //NO BUTTON
-                MouseEvent.MOUSE_MOVED
+
+        myRenderer.task {
+            scene.sendPointerEvent(
+                position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+                eventType = PointerEventType.Move,
+                nativeEvent = AWTUtils.MouseEvent(
+                    minecraft.mouse.xPos,
+                    minecraft.mouse.yPos,
+                    awtMods,
+                    0, //NO BUTTON
+                    MouseEvent.MOUSE_MOVED
+                )
             )
-        )
+        }
     }
 }

@@ -1,88 +1,10 @@
 package io.github.betterclient.ascendium.compose
 
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
+import io.github.betterclient.ascendium.bridge.minecraft
 import org.jetbrains.skia.*
-import org.lwjgl.opengl.GL33C
 
-object SkiaRenderer {
-    private var vpW = 0
-    private var vpH = 0
-    private var context = DirectContext.makeGL()
-    private lateinit var renderTarget: BackendRenderTarget
-    private lateinit var surface: Surface
-
-    private fun setKnownGoodStateForSkia() {
-        //"known good state for skia" - Gemini
-        GL33C.glBindBuffer(GL33C.GL_PIXEL_UNPACK_BUFFER, 0)
-        GL33C.glPixelStorei(GL33C.GL_UNPACK_SWAP_BYTES, GL33C.GL_FALSE)
-        GL33C.glPixelStorei(GL33C.GL_UNPACK_LSB_FIRST, GL33C.GL_FALSE)
-        GL33C.glPixelStorei(GL33C.GL_UNPACK_ROW_LENGTH, 0)
-        GL33C.glPixelStorei(GL33C.GL_UNPACK_SKIP_ROWS, 0)
-        GL33C.glPixelStorei(GL33C.GL_UNPACK_SKIP_PIXELS, 0)
-        GL33C.glPixelStorei(GL33C.GL_UNPACK_ALIGNMENT, 4)
-    }
-
-    fun withSkia(block: (Canvas) -> Unit) {
-        init()
-        GlStateUtil.save()
-        setKnownGoodStateForSkia()
-
-        this.context.resetAll()
-        block(surface.canvas)
-        this.context.flush()
-
-        GlStateUtil.restore()
-    }
-
-    fun init() {
-        val window = minecraft.window
-
-        if (vpW == vpH && vpW == 0) {
-            renderTarget = BackendRenderTarget.makeGL(
-                window.fbWidth,
-                window.fbHeight,
-                0,
-                8,
-                window.fbo,
-                FramebufferFormat.GR_GL_RGBA8
-            )
-
-            surface = Surface.makeFromBackendRenderTarget(
-                context,
-                renderTarget,
-                SurfaceOrigin.BOTTOM_LEFT,
-                SurfaceColorFormat.RGBA_8888,
-                ColorSpace.sRGB
-            )!!
-            vpW = window.fbWidth
-            vpH = window.fbHeight
-        } else if (vpW != window.fbWidth || vpH != window.fbHeight) {
-            if (::surface.isInitialized) surface.close()
-            if (::renderTarget.isInitialized) renderTarget.close()
-            context = DirectContext.makeGL()
-
-            renderTarget = BackendRenderTarget.makeGL(
-                window.fbWidth,
-                window.fbHeight,
-                0,
-                8,
-                window.fbo,
-                FramebufferFormat.GR_GL_RGBA8
-            )
-
-            surface = Surface.makeFromBackendRenderTarget(
-                context,
-                renderTarget,
-                SurfaceOrigin.BOTTOM_LEFT,
-                SurfaceColorFormat.RGBA_8888,
-                ColorSpace.sRGB
-            )!!
-
-            vpW = window.fbWidth
-            vpH = window.fbHeight
-        }
-    }
-
+object ScalingUtils {
     fun <T : Number> getUnscaled(i: T): Float {
         val scaleFactor = minecraft.window.scale
         return ((i.toDouble() * scaleFactor).toFloat())
@@ -94,7 +16,24 @@ object SkiaRenderer {
     }
 }
 
+class SkiaRenderer {
+    val adapter = (BridgeAdapterManager.useBridgeUtil({ it.skiaRenderAdapter }) as SkiaRenderAdapter)
+    fun withSkia(block: (Canvas) -> Unit) {
+        adapter.withSkia(block)
+    }
+
+    fun task(block: () -> Unit) {
+        //non rendering task that require being run on the same thread as skia (compose input events)
+        adapter.task(block)
+    }
+}
+
+interface SkiaRenderAdapter {
+    fun withSkia(block: (Canvas) -> Unit)
+    fun task(block: () -> Unit)
+}
+
 private val cache = mutableMapOf<Int, Paint>()
 fun Int.asPaint() = cache.computeIfAbsent(this) { Paint().apply { color = this@asPaint } }
-fun Number.getScaled() = SkiaRenderer.getScaled(this)
-fun Number.getUnscaled() = SkiaRenderer.getUnscaled(this)
+fun Number.getScaled() = ScalingUtils.getScaled(this)
+fun Number.getUnscaled() = ScalingUtils.getUnscaled(this)

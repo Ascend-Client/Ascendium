@@ -5,7 +5,7 @@ import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 
 object NotificationScene {
     @OptIn(InternalComposeUiApi::class)

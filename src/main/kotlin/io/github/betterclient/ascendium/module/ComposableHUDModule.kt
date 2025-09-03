@@ -32,7 +32,7 @@ import io.github.betterclient.ascendium.compose.getUnscaled
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.config.ColorSetting
 import io.github.betterclient.ascendium.ui.utils.MCFont
 import io.github.betterclient.ascendium.ui.utils.ModifyAll
@@ -175,10 +175,14 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
             renderAll(hud = true)
         }
 
+        val myRenderer = SkiaRenderer()
         @OptIn(InternalComposeUiApi::class)
         fun renderAll(modules: List<ComposableHUDModule> = ModManager.getHUDModules(), hud: Boolean) {
-            SkiaRenderer.withSkia {
+            myRenderer.task {
                 tryInitCompose(modules, hud)
+            }
+
+            myRenderer.withSkia {
                 scene.render(it.asComposeCanvas(), System.nanoTime())
             }
         }

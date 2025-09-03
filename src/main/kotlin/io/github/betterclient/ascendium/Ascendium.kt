@@ -1,6 +1,7 @@
 package io.github.betterclient.ascendium
 
 import androidx.compose.runtime.getValue
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager

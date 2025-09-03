@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.betterclient.ascendium.mixin",
+  "plugin": "io.github.betterclient.ascendium.bridge.BridgeMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "v1218.MixinClickEvent",
+    "v1218.MixinSplashOverlay",
+    "v1218.MixinWindow",
+    "v1218.MixinSimpleResourceReload",
+    "v1218.MixinPlayerEntity",
+    "v1218.MixinScreen"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

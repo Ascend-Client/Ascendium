@@ -1,9 +1,9 @@
 package io.github.betterclient.ascendium.event
 
-import io.github.betterclient.ascendium.EntityBridge
-import io.github.betterclient.ascendium.Pos3D
-import io.github.betterclient.ascendium.TextBridge
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.EntityBridge
+import io.github.betterclient.ascendium.bridge.Pos3D
+import io.github.betterclient.ascendium.bridge.TextBridge
+import io.github.betterclient.ascendium.bridge.minecraft
 import java.util.concurrent.atomic.AtomicReference
 
 class RenderHudEvent() : Event()

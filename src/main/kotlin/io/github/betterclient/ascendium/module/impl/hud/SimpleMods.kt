@@ -1,7 +1,7 @@
 package io.github.betterclient.ascendium.module.impl.hud
 
 import androidx.compose.runtime.getValue
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.event.EntityHitEvent
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.module.TextModule

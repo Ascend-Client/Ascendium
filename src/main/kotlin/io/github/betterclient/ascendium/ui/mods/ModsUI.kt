@@ -10,16 +10,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
 import io.github.betterclient.ascendium.ui.chrome.EasterEggUI

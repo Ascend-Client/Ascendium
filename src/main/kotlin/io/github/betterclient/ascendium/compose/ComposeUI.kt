@@ -13,8 +13,9 @@ import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import io.github.betterclient.ascendium.BridgeScreen
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.BridgeScreen
+import io.github.betterclient.ascendium.bridge.minecraft
+import org.jetbrains.skia.Rect
 import java.awt.event.MouseEvent
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.properties.Delegates
@@ -34,9 +35,10 @@ open class ComposeUI(
 
     companion object {
         lateinit var current: ComposeUI
+        @JvmStatic fun initialized() = ::current.isInitialized
     }
 
-    override fun init() {
+    fun init0() {
         handle = minecraft.window.windowHandle
         if (!::scene.isInitialized) {
             //scene should be created at init, once
@@ -61,7 +63,7 @@ open class ComposeUI(
                     _toast.value()
                 }
             }
-        } else {
+        } else if (scene.size != IntSize(minecraft.window.fbWidth, minecraft.window.fbHeight)) {
             //scene already initalized, just update size
             val window = minecraft.window
             val density = Density(window.scale.toFloat().div(2f))
@@ -70,13 +72,15 @@ open class ComposeUI(
         }
     }
 
+    val myRenderer = SkiaRenderer()
     override fun render(mouseX: Int, mouseY: Int) {
-        SkiaRenderer.withSkia {
-            scene.render(it.asComposeCanvas(), System.nanoTime())
+        handle = minecraft.window.windowHandle
+        myRenderer.task {
+            init0()
         }
 
-        renderHandlers.forEach { handler ->
-            handler(mouseX, mouseY)
+        myRenderer.withSkia {
+            scene.render(it.asComposeCanvas(), System.nanoTime())
         }
 
         val event = AWTUtils.MouseEvent(
@@ -86,18 +90,28 @@ open class ComposeUI(
             0, //NO BUTTON
             MouseEvent.MOUSE_MOVED
         )
+
+        renderHandlers.forEach { handler ->
+            handler(mouseX, mouseY)
+        }
         mouseEventHandlers.forEach {
             it(minecraft.mouse.xPos, minecraft.mouse.yPos, event) //this event is going out no matter what, sorry.
         }
-        scene.sendPointerEvent(
-            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
-            eventType = PointerEventType.Move,
-            nativeEvent = event
-        )
+
+        myRenderer.task {
+            scene.sendPointerEvent(
+                position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+                eventType = PointerEventType.Move,
+                nativeEvent = event
+            )
+        }
     }
 
     //awt events
     override fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {
+        if (!::scene.isInitialized) //how?
+            return
+
         mouseHandlers.forEach { handler ->
             val composeMouse = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat())
             val mcMouse = Offset(mouseX.toFloat(), mouseY.toFloat())
@@ -119,15 +133,20 @@ open class ComposeUI(
                 return
             }
         }
-        scene.sendPointerEvent(
-            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
-            eventType = PointerEventType.Press,
-            nativeEvent = event,
-            button = PointerButton(button)
-        )
+        myRenderer.task {
+            scene.sendPointerEvent(
+                position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+                eventType = PointerEventType.Press,
+                nativeEvent = event,
+                button = PointerButton(button)
+            )
+        }
     }
 
     override fun mouseReleased(mouseX: Int, mouseY: Int, button: Int) {
+        if (!::scene.isInitialized) //how?
+            return
+
         mouseHandlers.forEach { handler ->
             val composeMouse = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat())
             val mcMouse = Offset(mouseX.toFloat(), mouseY.toFloat())
@@ -158,15 +177,20 @@ open class ComposeUI(
             }
         }
 
-        scene.sendPointerEvent(
-            position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
-            eventType = PointerEventType.Release,
-            nativeEvent = event,
-            button = PointerButton(button)
-        )
+        myRenderer.task {
+            scene.sendPointerEvent(
+                position = Offset(client.mouse.xPos.toFloat(), client.mouse.yPos.toFloat()),
+                eventType = PointerEventType.Release,
+                nativeEvent = event,
+                button = PointerButton(button)
+            )
+        }
     }
 
     override fun mouseScrolled(mouseX: Int, mouseY: Int, scrollX: Double, scrollY: Double) {
+        if (!::scene.isInitialized) //how?
+            return
+
         val event = AWTUtils.MouseWheelEvent(
             minecraft.mouse.xPos,
             minecraft.mouse.yPos,
@@ -180,58 +204,74 @@ open class ComposeUI(
             }
         }
 
-        scene.sendPointerEvent(
-            position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
-            eventType = PointerEventType.Scroll,
-            scrollDelta = Offset(scrollX.toFloat(), -scrollY.toFloat()),
-            nativeEvent = event
-        )
+        myRenderer.task {
+            scene.sendPointerEvent(
+                position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+                eventType = PointerEventType.Scroll,
+                scrollDelta = Offset(scrollX.toFloat(), -scrollY.toFloat()),
+                nativeEvent = event
+            )
+        }
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int) {
+        if (!::scene.isInitialized) //how?
+            return
+
         val awtKey = glfwToAwtKeyCode(keyCode)
         val time = System.nanoTime() / 1_000_000
 
-        scene.sendKeyEvent(
-            AWTUtils.KeyEvent(
-                AwtKeyEvent.KEY_PRESSED,
-                time,
-                AWTUtils.getAwtMods(handle),
-                awtKey,
-                0.toChar(),
-                AwtKeyEvent.KEY_LOCATION_STANDARD
+        myRenderer.task {
+            scene.sendKeyEvent(
+                AWTUtils.KeyEvent(
+                    AwtKeyEvent.KEY_PRESSED,
+                    time,
+                    AWTUtils.getAwtMods(handle),
+                    awtKey,
+                    0.toChar(),
+                    AwtKeyEvent.KEY_LOCATION_STANDARD
+                )
             )
-        )
+        }
     }
 
     override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int) {
         val awtKey = glfwToAwtKeyCode(keyCode)
         val time = System.nanoTime() / 1_000_000
+        if (!::scene.isInitialized) //how?
+            return
 
-        scene.sendKeyEvent(
-            AWTUtils.KeyEvent(
-                AwtKeyEvent.KEY_RELEASED,
-                time,
-                AWTUtils.getAwtMods(handle),
-                awtKey,
-                0.toChar(),
-                AwtKeyEvent.KEY_LOCATION_STANDARD
+        myRenderer.task {
+            scene.sendKeyEvent(
+                AWTUtils.KeyEvent(
+                    AwtKeyEvent.KEY_RELEASED,
+                    time,
+                    AWTUtils.getAwtMods(handle),
+                    awtKey,
+                    0.toChar(),
+                    AwtKeyEvent.KEY_LOCATION_STANDARD
+                )
             )
-        )
+        }
     }
 
     override fun charTyped(chr: Char, modifiers: Int) {
+        if (!::scene.isInitialized) //how?
+            return
+
         val time = System.nanoTime() / 1_000_000
-        scene.sendKeyEvent(
-            AWTUtils.KeyEvent(
-                AwtKeyEvent.KEY_TYPED,
-                time,
-                AWTUtils.getAwtMods(handle),
-                Key.Unknown.keyCode.toInt(),
-                chr,
-                AwtKeyEvent.KEY_LOCATION_UNKNOWN
+        myRenderer.task {
+            scene.sendKeyEvent(
+                AWTUtils.KeyEvent(
+                    AwtKeyEvent.KEY_TYPED,
+                    time,
+                    AWTUtils.getAwtMods(handle),
+                    Key.Unknown.keyCode.toInt(),
+                    chr,
+                    AwtKeyEvent.KEY_LOCATION_UNKNOWN
+                )
             )
-        )
+        }
     }
 
     fun switchTo(newContent: @Composable () -> Unit) {

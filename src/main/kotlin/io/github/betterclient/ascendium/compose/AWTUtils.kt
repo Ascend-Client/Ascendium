@@ -4,7 +4,7 @@ import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import org.lwjgl.glfw.GLFW.*
 import java.awt.Component
 import java.awt.event.InputEvent

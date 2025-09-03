@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
-import io.github.betterclient.ascendium.MCScreen
+import io.github.betterclient.ascendium.bridge.MCScreen
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme

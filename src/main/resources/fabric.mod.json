@@ -13,10 +13,11 @@
   "environment": "client",
   "entrypoints": {},
   "mixins": [
-    "ascendium.mixins.json"
+    "ascendium.adapter.1214.mixins.json",
+    "ascendium.adapter.1218.mixins.json"
   ],
   "depends": {
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
-    "minecraft": "${minecraft_version}"
+    "minecraft": ">=1.14"
   }
 }

@@ -6,23 +6,24 @@ import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
-import io.github.betterclient.ascendium.MCScreen
+import io.github.betterclient.ascendium.bridge.MCScreen
 import io.github.betterclient.ascendium.compose.AWTUtils
 import io.github.betterclient.ascendium.compose.SkiaRenderer
 import io.github.betterclient.ascendium.compose.glfwToAwtKeyCode
 import io.github.betterclient.ascendium.event.*
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.impl.notifications.Notifications.multipleNotifications
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 
 object NotificationEvents {
+    val myRenderer = SkiaRenderer()
     @OptIn(InternalComposeUiApi::class)
     @EventTarget
     fun onRender(event: RenderHudEvent) {
         multipleNotifications = minecraft.screen == MCScreen.CHAT_SCREEN
         NotificationScene.init()
-        SkiaRenderer.withSkia {
+        myRenderer.withSkia {
             NotificationScene.scene.render(it.asComposeCanvas(), System.nanoTime())
         }
     }
@@ -37,7 +38,7 @@ object NotificationEvents {
     fun onScreenRender(event: RenderScreenEvent) {
         if (minecraft.isWorldNull) return
         NotificationScene.init()
-        SkiaRenderer.withSkia {
+        myRenderer.withSkia {
             NotificationScene.scene.render(it.asComposeCanvas(), System.nanoTime())
         }
 

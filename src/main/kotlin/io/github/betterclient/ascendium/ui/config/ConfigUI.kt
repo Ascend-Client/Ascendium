@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.compose.ComposeUI
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground

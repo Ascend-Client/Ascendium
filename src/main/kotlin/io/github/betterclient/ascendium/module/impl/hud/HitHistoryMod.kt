@@ -12,11 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.IdentifierBridge
+import io.github.betterclient.ascendium.bridge.IdentifierBridge
 import io.github.betterclient.ascendium.event.EntityHitEvent
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.HUDModule
 
 object HitHistoryMod : HUDModule("Hit history", "Show your last X hits") {

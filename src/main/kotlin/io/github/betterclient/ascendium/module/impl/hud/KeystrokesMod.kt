@@ -14,10 +14,10 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.KeybindingBridge
+import io.github.betterclient.ascendium.bridge.KeybindingBridge
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.HUDModule
 
 object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing", hasBackground = false) {

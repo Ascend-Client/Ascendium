@@ -10,6 +10,30 @@ plugins {
     kotlin("plugin.serialization") version "2.2.0"
 }
 
+configurations.all {
+    resolutionStrategy {
+        force(
+            "org.jetbrains.kotlinx:kotlinx-serialization:2.2.0",
+            "org.jetbrains.kotlinx:kotlinx-serialization-jvm:2.2.0",
+            "org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0"
+        )
+    }
+}
+
+subprojects {
+    if (this.childProjects.isNotEmpty()) {
+        return@subprojects
+    }
+
+    if (this.path.contains("SupportedVersions")) {
+        this.setupSupportedVersion()
+    }
+
+    if (this.path.contains("Adapters")) {
+        this.setupAdapter()
+    }
+}
+
 version = project.property("mod_version") as String
 group = project.property("maven_group") as String
 
@@ -34,11 +58,7 @@ repositories {
 loom {
     runs {
         forEach {
-            it.programArgs(
-                "--add-opens java.desktop/sun.awt=ALL-UNNAMED",
-                "--add-opens java.desktop/sun.lwawt=ALL-UNNAMED",
-                "--add-opens java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
-            )
+            it.ideConfigGenerated(false)
         }
     }
 }
@@ -55,6 +75,7 @@ val transitiveInclude: Configuration by configurations.creating {
 }
 
 dependencies {
+    //unused, just for include() and stuff
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
@@ -79,16 +100,22 @@ dependencies {
     use("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     use("dev.datlag:kcef:2025.03.23")
 
+    for (item in subprojects) {
+        if (item.childProjects.isNotEmpty()) {
+            continue
+        }
+
+        if (item.path.contains("Adapters")) {
+            include(project(item.path, "namedElements"))
+        }
+    }
+
     var i = 0
     transitiveInclude.resolvedConfiguration.resolvedArtifacts.forEach {
         i++
         include(it.moduleVersion.id.toString())
     }
     println("Bundled $i transitive dependencies.")
-
-    modRuntimeOnly("maven.modrinth:sodium:mc1.21.4-0.6.13-fabric")
-    modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:0.119.4+1.21.4")
-    modRuntimeOnly("maven.modrinth:in-game-account-switcher:GpMGjDlf")
 }
 
 tasks.processResources {
@@ -128,6 +155,115 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "AscendiumJvmComposeApp"
             packageVersion = "1.0.0"
+        }
+    }
+}
+
+fun Project.setupSupportedVersion() {
+    buildscript {
+        repositories {
+            gradlePluginPortal()
+            mavenCentral()
+            maven("https://maven.fabricmc.net/")
+        }
+        dependencies {
+            classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0")
+            classpath("org.jetbrains.kotlin:kotlin-serialization:2.2.0")
+            classpath("net.fabricmc:fabric-loom:1.11-SNAPSHOT")
+        }
+    }
+
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "kotlinx-serialization")
+    apply(plugin = "fabric-loom")
+
+    repositories {
+        mavenCentral()
+        google()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://maven.google.com/")
+        maven("https://api.modrinth.com/maven")
+        maven("https://jogamp.org/deployment/maven")
+    }
+
+    dependencies {
+        minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
+        mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
+
+        implementation(project(":"))
+
+        modImplementation("net.fabricmc:fabric-loader:${rootProject.property("loader_version")}")
+        modImplementation("net.fabricmc:fabric-language-kotlin:${rootProject.property("kotlin_loader_version")}")
+
+        modRuntimeOnly("maven.modrinth:sodium:${project.property("sodium_ver")}")
+        modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_ver")}")
+        modRuntimeOnly("maven.modrinth:in-game-account-switcher:${project.property("igas_ver")}")
+    }
+
+    loom {
+        runs {
+            forEach {
+                if (it.name == "server") {
+                    it.ideConfigGenerated(false)
+                } else {
+                    it.client()
+                    it.ideConfigGenerated(true)
+                    it.programArgs(
+                        "--add-opens java.desktop/sun.awt=ALL-UNNAMED",
+                        "--add-opens java.desktop/sun.lwawt=ALL-UNNAMED",
+                        "--add-opens java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
+                    )
+                    it.runDir("../../../run") //united run directory
+                }
+            }
+        }
+    }
+}
+
+fun Project.setupAdapter() {
+    buildscript {
+        repositories {
+            gradlePluginPortal()
+            mavenCentral()
+            maven("https://maven.fabricmc.net/")
+        }
+        dependencies {
+            classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0")
+            classpath("org.jetbrains.kotlin:kotlin-serialization:2.2.0")
+            classpath("net.fabricmc:fabric-loom:1.11-SNAPSHOT")
+        }
+    }
+
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "kotlinx-serialization")
+    apply(plugin = "fabric-loom")
+
+    repositories {
+        mavenCentral()
+        google()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://maven.google.com/")
+        maven("https://api.modrinth.com/maven")
+        maven("https://jogamp.org/deployment/maven")
+    }
+
+    dependencies {
+        minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
+        mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
+
+        implementation(project(":"))
+
+        modImplementation("net.fabricmc:fabric-loader:${rootProject.property("loader_version")}")
+        modImplementation("net.fabricmc:fabric-language-kotlin:${rootProject.property("kotlin_loader_version")}")
+
+        implementation("org.jetbrains.skiko:skiko-awt:0.9.22")
+    }
+
+    loom {
+        runs {
+            forEach {
+                it.ideConfigGenerated(false)
+            }
         }
     }
 }

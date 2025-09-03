@@ -18,9 +18,10 @@ import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.betterclient.ascendium.IdentifierBridge
-import io.github.betterclient.ascendium.ItemStackBridge
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.FakeItemStack
+import io.github.betterclient.ascendium.bridge.IdentifierBridge
+import io.github.betterclient.ascendium.bridge.ItemStackBridge
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.module.HUDModule
@@ -85,19 +86,19 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
 
     @Composable
     private fun RenderItemPreview() {
-        RenderItem(minecraft.createItemStack(
-            IdentifierBridge("minecraft", "textures/item/netherite_helmet.png"), 1, 1f
+        RenderItem(FakeItemStack(
+            IdentifierBridge("minecraft", "textures/item/diamond_helmet.png"), 1, 1f
         ))
-        RenderItem(minecraft.createItemStack(
-            IdentifierBridge("minecraft", "textures/item/netherite_chestplate.png"), 1, 0.9f
+        RenderItem(FakeItemStack(
+            IdentifierBridge("minecraft", "textures/item/diamond_chestplate.png"), 1, 0.9f
         ))
-        RenderItem(minecraft.createItemStack(
-            IdentifierBridge("minecraft", "textures/item/netherite_leggings.png"), 1, 0.6f
+        RenderItem(FakeItemStack(
+            IdentifierBridge("minecraft", "textures/item/diamond_leggings.png"), 1, 0.6f
         ))
-        RenderItem(minecraft.createItemStack(
-            IdentifierBridge("minecraft", "textures/item/netherite_boots.png"), 1, 0.2f
+        RenderItem(FakeItemStack(
+            IdentifierBridge("minecraft", "textures/item/diamond_boots.png"), 1, 0.2f
         ))
-        RenderItem(minecraft.createItemStack(
+        RenderItem(FakeItemStack(
             IdentifierBridge("minecraft", "textures/item/golden_apple.png"), 64, 1f
         ))
     }

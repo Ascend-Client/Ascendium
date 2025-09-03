@@ -25,7 +25,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.minecraft
+import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import org.cef.CefApp
 import org.lwjgl.glfw.GLFW.glfwGetWindowPos
