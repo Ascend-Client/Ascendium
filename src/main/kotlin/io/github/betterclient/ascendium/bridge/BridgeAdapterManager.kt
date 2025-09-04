@@ -64,6 +64,7 @@ val `1_21_8` = `1_21_4`.copy(
     simpleResourceReloadAdapter = "1218",
     playerEntityAdapter = "1218",
     screenAdapter = "1218",
+    mouseAdapter = "1218",
     skiaRenderAdapter = "V1218SkiaRenderAdapter",
     applyElse = arrayOf(
         "1218.MixinCubeMapRenderer",

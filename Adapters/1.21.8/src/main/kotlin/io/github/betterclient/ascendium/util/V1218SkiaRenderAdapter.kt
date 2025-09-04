@@ -1,11 +1,14 @@
 package io.github.betterclient.ascendium.util
 
 import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.blaze3d.textures.FilterMode
 import com.mojang.blaze3d.textures.GpuTextureView
 import com.mojang.blaze3d.textures.TextureFormat
-import io.github.betterclient.ascendium.Logger
+import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.compose.SkiaRenderAdapter
+import io.github.betterclient.ascendium.module.config.NumberSetting
+import io.github.betterclient.ascendium.module.config.Setting
 import kotlinx.atomicfu.locks.withLock
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gl.RenderPipelines
@@ -28,7 +31,6 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.system.measureNanoTime
 
 
 private val NativeImage.pointer: Long
@@ -79,6 +81,16 @@ class V1218SkiaRenderAdapterObject {
         }
     }
 
+    companion object {
+        val scaleF = NumberSetting("UI Scale", 1.2, 1.0, 4.0)
+        val UI_SCALE
+            get() = scaleF.value
+
+        init {
+            Ascendium.settings.settings.add(scaleF)
+        }
+    }
+
     lateinit var state: TexturedQuadGuiElementRenderState
     val guiState = MinecraftClient.getInstance().gameRenderer.guiState
 
@@ -117,6 +129,12 @@ class V1218SkiaRenderAdapterObject {
                     TextureFormat.RGBA8,
                     vpW, vpH, 1, 1
                 )
+            )
+
+            texture.texture().setTextureFilter(
+                FilterMode.NEAREST,
+                FilterMode.NEAREST,
+                false
             )
 
             state = TexturedQuadGuiElementRenderState(
@@ -171,15 +189,13 @@ class V1218SkiaRenderAdapterObject {
 
             val surfaceToDrawOn = softwareSurface ?: continue
 
-            println(measureNanoTime {
-                surfaceToDrawOn.canvas.save()
-                try {
-                    surfaceToDrawOn.canvas.clear(Color.TRANSPARENT)
-                    currentContent(surfaceToDrawOn.canvas)
-                } finally {
-                    surfaceToDrawOn.canvas.restore()
-                }
-            }.toString() + " nanoseconds for render.")
+            surfaceToDrawOn.canvas.save()
+            try {
+                surfaceToDrawOn.canvas.clear(Color.TRANSPARENT)
+                currentContent(surfaceToDrawOn.canvas)
+            } finally {
+                surfaceToDrawOn.canvas.restore()
+            }
 
             if (backImage == null || backImage!!.width != surfaceToDrawOn.width || backImage!!.height != surfaceToDrawOn.height) {
                 backImage?.close()

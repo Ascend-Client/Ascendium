@@ -32,13 +32,13 @@ open class ComposeUI(
 
     private lateinit var scene: ComposeScene
     private var handle by Delegates.notNull<Long>()
-    private val tasks = ConcurrentLinkedQueue<() -> Unit>()
 
     fun onRenderThread(task: () -> Unit) {
         tasks.add(task)
     }
 
     companion object {
+        private val tasks = ConcurrentLinkedQueue<() -> Unit>()
         lateinit var current: ComposeUI
         @JvmStatic fun initialized() = ::current.isInitialized
     }
@@ -74,6 +74,12 @@ open class ComposeUI(
             val density = Density(window.scale.toFloat().div(2f))
             scene.size = IntSize(window.fbWidth, window.fbHeight)
             scene.density = density
+        }
+    }
+
+    override fun init() {
+        myRenderer.task {
+            init0()
         }
     }
 

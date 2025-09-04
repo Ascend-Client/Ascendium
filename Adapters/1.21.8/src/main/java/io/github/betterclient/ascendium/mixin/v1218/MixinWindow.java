@@ -1,6 +1,8 @@
 package io.github.betterclient.ascendium.mixin.v1218;
 
 import io.github.betterclient.ascendium.bridge.WindowBridge;
+import io.github.betterclient.ascendium.util.V1218SkiaRenderAdapterKt;
+import io.github.betterclient.ascendium.util.V1218SkiaRenderAdapterObject;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.GlTexture;
 import net.minecraft.client.util.Window;
@@ -21,12 +23,12 @@ public class MixinWindow implements WindowBridge {
 
     @Override
     public int getFbWidth() {
-        return this.framebufferWidth;
+        return (int) (this.framebufferWidth / V1218SkiaRenderAdapterObject.Companion.getUI_SCALE());
     }
 
     @Override
     public int getFbHeight() {
-        return this.framebufferHeight;
+        return (int) (this.framebufferHeight / V1218SkiaRenderAdapterObject.Companion.getUI_SCALE());
     }
 
     @Override
@@ -36,7 +38,7 @@ public class MixinWindow implements WindowBridge {
 
     @Override
     public @NotNull double getScale() {
-        return this.scaleFactor;
+        return this.scaleFactor / V1218SkiaRenderAdapterObject.Companion.getUI_SCALE();
     }
 
     @Override

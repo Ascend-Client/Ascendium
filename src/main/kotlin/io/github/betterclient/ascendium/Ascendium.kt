@@ -54,5 +54,5 @@ class ClientSettings {
     private val _mf = BooleanSetting("Use minecraft font in UI's", false)
     val mcFontState: Boolean by _mf.state
 
-    val settings = listOf(_t, _mf, _bo)
+    val settings = mutableListOf(_t, _mf, _bo)
 }

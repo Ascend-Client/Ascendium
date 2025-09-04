@@ -181,7 +181,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
             val window = minecraft.window
             modules.forEach { it.isPreview = (minecraft.isWorldNull || !hud) }
             if (!::scene.isInitialized) {
-                val density = Density(1f)
+                val density = Density(window.scale.toFloat().div(2f))
                 scene = CanvasLayersComposeScene(
                     density = density,
                     size = IntSize(window.fbWidth, window.fbHeight),
@@ -195,7 +195,9 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
                     scene.setContent({ RenderModules(modules) })
                 }
                 if (window.fbWidth != scene.size!!.width || window.fbHeight != scene.size!!.height) {
+                    val density = Density(window.scale.toFloat().div(2f))
                     scene.size = IntSize(window.fbWidth, window.fbHeight)
+                    scene.density = density
                 }
                 modulesLast = modules
             }
@@ -204,8 +206,9 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
         @Composable
         fun RenderModules(modules: List<ComposableHUDModule>) {
             Box(Modifier.fillMaxSize()) {
+                val localBefore = LocalDensity.current
                 for (module in modules) {
-                    CompositionLocalProvider(LocalDensity provides Density(module.scale.toFloat())) {
+                    CompositionLocalProvider(LocalDensity provides Density(localBefore.density * module.scale.toFloat())) {
                         module.RenderComposable()
                     }
                 }
