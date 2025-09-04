@@ -118,21 +118,6 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
         }
     }
 
-    fun renderAt(x: Int, y: Int, scale: Double) {
-        val xo = this.x
-        val yo = this.y
-        val so = this.scale
-        this.x = x
-        this.y = y
-        this.scale = scale
-
-        renderAll(listOf(this), false)
-
-        this.x = xo
-        this.y = yo
-        this.scale = so
-    }
-
     @Composable
     fun createScheme(
         textColor: Color,
@@ -206,7 +191,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
                 scene.setContent({ RenderModules(modules) })
                 modulesLast = modules
             } else {
-                if (modulesLast != modules) {
+                if (modulesLast.map { it.name } != modules.map { it.name }) {
                     scene.setContent({ RenderModules(modules) })
                 }
                 if (window.fbWidth != scene.size!!.width || window.fbHeight != scene.size!!.height) {

@@ -46,6 +46,19 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
 }
 
+/*tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${buildDir.absolutePath}/compose_metrics"
+        )
+        freeCompilerArgs.addAll(
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=${buildDir.absolutePath}/compose_metrics"
+        )
+    }
+}*/
+
 repositories {
     mavenCentral()
     jetbrainsCompose

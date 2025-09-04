@@ -40,7 +40,9 @@ object CustomMainMenu : ComposeUI({
         ParallaxBackground()
         Box(Modifier.fillMaxSize()) {
             ModeButtons {
-                minecraft.openScreen(MoveModuleUI(ModManager.getHUDModules()))
+                current.onRenderThread {
+                    minecraft.openScreen(MoveModuleUI(ModManager.getHUDModules()))
+                }
             }
             CornerButtons()
         }
@@ -81,7 +83,9 @@ private fun EntranceAnimation(onFinish: () -> Unit) {
 private fun BoxScope.CornerButtons() {
     Row(Modifier.align(Alignment.TopEnd), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         TextButton(onClick = {
-            minecraft.setScreen(MCScreen.OPTIONS_SCREEN)
+            ComposeUI.current.onRenderThread {
+                minecraft.setScreen(MCScreen.OPTIONS_SCREEN)
+            }
         }) {
             Text("Options")
         }
@@ -105,7 +109,9 @@ private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
         Spacer(Modifier.height(128.dp))
         Button(
             onClick = {
-                minecraft.setScreen(MCScreen.SELECT_WORLD_SCREEN)
+                ComposeUI.current.onRenderThread {
+                    minecraft.setScreen(MCScreen.SELECT_WORLD_SCREEN)
+                }
             },
             modifier = Modifier
                 .width(512.dp)
@@ -116,7 +122,9 @@ private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
 
         Button(
             onClick = {
-                minecraft.setScreen(MCScreen.MULTIPLAYER_SCREEN)
+                ComposeUI.current.onRenderThread {
+                    minecraft.setScreen(MCScreen.MULTIPLAYER_SCREEN)
+                }
             },
             modifier = Modifier
                 .width(512.dp)
@@ -127,7 +135,9 @@ private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
 
         Button(
             onClick = {
-                minecraft.setScreen(MCScreen.REALMS_MAIN_SCREEN)
+                ComposeUI.current.onRenderThread {
+                    minecraft.setScreen(MCScreen.REALMS_MAIN_SCREEN)
+                }
             },
             modifier = Modifier
                 .width(512.dp)

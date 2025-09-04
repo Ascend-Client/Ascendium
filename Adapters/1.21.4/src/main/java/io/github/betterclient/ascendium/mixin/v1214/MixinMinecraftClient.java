@@ -6,7 +6,6 @@ import io.github.betterclient.ascendium.event.EntityHitEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.RunArgs;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -52,8 +51,6 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Shadow @Final public Mouse mouse;
 
     @Shadow private static int currentFps;
-
-    @Shadow @Final public TextRenderer textRenderer;
 
     @Shadow @Nullable public abstract ServerInfo getCurrentServerEntry();
 

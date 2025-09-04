@@ -12,6 +12,10 @@ object BridgeAdapterManager {
             .firstOrNull { (mixinName, _) -> className.contains(mixinName) }
             ?.value(adapter)
 
+        if (adapterVersion == null && adapter.applyElse.any { className.endsWith(it) }) {
+            return true //apply or else
+        }
+
         return adapterVersion?.let { className.contains("v$it") } ?: false
     }
 
@@ -60,7 +64,11 @@ val `1_21_8` = `1_21_4`.copy(
     simpleResourceReloadAdapter = "1218",
     playerEntityAdapter = "1218",
     screenAdapter = "1218",
-    skiaRenderAdapter = "V1218SkiaRenderAdapter"
+    skiaRenderAdapter = "V1218SkiaRenderAdapter",
+    applyElse = arrayOf(
+        "1218.MixinCubeMapRenderer",
+        "1218.MixinDrawContext"
+    )
 )
 
 data class BridgeAdapter(
@@ -88,6 +96,7 @@ data class BridgeAdapter(
     val textAdapter: String,
     val mainAdapter: String,
     val mouseAdapter: String,
+    val applyElse: Array<String> = emptyArray()
 )
 
 val adapters = mutableMapOf(

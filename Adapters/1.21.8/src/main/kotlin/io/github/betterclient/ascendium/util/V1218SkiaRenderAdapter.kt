@@ -3,6 +3,7 @@ package io.github.betterclient.ascendium.util
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.textures.GpuTextureView
 import com.mojang.blaze3d.textures.TextureFormat
+import io.github.betterclient.ascendium.Logger
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.compose.SkiaRenderAdapter
 import kotlinx.atomicfu.locks.withLock
@@ -16,14 +17,26 @@ import net.minecraft.client.texture.NativeImage
 import net.minecraft.client.texture.TextureSetup
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Color
+import org.jetbrains.skia.Pixmap
 import org.jetbrains.skia.Surface
 import org.joml.Matrix3x2fStack
+import org.lwjgl.system.MemoryUtil
 import java.lang.reflect.Field
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.system.measureNanoTime
 
 
+private val NativeImage.pointer: Long
+    get() {
+        val field: Field = NativeImage::class.java.getDeclaredField("pointer")
+        field.isAccessible = true
+        return field.getLong(this)
+    }
 private val GameRenderer.guiState: GuiRenderState
     get() {
         val guiStateField: Field = GameRenderer::class.java.getDeclaredField("guiState")
@@ -54,8 +67,10 @@ class V1218SkiaRenderAdapterObject {
     private var content: ((Canvas) -> Unit)? = null
     @Volatile
     private var frontImage: NativeImage? = null
+    private var backImage: NativeImage? = null
     private val lock = ReentrantLock()
     val tasks = ConcurrentLinkedQueue<() -> Unit>()
+    val render = AtomicBoolean(true)
 
     init {
         Thread(this::backgroundRenderLoop, "Skia-Software-Renderer").apply {
@@ -64,8 +79,12 @@ class V1218SkiaRenderAdapterObject {
         }
     }
 
+    lateinit var state: TexturedQuadGuiElementRenderState
+    val guiState = MinecraftClient.getInstance().gameRenderer.guiState
+
     fun withSkia(block: (Canvas) -> Unit) {
-        this.content = block
+        if (this.content == null)
+            this.content = block
         init()
 
         lock.withLock {
@@ -74,25 +93,20 @@ class V1218SkiaRenderAdapterObject {
                 if (imageToDraw.width == texture.texture().getWidth(0) && imageToDraw.height == texture.texture().getHeight(0)) {
                     RenderSystem.getDevice().createCommandEncoder().writeToTexture(texture.texture(), imageToDraw)
                 }
-                val renderState = TexturedQuadGuiElementRenderState(
-                    RenderPipelines.GUI_TEXTURED,
-                    TextureSetup.withoutGlTexture(texture),
-                    Matrix3x2fStack(),
-                    0, 0, MinecraftClient.getInstance().window.scaledWidth, MinecraftClient.getInstance().window.scaledHeight,
-                    0.0f, 1.0f, 0.0f, 1.0f,
-                    -1, null
-                )
-                MinecraftClient.getInstance().gameRenderer.guiState.addSimpleElement(renderState)
+                guiState.addSimpleElement(state)
             }
         }
+        render.set(true)
     }
 
     private fun init() {
         val window = minecraft.window
 
-        if (vpW != window.fbWidth || vpH != window.fbHeight) {
-            vpW = window.fbWidth
-            vpH = window.fbHeight
+        val i = window.fbWidth
+        val i1 = window.fbHeight
+        if (vpW != i || vpH != i1) {
+            vpW = i
+            vpH = i1
             if (::texture.isInitialized) texture.close()
             if (vpW <= 0 || vpH <= 0) return
 
@@ -103,6 +117,22 @@ class V1218SkiaRenderAdapterObject {
                     TextureFormat.RGBA8,
                     vpW, vpH, 1, 1
                 )
+            )
+
+            state = TexturedQuadGuiElementRenderState(
+                RenderPipelines.GUI_TEXTURED,
+                TextureSetup.withoutGlTexture(texture),
+                Matrix3x2fStack(),
+                0,
+                0,
+                MinecraftClient.getInstance().window.scaledWidth,
+                MinecraftClient.getInstance().window.scaledHeight,
+                0.0f,
+                1.0f,
+                0.0f,
+                1.0f,
+                -1,
+                null
             )
         }
     }
@@ -124,6 +154,8 @@ class V1218SkiaRenderAdapterObject {
                 continue
             }
 
+            if (!render.get()) continue
+
             val vpW = minecraft.window.fbWidth
             val vpH = minecraft.window.fbHeight
             if (vpW != currentW || vpH != currentH) {
@@ -139,35 +171,66 @@ class V1218SkiaRenderAdapterObject {
 
             val surfaceToDrawOn = softwareSurface ?: continue
 
-            surfaceToDrawOn.canvas.save()
-            try {
-                surfaceToDrawOn.canvas.clear(Color.TRANSPARENT)
-                currentContent(surfaceToDrawOn.canvas)
-            } finally {
-                surfaceToDrawOn.canvas.restore()
+            println(measureNanoTime {
+                surfaceToDrawOn.canvas.save()
+                try {
+                    surfaceToDrawOn.canvas.clear(Color.TRANSPARENT)
+                    currentContent(surfaceToDrawOn.canvas)
+                } finally {
+                    surfaceToDrawOn.canvas.restore()
+                }
+            }.toString() + " nanoseconds for render.")
+
+            if (backImage == null || backImage!!.width != surfaceToDrawOn.width || backImage!!.height != surfaceToDrawOn.height) {
+                backImage?.close()
+                backImage = NativeImage(surfaceToDrawOn.width, surfaceToDrawOn.height, false)
             }
 
-            println(measureNanoTime {
-                lock.withLock {
-                    if (frontImage == null || frontImage!!.width != surfaceToDrawOn.width || frontImage!!.height != surfaceToDrawOn.height) {
-                        frontImage?.close()
-                        frontImage = NativeImage(surfaceToDrawOn.width, surfaceToDrawOn.height, false)
-                    }
+            val snapshot = surfaceToDrawOn.makeImageSnapshot()
+            snapshot.peekPixels()?.let { pixmap ->
+                parsePixels(pixmap)
+            }
+            lock.withLock {
+                val temp = frontImage
+                frontImage = backImage
+                backImage = temp
+            }
 
-                    val snapshot = surfaceToDrawOn.makeImageSnapshot()
-                    snapshot.peekPixels()?.let { pixmap ->
-                        val width = pixmap.info.width
-                        val height = pixmap.info.height
-
-                        for (y in 0 until height) {
-                            for (x in 0 until width) {
-                                val rgba = pixmap.getColor(x, y)
-                                frontImage!!.setColorArgb(x, y, rgba)
-                            }
-                        }
-                    }
-                }
-            })
+            render.set(false)
         }
+    }
+
+    private fun parsePixels(pixmap: Pixmap) {
+        val byteBuffer = ByteBuffer.wrap(pixmap.buffer.bytes).order(ByteOrder.BIG_ENDIAN)
+        val intBuffer = byteBuffer.asIntBuffer()
+
+        val basePtr = backImage!!.pointer
+        val nThreads = 4
+        val pool = Executors.newFixedThreadPool(nThreads)
+        val chunk = intBuffer.capacity() / nThreads
+        for (t in 0 until nThreads) {
+            val start = t * chunk
+            val end = if (t == nThreads - 1) intBuffer.capacity() else start + chunk
+
+            pool.submit {
+                var i = start
+                while (i < end) {
+                    val rgba = intBuffer[i]
+
+                    val r = (rgba ushr 24) and 0xFF
+                    val g = (rgba ushr 16) and 0xFF
+                    val b = (rgba ushr 8) and 0xFF
+                    val a = rgba and 0xFF
+
+                    val argb = (a shl 24) or (r shl 16) or (g shl 8) or b
+                    MemoryUtil.memPutInt(basePtr + i.toLong() * 4, argb)
+
+                    i++
+                }
+            }
+        }
+
+        pool.shutdown()
+        pool.awaitTermination(Long.MAX_VALUE, java.util.concurrent.TimeUnit.NANOSECONDS)
     }
 }

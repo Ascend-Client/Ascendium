@@ -1,11 +1,15 @@
 package io.github.betterclient.ascendium.module
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.module.config.*
 
 open class Module(val name: String, val description: String) {
-    var enabled: Boolean = false
-    val settings: MutableList<Setting> = mutableListOf()
+    var enabled: Boolean by mutableStateOf(false)
+    val settings: MutableList<Setting> = mutableStateListOf()
 
     open fun toggle() {
         enabled = !enabled

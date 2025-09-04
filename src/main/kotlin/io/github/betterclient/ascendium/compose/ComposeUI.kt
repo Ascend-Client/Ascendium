@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import io.github.betterclient.ascendium.bridge.BridgeScreen
 import io.github.betterclient.ascendium.bridge.minecraft
-import org.jetbrains.skia.Rect
 import java.awt.event.MouseEvent
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.properties.Delegates
 import java.awt.event.KeyEvent as AwtKeyEvent
@@ -32,6 +32,11 @@ open class ComposeUI(
 
     private lateinit var scene: ComposeScene
     private var handle by Delegates.notNull<Long>()
+    private val tasks = ConcurrentLinkedQueue<() -> Unit>()
+
+    fun onRenderThread(task: () -> Unit) {
+        tasks.add(task)
+    }
 
     companion object {
         lateinit var current: ComposeUI
@@ -74,6 +79,11 @@ open class ComposeUI(
 
     val myRenderer = SkiaRenderer()
     override fun render(mouseX: Int, mouseY: Int) {
+        while (true) {
+            val item = tasks.poll() ?: break
+            item()
+        }
+
         handle = minecraft.window.windowHandle
         myRenderer.task {
             init0()
