@@ -113,6 +113,8 @@ dependencies {
     use("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     use("dev.datlag:kcef:2025.03.23")
 
+    use("org.jetbrains.kotlinx:kotlinx-html:0.12.0")
+
     for (item in subprojects) {
         if (item.childProjects.isNotEmpty()) {
             continue

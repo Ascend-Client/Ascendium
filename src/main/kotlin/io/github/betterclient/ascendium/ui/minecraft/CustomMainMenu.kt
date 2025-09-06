@@ -35,7 +35,6 @@ import kotlin.system.exitProcess
 
 private var didMenuAnim by mutableStateOf(false)
 
-//TODO: main menu server
 object CustomMainMenu : DynamicUI({
     AscendiumTheme {
         ParallaxBackground()

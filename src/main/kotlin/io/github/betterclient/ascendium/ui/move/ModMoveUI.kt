@@ -24,7 +24,7 @@ import io.github.betterclient.ascendium.ui.utils.Center
 //TODO: Move module server
 class MoveModuleUI(val mods: List<ComposableHUDModule>) : DynamicUI({
     MoveModuleUI(mods, null)
-})
+}, { ByteArray(0) })
 
 @Composable
 fun MoveModuleUI(mods: List<ComposableHUDModule>, backToConfig: Boolean?) {
@@ -65,13 +65,13 @@ fun MoveModuleUI(mods: List<ComposableHUDModule>, backToConfig: Boolean?) {
         Center {
             Button(onClick = {
                 if (backToConfig == true) {
-                    DynamicUI.current.switchTo {
+                    /*DynamicUI.current.switchTo {
                         ConfigUI(mods[0], false)
-                    }
+                    }*/
                 } else {
-                    DynamicUI.current.switchTo {
+                    /*DynamicUI.current.switchTo {
                         ModsUI(false)
-                    }
+                    }*/
                 }
             }, shape = RoundedCornerShape(16.dp)) {
                 Text(if (backToConfig == true) "Back" else "Mods")

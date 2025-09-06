@@ -82,9 +82,9 @@ private fun ModuleView(module: Module) {
             matcher = PointerMatcher.mouse(PointerButton.Secondary),
             onClick = {
                 //TODO: config ui server
-                DynamicUI.current.switchTo {
+                /*DynamicUI.current.switchTo {
                     ConfigUI(module, true)
-                }
+                }*/
             }
         )
         .clickable { enabled = !enabled; module.toggle(); ConfigManager.saveConfig() }
