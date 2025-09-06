@@ -1,7 +1,7 @@
 package io.github.betterclient.ascendium.util
 
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.compose.SkiaRenderAdapter
+import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderAdapter
 import org.jetbrains.skia.*
 import org.lwjgl.opengl.GL33C
 

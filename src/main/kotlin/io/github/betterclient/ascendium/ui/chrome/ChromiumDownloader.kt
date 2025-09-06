@@ -22,12 +22,7 @@ object ChromiumDownloader {
 
         suspendCoroutine { continuation ->
             KCEF.initBlocking(builder = {
-                addArgs(
-                    "--disable-gpu",
-                    "--disable-gpu-compositing",
-                    "--in-process-gpu",
-                    "--no-sandbox"
-                )
+                addArgs()
 
                 installDir(installDir)
                 settings {
@@ -48,10 +43,9 @@ object ChromiumDownloader {
                             e.printStackTrace()
                         }
                         if (app != null) {
-                            client = app!!.createClient()
+                            client = app!!.createClient().alsoAddPopupPrevention()
                             chromiumDownloaded = true
                             continuation.resume(Unit)
-                            addPopupPrevention(client!!)
                         }
                     }
                 }
@@ -66,15 +60,13 @@ object ChromiumDownloader {
     } }.start()
 }
 
-private fun addPopupPrevention(client: CefClient) {
-    client.addLifeSpanHandler(object : CefLifeSpanHandlerAdapter() {
-        override fun onBeforePopup(
-            browser: CefBrowser,
-            frame: CefFrame,
-            target_url: String,
-            target_frame_name: String
-        ): Boolean {
-            return true
-        }
-    })
-}
+fun CefClient.alsoAddPopupPrevention() = this.addLifeSpanHandler(object : CefLifeSpanHandlerAdapter() {
+    override fun onBeforePopup(
+        browser: CefBrowser,
+        frame: CefFrame,
+        target_url: String,
+        target_frame_name: String
+    ): Boolean {
+        return true
+    }
+})

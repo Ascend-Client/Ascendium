@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
-import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ModManager
+import io.github.betterclient.ascendium.ui.bridge.DynamicUI
 import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
 import io.github.betterclient.ascendium.ui.chrome.EasterEggUI
 import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
@@ -66,7 +66,8 @@ fun ModsUI(smallen: Boolean) {
                 Row(modifier = Modifier.align(Alignment.TopStart)) {
                     Spacer(Modifier.width(8.dp))
                     Button(onClick = {
-                        ComposeUI.current.switchTo {
+                        //TODO: Move module server
+                        DynamicUI.current.switchTo {
                             MoveModuleUI(ModManager.getHUDModules(), false)
                         }
                     },
@@ -79,7 +80,8 @@ fun ModsUI(smallen: Boolean) {
                 Row(modifier = Modifier.align(Alignment.TopEnd), verticalAlignment = Alignment.CenterVertically) {
                     Button(onClick = {
                         if (!ChromiumDownloader.chromiumDownloaded) return@Button
-                        ComposeUI.current.switchTo {
+                        //TODO: easter egg server????
+                        DynamicUI.current.switchTo {
                             EasterEggUI()
                         }
                     }, colors = ButtonDefaults.buttonColors()) {

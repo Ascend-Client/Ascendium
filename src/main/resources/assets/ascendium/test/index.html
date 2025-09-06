@@ -1,0 +1,120 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Chromium Basic UI Test</title>
+    <style>
+        :root{font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0}
+        body{padding:20px;background:#0f172a;color:#e6eef8}
+        h1{font-size:20px;margin:0 0 8px}
+        .card{background:#0b1220;border:1px solid rgba(255,255,255,0.04);padding:12px;border-radius:8px;margin:12px 0}
+        button,input,select,textarea{padding:8px 10px;border-radius:6px;border:1px solid #334155;background:#1e293b;color:#e6eef8}
+        button{cursor:pointer}
+        pre{background:#071024;padding:8px;border-radius:6px;overflow:auto}
+        .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+        label{display:block;margin-bottom:6px}
+        canvas{background:#000;border-radius:6px}
+    </style>
+</head>
+<body>
+<h1>Basic Chromium UI Test</h1>
+
+<div class="card">
+    <h2>Buttons & Events</h2>
+    <div class="row">
+        <button id="btn-click">Click Me</button>
+        <button id="btn-dblclick">Double Click Me</button>
+        <button id="btn-hover">Hover Me</button>
+    </div>
+    <pre id="btn-result">(no events yet)</pre>
+</div>
+
+<div class="card">
+    <h2>Text Inputs</h2>
+    <div class="row">
+        <input type="text" id="text-input" placeholder="Type something..." />
+        <input type="password" id="pass-input" placeholder="Password" />
+        <input type="number" id="num-input" value="42" />
+    </div>
+    <pre id="input-result">(no input yet)</pre>
+</div>
+
+<div class="card">
+    <h2>Checkboxes & Radios</h2>
+    <div class="row">
+        <label><input type="checkbox" id="chk1" /> Check me</label>
+        <label><input type="radio" name="rad" value="A" /> A</label>
+        <label><input type="radio" name="rad" value="B" /> B</label>
+    </div>
+    <pre id="check-result">(no selection yet)</pre>
+</div>
+
+<div class="card">
+    <h2>Select & Textarea</h2>
+    <div class="row">
+        <select id="dropdown">
+            <option value="one">One</option>
+            <option value="two">Two</option>
+            <option value="three">Three</option>
+        </select>
+        <textarea id="textarea" rows="3" cols="20" placeholder="Write here..."></textarea>
+    </div>
+    <pre id="select-result">(no input yet)</pre>
+</div>
+
+<div class="card">
+    <h2>Mouse & Keyboard Events</h2>
+    <div class="row">
+        <div id="mouse-box" style="width:200px;height:100px;background:#1e293b;display:flex;align-items:center;justify-content:center;border-radius:6px">
+            Hover or click inside me
+        </div>
+    </div>
+    <pre id="mouse-result">(no events yet)</pre>
+</div>
+
+<div class="card">
+    <h2>Canvas Drawing</h2>
+    <canvas id="draw" width="320" height="180"></canvas>
+    <pre id="draw-result">(idle)</pre>
+</div>
+
+<script>
+    const btnRes = document.getElementById('btn-result');
+    document.getElementById('btn-click').addEventListener('click', ()=> btnRes.textContent = 'Button clicked');
+    document.getElementById('btn-dblclick').addEventListener('dblclick', ()=> btnRes.textContent = 'Button double-clicked');
+    document.getElementById('btn-hover').addEventListener('mouseenter', ()=> btnRes.textContent = 'Button hovered');
+
+    const inputRes = document.getElementById('input-result');
+    document.querySelectorAll('#text-input,#pass-input,#num-input').forEach(el=>{
+      el.addEventListener('input', ()=> inputRes.textContent = `Values: text=${document.getElementById('text-input').value}, pass=${document.getElementById('pass-input').value}, num=${document.getElementById('num-input').value}`);
+    });
+
+    const checkRes = document.getElementById('check-result');
+    document.getElementById('chk1').addEventListener('change', (e)=> checkRes.textContent = 'Checkbox: '+e.target.checked);
+    document.querySelectorAll('input[name="rad"]').forEach(r=>{
+      r.addEventListener('change', (e)=> checkRes.textContent = 'Radio: '+e.target.value);
+    });
+
+    const selectRes = document.getElementById('select-result');
+    document.getElementById('dropdown').addEventListener('change', (e)=> selectRes.textContent = 'Selected: '+e.target.value);
+    document.getElementById('textarea').addEventListener('input', (e)=> selectRes.textContent = 'Textarea: '+e.target.value);
+
+    const mouseRes = document.getElementById('mouse-result');
+    const box = document.getElementById('mouse-box');
+    box.addEventListener('mouseenter', ()=> mouseRes.textContent = 'Mouse entered');
+    box.addEventListener('mouseleave', ()=> mouseRes.textContent = 'Mouse left');
+    box.addEventListener('click', ()=> mouseRes.textContent = 'Box clicked');
+    document.addEventListener('keydown', (e)=> mouseRes.textContent = 'Key pressed: '+e.key);
+
+    const canvas = document.getElementById('draw');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'teal';
+    ctx.fillRect(10,10,100,100);
+    ctx.fillStyle = 'orange';
+    ctx.fillRect(150,50,120,100);
+    document.getElementById('draw-result').textContent = 'Canvas drew two rectangles';
+</script>
+</body>
+</html>

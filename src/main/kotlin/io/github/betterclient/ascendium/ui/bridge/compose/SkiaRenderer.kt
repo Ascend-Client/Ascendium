@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.compose
+package io.github.betterclient.ascendium.ui.bridge.compose
 
 import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
 import io.github.betterclient.ascendium.bridge.minecraft

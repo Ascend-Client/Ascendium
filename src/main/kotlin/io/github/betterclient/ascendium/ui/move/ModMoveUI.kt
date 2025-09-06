@@ -8,25 +8,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
-import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ComposableHUDModule
+import io.github.betterclient.ascendium.ui.bridge.DynamicUI
 import io.github.betterclient.ascendium.ui.config.ConfigUI
 import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
 
-class MoveModuleUI(val mods: List<ComposableHUDModule>) : ComposeUI({
+//TODO: Move module server
+class MoveModuleUI(val mods: List<ComposableHUDModule>) : DynamicUI({
     MoveModuleUI(mods, null)
 })
 
@@ -69,11 +65,11 @@ fun MoveModuleUI(mods: List<ComposableHUDModule>, backToConfig: Boolean?) {
         Center {
             Button(onClick = {
                 if (backToConfig == true) {
-                    ComposeUI.current.switchTo {
+                    DynamicUI.current.switchTo {
                         ConfigUI(mods[0], false)
                     }
                 } else {
-                    ComposeUI.current.switchTo {
+                    DynamicUI.current.switchTo {
                         ModsUI(false)
                     }
                 }

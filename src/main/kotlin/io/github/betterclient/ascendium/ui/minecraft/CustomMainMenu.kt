@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.MCScreen
-import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ModManager
+import io.github.betterclient.ascendium.ui.bridge.DynamicUI
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import kotlinx.coroutines.delay
@@ -35,7 +35,8 @@ import kotlin.system.exitProcess
 
 private var didMenuAnim by mutableStateOf(false)
 
-object CustomMainMenu : ComposeUI({
+//TODO: main menu server
+object CustomMainMenu : DynamicUI({
     AscendiumTheme {
         ParallaxBackground()
         Box(Modifier.fillMaxSize()) {
@@ -56,6 +57,10 @@ object CustomMainMenu : ComposeUI({
 }) {
     override fun shouldRenderBackground() = false
     override fun shouldCloseOnEsc() = false
+
+    /*override fun init() {
+        minecraft.openScreen(TestChromeUI())
+    }*/
 }
 
 @Composable
@@ -83,7 +88,7 @@ private fun EntranceAnimation(onFinish: () -> Unit) {
 private fun BoxScope.CornerButtons() {
     Row(Modifier.align(Alignment.TopEnd), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         TextButton(onClick = {
-            ComposeUI.current.onRenderThread {
+            DynamicUI.current.onRenderThread {
                 minecraft.setScreen(MCScreen.OPTIONS_SCREEN)
             }
         }) {
@@ -110,7 +115,7 @@ private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
         Button(
             onClick = {
                 println("Click!")
-                ComposeUI.current.onRenderThread {
+                DynamicUI.current.onRenderThread {
                     println("onRenderThread")
                     minecraft.setScreen(MCScreen.SELECT_WORLD_SCREEN)
                 }
@@ -124,7 +129,7 @@ private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
 
         Button(
             onClick = {
-                ComposeUI.current.onRenderThread {
+                DynamicUI.current.onRenderThread {
                     minecraft.setScreen(MCScreen.MULTIPLAYER_SCREEN)
                 }
             },
@@ -137,7 +142,7 @@ private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
 
         Button(
             onClick = {
-                ComposeUI.current.onRenderThread {
+                DynamicUI.current.onRenderThread {
                     minecraft.setScreen(MCScreen.REALMS_MAIN_SCREEN)
                 }
             },

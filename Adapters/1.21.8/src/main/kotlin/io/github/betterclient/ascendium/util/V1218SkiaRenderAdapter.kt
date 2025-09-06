@@ -6,10 +6,10 @@ import com.mojang.blaze3d.textures.GpuTextureView
 import com.mojang.blaze3d.textures.TextureFormat
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.compose.SkiaRenderAdapter
 import io.github.betterclient.ascendium.module.config.NumberSetting
-import io.github.betterclient.ascendium.module.config.Setting
+import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderAdapter
 import kotlinx.atomicfu.locks.withLock
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.render.state.GuiRenderState
@@ -32,20 +32,15 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 
+val NativeImage.pointer: Long
+    get() = this.imageId()
 
-private val NativeImage.pointer: Long
+val GameRenderer.guiState: GuiRenderState
     get() {
-        val field: Field = NativeImage::class.java.getDeclaredField("pointer")
-        field.isAccessible = true
-        return field.getLong(this)
-    }
-private val GameRenderer.guiState: GuiRenderState
-    get() {
-        val guiStateField: Field = GameRenderer::class.java.getDeclaredField("guiState")
-        guiStateField.setAccessible(true)
-
-        val guiState: Any? = guiStateField.get(this)
-        return guiState as GuiRenderState
+        val guiStateField: Field = GameRenderer::class.java.declaredFields
+            .first { it.type == GuiRenderState::class.java }
+        guiStateField.isAccessible = true
+        return guiStateField.get(this) as GuiRenderState
     }
 
 class V1218SkiaRenderAdapter : SkiaRenderAdapter {
@@ -92,7 +87,6 @@ class V1218SkiaRenderAdapterObject {
     }
 
     lateinit var state: TexturedQuadGuiElementRenderState
-    val guiState = MinecraftClient.getInstance().gameRenderer.guiState
 
     fun withSkia(block: (Canvas) -> Unit) {
         if (this.content == null)
@@ -105,7 +99,7 @@ class V1218SkiaRenderAdapterObject {
                 if (imageToDraw.width == texture.texture().getWidth(0) && imageToDraw.height == texture.texture().getHeight(0)) {
                     RenderSystem.getDevice().createCommandEncoder().writeToTexture(texture.texture(), imageToDraw)
                 }
-                guiState.addSimpleElement(state)
+                MinecraftClient.getInstance().gameRenderer.guiState.addSimpleElement(state)
             }
         }
         render.set(true)

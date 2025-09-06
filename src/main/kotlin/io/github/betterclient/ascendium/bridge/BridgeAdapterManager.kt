@@ -34,6 +34,9 @@ val `1_21_4` = BridgeAdapter(
     keybindingBridgeAdapter = "V1214KeybindingHelper",
     screenBridgeAdapter = "Post120BridgedScreen",
     skiaRenderAdapter = "V1214SkiaRenderAdapter",
+    openglTextureAdapter = "V1214OpenGLTextureAdapter",
+    chromium = "DontRequireChromium",
+
     minecraftClientAdapter = "1214",
     entityAdapter = "1214",
     itemStackAdapter = "1214",
@@ -54,10 +57,14 @@ val `1_21_4` = BridgeAdapter(
     styleAdapter = "1214",
     textAdapter = "1214",
     mainAdapter = "1214",
-    mouseAdapter = "1214"
+    mouseAdapter = "1214",
 )
 
 val `1_21_8` = `1_21_4`.copy(
+    skiaRenderAdapter = "V1218SkiaRenderAdapter",
+    openglTextureAdapter = "V1218OpenGLTextureAdapter",
+    chromium = "RequireChromium",
+
     clickEventAdapter = "1218",
     splashOverlayAdapter = "1218",
     windowAdapter = "1218",
@@ -65,7 +72,6 @@ val `1_21_8` = `1_21_4`.copy(
     playerEntityAdapter = "1218",
     screenAdapter = "1218",
     mouseAdapter = "1218",
-    skiaRenderAdapter = "V1218SkiaRenderAdapter",
     applyElse = arrayOf(
         "1218.MixinCubeMapRenderer",
         "1218.MixinDrawContext"
@@ -76,6 +82,9 @@ data class BridgeAdapter(
     val keybindingBridgeAdapter: String,
     val screenBridgeAdapter: String,
     val skiaRenderAdapter: String,
+    val openglTextureAdapter: String,
+    val chromium: String,
+
     val minecraftClientAdapter: String,
     val entityAdapter: String,
     val itemStackAdapter: String,

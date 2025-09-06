@@ -1,9 +1,11 @@
 package io.github.betterclient.ascendium.bridge
 
+import org.jetbrains.skia.Rect
+import java.awt.image.BufferedImage
 import kotlin.math.sqrt
 
 //globally accessible client!
-val minecraft: MinecraftBridge
+inline val minecraft: MinecraftBridge
     get() {
         return try {
             Class.forName("net.minecraft.class_310").getMethod("method_1551").invoke(null) as MinecraftBridge
@@ -11,6 +13,13 @@ val minecraft: MinecraftBridge
             Class.forName("net.minecraft.client.MinecraftClient").getMethod("getInstance").invoke(null) as MinecraftBridge
         }
     }
+
+inline fun createOpenGLTexture(): TextureBridge {
+    return BridgeAdapterManager.useBridgeUtil({ it.openglTextureAdapter }) as TextureBridge
+}
+
+inline val requireChromium: Boolean
+    get() = (BridgeAdapterManager.useBridgeUtil({ it.chromium }) as RequiresChromium).does
 
 interface MinecraftBridge {
     val screen: MCScreen?
@@ -138,6 +147,7 @@ interface KeybindHelper {
 open class BridgeScreen {
     open var width: Int = 0
     open var height: Int = 0
+    open var renderUtil: RenderUtilBridge = NullRenderUtilBridge
 
     open fun render(mouseX: Int, mouseY: Int) {}
     open fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {}
@@ -178,3 +188,20 @@ enum class ClickEventActionBridge {
     CHANGE_PAGE,
     COPY_TO_CLIPBOARD
 }
+
+interface RenderUtilBridge {
+    fun text(str: String, x: Int, y: Int, color: Int)
+    fun rect(rect: Rect, color: Int)
+}
+
+object NullRenderUtilBridge : RenderUtilBridge {
+    override fun text(str: String, x: Int, y: Int, color: Int) {}
+    override fun rect(rect: Rect, color: Int) {}
+}
+
+interface TextureBridge {
+    fun update(image: BufferedImage)
+    fun blit()
+}
+
+interface RequiresChromium { val does: Boolean }

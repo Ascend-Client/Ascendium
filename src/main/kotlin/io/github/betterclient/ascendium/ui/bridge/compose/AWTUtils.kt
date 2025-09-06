@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.compose
+package io.github.betterclient.ascendium.ui.bridge.compose
 
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key
@@ -8,6 +8,7 @@ import io.github.betterclient.ascendium.bridge.minecraft
 import org.lwjgl.glfw.GLFW.*
 import java.awt.Component
 import java.awt.event.InputEvent
+import java.awt.event.MouseEvent
 import java.awt.event.KeyEvent as AwtKeyEvent
 import java.awt.event.MouseWheelEvent
 
@@ -37,13 +38,13 @@ internal object AWTUtils {
     }
 
     fun glfwToAwtButton(glfwButton: Int): Int = when (glfwButton) {
-        GLFW_MOUSE_BUTTON_1 -> java.awt.event.MouseEvent.BUTTON1
-        GLFW_MOUSE_BUTTON_2 -> java.awt.event.MouseEvent.BUTTON2
-        GLFW_MOUSE_BUTTON_3 -> java.awt.event.MouseEvent.BUTTON3
-        else -> java.awt.event.MouseEvent.BUTTON1
+        GLFW_MOUSE_BUTTON_1 -> MouseEvent.BUTTON1
+        GLFW_MOUSE_BUTTON_2 -> MouseEvent.BUTTON2
+        GLFW_MOUSE_BUTTON_3 -> MouseEvent.BUTTON3
+        else -> MouseEvent.BUTTON1
     }
 
-    fun MouseEvent(mouseX: Int, mouseY: Int, awtMods: Int, button: Int, eventType: Int) = java.awt.event.MouseEvent(
+    fun MouseEvent(mouseX: Int, mouseY: Int, awtMods: Int, button: Int, eventType: Int) = MouseEvent(
         awtComponent, eventType, System.currentTimeMillis(), awtMods, mouseX, mouseY, 1, false, glfwToAwtButton(button)
     )
 

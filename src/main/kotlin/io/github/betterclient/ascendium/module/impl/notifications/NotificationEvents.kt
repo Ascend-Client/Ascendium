@@ -7,12 +7,12 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
 import io.github.betterclient.ascendium.bridge.MCScreen
-import io.github.betterclient.ascendium.compose.AWTUtils
-import io.github.betterclient.ascendium.compose.SkiaRenderer
-import io.github.betterclient.ascendium.compose.glfwToAwtKeyCode
 import io.github.betterclient.ascendium.event.*
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.impl.notifications.Notifications.multipleNotifications
+import io.github.betterclient.ascendium.ui.bridge.compose.AWTUtils
+import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderer
+import io.github.betterclient.ascendium.ui.bridge.compose.glfwToAwtKeyCode
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 

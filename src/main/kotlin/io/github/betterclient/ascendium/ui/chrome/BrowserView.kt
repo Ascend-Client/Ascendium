@@ -42,7 +42,7 @@ private const val SCROLL_MULTIPLIER = 30f
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BrowserView(browser: Browser, modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(16.dp)) {
+fun BrowserView(composeBrowser: ComposeBrowser, modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(16.dp)) {
     CefApp.getInstance().doMessageLoopWork(1)
 
     val focusRequester = remember { FocusRequester() }
@@ -50,11 +50,11 @@ fun BrowserView(browser: Browser, modifier: Modifier = Modifier, shape: Shape = 
 
     DisposableEffect(Unit) {
         onDispose {
-            browser.close()
+            composeBrowser.close()
         }
     }
 
-    browser.bitmap?.let {
+    composeBrowser.bitmap?.let {
         Image(
             modifier = modifier
                 .clip(shape)
@@ -63,7 +63,7 @@ fun BrowserView(browser: Browser, modifier: Modifier = Modifier, shape: Shape = 
             bitmap = it
         )
     }
-    if (browser.bitmap == null) {
+    if (composeBrowser.bitmap == null) {
         Box(
             modifier = modifier
                 .clip(shape)
@@ -79,44 +79,44 @@ fun BrowserView(browser: Browser, modifier: Modifier = Modifier, shape: Shape = 
     }
 
     DisposableEffect(dummyComponent) {
-        browser.createBrowser(dummyComponent)
+        composeBrowser.createBrowser(dummyComponent)
         onDispose { }
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-private fun Modifier.chromiumModifier(dummyComponent: Component, focusRequester: FocusRequester) = this
-    .onGloballyPositioned { coordinates ->
-    MemoryStack.stackPush().use { stack ->
-        val xPos = stack.mallocInt(1)
-        val yPos = stack.mallocInt(1)
-        glfwGetWindowPos(minecraft.window.windowHandle, xPos, yPos)
-        val windowX = xPos.get(0)
-        val windowY = yPos.get(0)
+private fun Modifier.chromiumModifier(dummyComponent: Component, focusRequester: FocusRequester) =
+    this.onGloballyPositioned { coordinates ->
+        MemoryStack.stackPush().use { stack ->
+            val xPos = stack.mallocInt(1)
+            val yPos = stack.mallocInt(1)
+            glfwGetWindowPos(minecraft.window.windowHandle, xPos, yPos)
+            val windowX = xPos.get(0)
+            val windowY = yPos.get(0)
 
-        val canvasPos = coordinates.positionInWindow()
-        browser.screenPosition = Point(
-            windowX + canvasPos.x.toInt(),
-            windowY + canvasPos.y.toInt()
-        )
+            val canvasPos = coordinates.positionInWindow()
+            composeBrowser.screenPosition = Point(
+                windowX + canvasPos.x.toInt(),
+                windowY + canvasPos.y.toInt()
+            )
+        }
     }
-}
     .onSizeChanged { size ->
         dummyComponent.setSize(size.width, size.height)
-        browser.wasResized(size.width, size.height)
+        composeBrowser.wasResized(size.width, size.height)
     }
     .onPointerEvent(
         eventType = PointerEventType.Move,
         onEvent = { event ->
             val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_MOVED, dummyComponent)
-            browser.sendMouseEvent(awtEvent)
+            composeBrowser.sendMouseEvent(awtEvent)
         }
     )
     .onPointerEvent(
         eventType = PointerEventType.Press,
         onEvent = { event ->
             val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_PRESSED, dummyComponent)
-            browser.sendMouseEvent(awtEvent)
+            composeBrowser.sendMouseEvent(awtEvent)
             focusRequester.requestFocus()
         }
     )
@@ -124,7 +124,7 @@ private fun Modifier.chromiumModifier(dummyComponent: Component, focusRequester:
         eventType = PointerEventType.Release,
         onEvent = { event ->
             val awtEvent = event.toAwtMouseEvent(MouseEvent.MOUSE_RELEASED, dummyComponent)
-            browser.sendMouseEvent(awtEvent)
+            composeBrowser.sendMouseEvent(awtEvent)
         }
     )
     .onPointerEvent(
@@ -144,16 +144,16 @@ private fun Modifier.chromiumModifier(dummyComponent: Component, focusRequester:
                 1,
                 (-change.scrollDelta.y * SCROLL_MULTIPLIER).toInt()
             )
-            browser.sendMouseWheelEvent(awtEvent)
+            composeBrowser.sendMouseWheelEvent(awtEvent)
         }
     )
     .onKeyEvent { keyEvent ->
         val awtEvent = keyEvent.toAwtKeyEvent(dummyComponent)
-        browser.sendKeyEvent(awtEvent)
+        composeBrowser.sendKeyEvent(awtEvent)
         true
     }
     .focusRequester(focusRequester)
-    .onFocusChanged { focusState -> browser.setFocus(focusState.isFocused) }
+    .onFocusChanged { focusState -> composeBrowser.setFocus(focusState.isFocused) }
     .focusable()
 
 @OptIn(ExperimentalComposeUiApi::class)

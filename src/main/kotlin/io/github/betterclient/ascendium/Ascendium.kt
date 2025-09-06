@@ -2,10 +2,12 @@ package io.github.betterclient.ascendium
 
 import androidx.compose.runtime.getValue
 import io.github.betterclient.ascendium.bridge.minecraft
+import io.github.betterclient.ascendium.bridge.requireChromium
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.DropdownSetting
+import io.github.betterclient.ascendium.module.config.InfoSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
@@ -35,6 +37,11 @@ object Ascendium {
 
         //colorpicker crash
         Dispatchers.setMain(Dispatchers.Default)
+
+        if (requireChromium) {
+            settings.settings.remove(settings._ui)
+            settings._ui.set("Chromium") //this version requires chromium(compatibility)
+        }
     }
 }
 
@@ -52,7 +59,10 @@ class ClientSettings {
     val themeState by _t.state
 
     private val _mf = BooleanSetting("Use minecraft font in UI's", false)
-    val mcFontState: Boolean by _mf.state
+    val mcFontState by _mf.state
 
-    val settings = mutableListOf(_t, _mf, _bo)
+    val _ui = DropdownSetting("UI Backend (changed on reload/resize)", "Compose", listOf("Compose", "Chromium"))
+    val uiBackend by _ui.state
+
+    val settings = mutableListOf(_t, _mf, _bo, _ui)
 }

@@ -17,10 +17,10 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.compose.ComposeUI
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.module.config.ConfigManager
+import io.github.betterclient.ascendium.ui.bridge.DynamicUI
 import io.github.betterclient.ascendium.ui.config.ConfigUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 
@@ -81,7 +81,8 @@ private fun ModuleView(module: Module) {
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Secondary),
             onClick = {
-                ComposeUI.current.switchTo {
+                //TODO: config ui server
+                DynamicUI.current.switchTo {
                     ConfigUI(module, true)
                 }
             }

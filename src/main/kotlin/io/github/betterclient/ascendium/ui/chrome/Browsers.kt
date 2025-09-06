@@ -5,6 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import io.github.betterclient.ascendium.bridge.createOpenGLTexture
+import io.github.betterclient.ascendium.bridge.minecraft
+import org.cef.CefApp
 import org.cef.CefClient
 import org.cef.browser.CefBrowser
 import org.cef.browser.CefFrame
@@ -25,26 +28,19 @@ import java.awt.image.DataBufferInt
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Browser(
-    private val client: CefClient,
+open class BaseBrowser(
+    app: CefApp,
     private val url: String,
     private val transparent: Boolean = false
-) : CefNativeRenderHandler, CefLoadHandler, CefDisplayHandler {
+) : CefNativeRenderHandler {
+    val client = app.createClient().alsoAddPopupPrevention()
     private var cefBrowser: CefBrowser? = null
     private var browserImage: BufferedImage? = null
-    private var browserBitmap: ImageBitmap? = null
     private var browserComponent: Component? = null
     var screenPosition by mutableStateOf(Point(0, 0))
 
-    var bitmap: ImageBitmap? by mutableStateOf(null)
-        private set
-
-    var myURL by mutableStateOf(url)
-        private set
-    var canGoBack by mutableStateOf(false)
-        private set
-    var canGoForward by mutableStateOf(false)
-        private set
+    val browser: CefBrowser?
+        get() = cefBrowser
 
     fun createBrowser(component: Component) {
         if (cefBrowser != null) return
@@ -54,29 +50,16 @@ class Browser(
         cefBrowser?.createImmediately()
     }
 
-    init {
-        client.addLoadHandler(this)
-        client.addDisplayHandler(this)
-    }
-
     fun close() {
         cefBrowser?.close(true)
     }
 
-    fun canBack() = cefBrowser!!.canGoBack()
     fun back() = cefBrowser!!.goBack()
-    fun canForward() = cefBrowser!!.canGoForward()
     fun forward() = cefBrowser!!.goForward()
-    fun url() = cefBrowser!!.url!!
     fun setUrl(url: String) = cefBrowser!!.loadURL(url)
 
     override fun getViewRect(browser: CefBrowser?): Rectangle {
         return browserComponent?.bounds ?: Rectangle(0, 0, 1, 1)
-    }
-
-    override fun getScreenPoint(browser: CefBrowser?, viewPoint: Point?): Point {
-        if (viewPoint == null) return Point(0, 0)
-        return Point(screenPosition.x + viewPoint.x, screenPosition.y + viewPoint.y)
     }
 
     override fun onPaint(
@@ -97,8 +80,7 @@ class Browser(
         val pixels = (browserImage!!.raster.dataBuffer as DataBufferInt).data
         buffer.asIntBuffer().get(pixels, 0, pixels.size)
 
-        browserBitmap = browserImage!!.toComposeImageBitmap()
-        bitmap = browserBitmap
+        handleRender(browserImage!!)
     }
 
     override fun getScreenInfo(browser: CefBrowser?, screenInfo: CefScreenInfo?): Boolean {
@@ -121,24 +103,17 @@ class Browser(
         return true
     }
 
+    override fun getScreenPoint(browser: CefBrowser?, viewPoint: Point?): Point {
+        if (viewPoint == null) return Point(0, 0)
+        return Point(screenPosition.x + viewPoint.x, screenPosition.y + viewPoint.y)
+    }
+
     fun wasResized(width: Int, height: Int) {
         cefBrowser?.wasResized(width, height)
     }
 
     fun setFocus(focused: Boolean) {
         cefBrowser?.setFocus(focused)
-    }
-
-    override fun onPaintWithSharedMem(
-        browser: CefBrowser?,
-        popup: Boolean,
-        dirtyRectsCount: Int,
-        sharedMemName: String?,
-        sharedMemHandle: Long,
-        width: Int,
-        height: Int
-    ) {
-        println("onPaintWithSharedMem received (not rendered): handle=$sharedMemHandle")
     }
 
     fun sendKeyEvent(event: KeyEvent) {
@@ -167,6 +142,59 @@ class Browser(
     override fun updateDragCursor(browser: CefBrowser?, operation: Int) {}
     override fun disposeNativeResources() { }
 
+    override fun onPaintWithSharedMem(
+        browser: CefBrowser?,
+        popup: Boolean,
+        dirtyRectsCount: Int,
+        sharedMemName: String?,
+        sharedMemHandle: Long,
+        width: Int,
+        height: Int
+    ) {
+        println("onPaintWithSharedMem received (not rendered): handle=$sharedMemHandle")
+    }
+
+    open fun handleRender(image: BufferedImage) {}
+}
+
+class OpenGLBrowser(
+    client: CefApp,
+    url: String,
+    transparent: Boolean = false
+) : BaseBrowser(client, url, transparent) {
+    val texture = createOpenGLTexture()
+
+    override fun handleRender(image: BufferedImage) {
+        texture.update(image)
+    }
+
+    fun render() {
+        texture.blit()
+    }
+}
+
+class ComposeBrowser(
+    app: CefApp,
+    url: String,
+    transparent: Boolean = false
+) : BaseBrowser(app, url, transparent), CefLoadHandler, CefDisplayHandler {
+    private var browserBitmap: ImageBitmap? = null
+
+    var bitmap: ImageBitmap? by mutableStateOf(null)
+        private set
+
+    var myURL by mutableStateOf(url)
+        private set
+    var canGoBack by mutableStateOf(false)
+        private set
+    var canGoForward by mutableStateOf(false)
+        private set
+
+    init {
+        client.addLoadHandler(this)
+        client.addDisplayHandler(this)
+    }
+
     override fun onLoadingStateChange(
         browser: CefBrowser?,
         isLoading: Boolean,
@@ -191,4 +219,8 @@ class Browser(
     override fun onTooltip(browser: CefBrowser?, text: String?): Boolean = false
     override fun onStatusMessage(browser: CefBrowser?, value: String?) {}
     override fun onConsoleMessage(browser: CefBrowser?, level: org.cef.CefSettings.LogSeverity?, message: String?, source: String?, line: Int): Boolean = false
+
+    override fun handleRender(image: BufferedImage) {
+        this.browserBitmap = image.toComposeImageBitmap()
+    }
 }

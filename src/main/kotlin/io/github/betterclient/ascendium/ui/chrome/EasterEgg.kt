@@ -19,11 +19,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
-import io.github.betterclient.ascendium.compose.ComposeUI
+import io.github.betterclient.ascendium.ui.bridge.DynamicUI
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 
-val browser = Browser(ChromiumDownloader.client!!, "https://google.com/")
+val composeBrowser = ComposeBrowser(ChromiumDownloader.app!!, "https://google.com/")
 
 @Composable
 fun EasterEggUI() {
@@ -50,7 +50,7 @@ fun EasterEggUI() {
                 }
 
                 BrowserView(
-                    browser,
+                    composeBrowser,
                     modifier = Modifier.size(800.dp, 600.dp),
                     shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
                 )
@@ -61,18 +61,19 @@ fun EasterEggUI() {
 
 @Composable
 private fun RowScope.Navigation() {
-    var textFieldValue by remember(browser.myURL) { mutableStateOf(browser.myURL) }
+    var textFieldValue by remember(composeBrowser.myURL) { mutableStateOf(composeBrowser.myURL) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Spacer(Modifier.width(2.dp))
 
     Button(onClick = {
-        ComposeUI.current.switchTo { ModsUI(true) }
+        //TODO: mods UI server
+        DynamicUI.current.switchTo() { ModsUI(true) }
     }) { Text("Back") }
 
     IconButton(
-        onClick = { browser.back() },
-        enabled = browser.canGoBack
+        onClick = { composeBrowser.back() },
+        enabled = composeBrowser.canGoBack
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -82,8 +83,8 @@ private fun RowScope.Navigation() {
     }
 
     IconButton(
-        onClick = { browser.forward() },
-        enabled = browser.canGoForward
+        onClick = { composeBrowser.forward() },
+        enabled = composeBrowser.canGoForward
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
@@ -99,13 +100,13 @@ private fun RowScope.Navigation() {
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
         keyboardActions = KeyboardActions(onGo = {
-            browser.setUrl(textFieldValue)
+            composeBrowser.setUrl(textFieldValue)
             keyboardController?.hide()
         })
     )
 
     IconButton(onClick = {
-        browser.setUrl("https://www.google.com")
+        composeBrowser.setUrl("https://www.google.com")
     }) {
         Icon(
             imageVector = Icons.Default.Home,
