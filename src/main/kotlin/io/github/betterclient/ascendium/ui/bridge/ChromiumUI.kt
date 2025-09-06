@@ -2,6 +2,7 @@ package io.github.betterclient.ascendium.ui.bridge
 
 import io.github.betterclient.ascendium.bridge.BridgeScreen
 import io.github.betterclient.ascendium.bridge.minecraft
+import io.github.betterclient.ascendium.jetpack.JetpackServer
 import io.github.betterclient.ascendium.ui.bridge.compose.AWTUtils
 import io.github.betterclient.ascendium.ui.bridge.compose.glfwToAwtKeyCode
 import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
@@ -28,7 +29,7 @@ import java.net.URLConnection
 import javax.swing.JPanel
 
 abstract class ChromiumUI(val startingFile: String) : BridgeScreen() {
-    abstract fun serve(fileName: String): ByteArray
+    abstract fun serve(fileName: String, browser: CefBrowser): ByteArray
 
     companion object {
         lateinit var browser: OpenGLBrowser
@@ -52,6 +53,7 @@ abstract class ChromiumUI(val startingFile: String) : BridgeScreen() {
             renderUtil.text("Downloading chromium, please wait.", width / 2 - 200, height / 2 - 5, -1)
         } else if (!isBrowserInitialized() && ChromiumDownloader.app != null) {
             browser = OpenGLBrowser(ChromiumDownloader.app!!, "ascendium://$startingFile")
+            JetpackServer.addQueryRouter(browser.client)
 
             browser.client.addRequestHandler(ChromeUIRequestHandler.createHandler(this))
             val window = minecraft.window
@@ -192,8 +194,8 @@ internal object ChromeUIRequestHandler {
 }
 
 internal class AscendiumRequestHandler(val ui: ChromiumUI) : CefRequestHandlerAdapter() {
-    fun serve(fileName: String): ByteArray {
-        return ui.serve(fileName)
+    fun serve(fileName: String, browser: CefBrowser): ByteArray {
+        return ui.serve(fileName, browser)
     }
 
     override fun getResourceRequestHandler(
@@ -210,7 +212,7 @@ internal class AscendiumRequestHandler(val ui: ChromiumUI) : CefRequestHandlerAd
 
 class AscendiumResourceRequestHandler(
     private val url: String,
-    private val serve: (String) -> ByteArray
+    private val serve: (String, CefBrowser) -> ByteArray
 ) : CefResourceRequestHandler {
 
     override fun getCookieAccessFilter(
@@ -231,7 +233,7 @@ class AscendiumResourceRequestHandler(
         request: CefRequest?
     ): CefResourceHandler {
         val fileName = url.removePrefix("ascendium://")
-        val data = serve(fileName)
+        val data = serve(fileName, browser!!)
         val mime = guessMime(fileName, data)
         return AscendiumResourceHandler(mime, data)
     }

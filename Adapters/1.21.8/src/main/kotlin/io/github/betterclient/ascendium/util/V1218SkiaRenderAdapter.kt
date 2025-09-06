@@ -77,13 +77,8 @@ class V1218SkiaRenderAdapterObject {
     }
 
     companion object {
-        val scaleF = NumberSetting("UI Scale", 1.2, 1.0, 4.0)
         val UI_SCALE
-            get() = scaleF.value
-
-        init {
-            Ascendium.settings.settings.add(scaleF)
-        }
+            get() = 1f
     }
 
     lateinit var state: TexturedQuadGuiElementRenderState

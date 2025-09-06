@@ -6,14 +6,15 @@ import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.BridgeScreen
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.ui.bridge.compose.AWTUtils
+import org.cef.browser.CefBrowser
 import java.awt.event.MouseEvent
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.CopyOnWriteArrayList
 
 //UI that can switch between Chromium - Compose on request.
 open class DynamicUI(
-    private var composable: @Composable () -> Unit,
-    private var server: (fileName: String) -> ByteArray
+    private var composable: @Composable (() -> Unit),
+    private var server: (String, CefBrowser) -> ByteArray
 ) : BridgeScreen() {
     private var currentUI: BridgeScreen
     var activeBackend: UIBackend
@@ -42,7 +43,7 @@ open class DynamicUI(
         return when (backend) {
             UIBackend.COMPOSE -> ComposeUI(composable)
             UIBackend.CHROMIUM -> object : ChromiumUI("index.html") {
-                override fun serve(fileName: String) = server(fileName)
+                override fun serve(fileName: String, browser: CefBrowser) = server(fileName, browser)
             }
         }
     }
@@ -69,7 +70,7 @@ open class DynamicUI(
     }
 
     //Sorry, you have to provide both.
-    fun switchTo(server: (String) -> ByteArray, composable: @Composable () -> Unit) {
+    fun switchTo(server: (String, CefBrowser) -> ByteArray, composable: @Composable () -> Unit) {
         mouseHandlers.clear()
         renderHandlers.clear()
         mouseEventHandlers.clear()

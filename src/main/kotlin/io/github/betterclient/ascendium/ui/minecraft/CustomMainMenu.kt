@@ -53,13 +53,9 @@ object CustomMainMenu : DynamicUI({
             }
         }
     }
-}) {
+}, CustomMainMenuServer.serve()) {
     override fun shouldRenderBackground() = false
     override fun shouldCloseOnEsc() = false
-
-    /*override fun init() {
-        minecraft.openScreen(TestChromeUI())
-    }*/
 }
 
 @Composable
