@@ -1,6 +1,9 @@
 package io.github.betterclient.ascendium.ui.bridge
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.BridgeScreen
@@ -13,15 +16,20 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 //UI that can switch between Chromium - Compose on request.
 open class DynamicUI(
-    private var composable: @Composable (() -> Unit),
+    composable: @Composable (() -> Unit),
     private var server: (String, CefBrowser) -> ByteArray
 ) : BridgeScreen() {
-    private var currentUI: BridgeScreen
-    var activeBackend: UIBackend
-
+    private var composable: @Composable (() -> Unit) by mutableStateOf(composable)
     private val mouseHandlers = CopyOnWriteArrayList<(composeMouse: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean>()
     private val renderHandlers = CopyOnWriteArrayList<(mouseX: Int, mouseY: Int) -> Unit>()
     private val mouseEventHandlers = CopyOnWriteArrayList<(mouseX: Int, mouseY: Int, event: MouseEvent) -> Boolean>()
+
+    var activeBackend: UIBackend = if (Ascendium.settings._ui.value == "Compose") {
+        UIBackend.COMPOSE
+    } else {
+        UIBackend.CHROMIUM
+    }
+    private var currentUI: BridgeScreen = createUIBackend(activeBackend)
 
     companion object {
         lateinit var current: DynamicUI
@@ -29,19 +37,11 @@ open class DynamicUI(
         private val tasks = ConcurrentLinkedQueue<() -> Unit>()
     }
 
-    init {
-        activeBackend = if (Ascendium.settings._ui.value == "Compose") {
-            UIBackend.COMPOSE
-        } else {
-            UIBackend.CHROMIUM
-        }
-
-        currentUI = createUIBackend(activeBackend)
-    }
-
     private fun createUIBackend(backend: UIBackend): BridgeScreen {
         return when (backend) {
-            UIBackend.COMPOSE -> ComposeUI(composable)
+            UIBackend.COMPOSE -> ComposeUI({
+                composable()
+            })
             UIBackend.CHROMIUM -> object : ChromiumUI("index.html") {
                 override fun serve(fileName: String, browser: CefBrowser) = server(fileName, browser)
             }
@@ -78,7 +78,9 @@ open class DynamicUI(
         when (activeBackend) {
             UIBackend.COMPOSE -> {
                 this.composable = composable
-                (currentUI as ComposeUI).switchTo(composable)
+                (currentUI as ComposeUI).switchTo({
+                    this.composable()
+                })
             }
             UIBackend.CHROMIUM -> {
                 this.server = server

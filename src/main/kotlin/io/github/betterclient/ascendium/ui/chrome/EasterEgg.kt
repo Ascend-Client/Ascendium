@@ -68,7 +68,7 @@ private fun RowScope.Navigation() {
 
     Button(onClick = {
         //TODO: mods UI server
-        //DynamicUI.current.switchTo() { ModsUI(true) }
+        DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) { ModsUI(true) }
     }) { Text("Back") }
 
     IconButton(

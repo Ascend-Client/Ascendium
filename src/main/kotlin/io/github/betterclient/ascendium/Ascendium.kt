@@ -61,7 +61,7 @@ class ClientSettings {
     private val _mf = BooleanSetting("Use minecraft font in UI's", false)
     val mcFontState by _mf.state
 
-    val _ui = DropdownSetting("UI Backend (changed on reload/resize)", "Compose", listOf("Compose", "Chromium"))
+    val _ui = DropdownSetting("UI Backend (changed on reload/resize)", "Compose", listOf("Compose"))
     val uiBackend by _ui.state
 
     val settings = mutableListOf(_t, _mf, _bo, _ui)

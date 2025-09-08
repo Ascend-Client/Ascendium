@@ -30,43 +30,13 @@ object CustomMainMenuServer {
                 .background(Color.decode("#E0E0E0")),
             contentAlignment = HTMLAlignment.Center
         ) {
-            HTMLBox(
-                modifier = HTMLModifier
-                    .size(width = 300, height = 400)
-                    .background(Color.WHITE)
-                    .borderRadius(16)
-                    .then(RawCssElement("0px 4px 12px rgba(0,0,0,0.1)"))
+            HTMLRow(
+                modifier = HTMLModifier.align(HTMLAlignment.TopEnd)
             ) {
-                HTMLImage(
-                    src = "https://picsum.photos/300/150",
-                    modifier = HTMLModifier
-                        .fillMaxWidth()
-                        .height(150)
-                        .borderRadius(topStart = 16, topEnd = 16)
-                        .align(HTMLAlignment.TopCenter)
+                HTMLButton(
+                    content = { HTMLText("a?") },
+                    onClick = { println("working") }
                 )
-
-                HTMLColumn(
-                    modifier = HTMLModifier
-                        .fillMaxWidth()
-                        .padding(24)
-                        .align(HTMLAlignment.BottomCenter)
-                        .zIndex(2),
-                    horizontalAlignment = HTMLAlignment.CenterHorizontally,
-                    verticalArrangement = HTMLArrangement.Center_
-                ) {
-                    HTMLRow(
-                        modifier = HTMLModifier.padding(top = 20).fillMaxWidth(),
-                        horizontalArrangement = HTMLArrangement.SpaceAround,
-                        verticalAlignment = HTMLAlignment.CenterVertically
-                    ) {
-                        HTMLButton(onClick = {
-                            println("I LOVE YOU!")
-                        }, content = {
-                            HTMLText("Click me")
-                        })
-                    }
-                }
             }
         }
     }

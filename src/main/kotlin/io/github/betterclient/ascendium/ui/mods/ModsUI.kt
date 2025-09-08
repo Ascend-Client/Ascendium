@@ -67,9 +67,9 @@ fun ModsUI(smallen: Boolean) {
                     Spacer(Modifier.width(8.dp))
                     Button(onClick = {
                         //TODO: Move module server
-                        /*DynamicUI.current.switchTo {
+                        DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) {
                             MoveModuleUI(ModManager.getHUDModules(), false)
-                        }*/
+                        }
                     },
                         shape = RoundedCornerShape(16.dp)
                     ) {
@@ -81,9 +81,9 @@ fun ModsUI(smallen: Boolean) {
                     Button(onClick = {
                         if (!ChromiumDownloader.chromiumDownloaded) return@Button
                         //TODO: easter egg server????
-                        /*DynamicUI.current.switchTo {
+                        DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) {
                             EasterEggUI()
-                        }*/
+                        }
                     }, colors = ButtonDefaults.buttonColors()) {
                         Text("Ascendium", fontSize = 18.sp, color = rainbowAsState().value)
                     }

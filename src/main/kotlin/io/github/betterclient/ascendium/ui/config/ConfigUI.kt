@@ -66,7 +66,7 @@ fun ConfigUI(mod: Module, fromMods: Boolean) {
                             Spacer(Modifier.width(8.dp))
                             Button(onClick = {
                                 //TODO: Mods UI Server
-                                //DynamicUI.current.switchTo() { ModsUI(true) }
+                                DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) { ModsUI(true) }
                             }) { Text("Back", color = AscendiumTheme.colorScheme.onBackground) }
                         }
 

@@ -31,7 +31,7 @@ fun ModToggle(mod: Module) {
             Spacer(Modifier.width(4.dp))
             Button(onClick = {
                 //TODO: move module server
-                //DynamicUI.current.switchTo() { MoveModuleUI(listOf(mod), true) }
+                DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) { MoveModuleUI(listOf(mod), true) }
             }) { Text("Move") }
         }
     }

@@ -15,7 +15,9 @@ import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.ui.bridge.DynamicUI
+import io.github.betterclient.ascendium.ui.config.ConfigUI
 import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
+import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
 
@@ -63,13 +65,13 @@ fun MoveModuleUI(mods: List<ComposableHUDModule>, backToConfig: Boolean?) {
         Center {
             Button(onClick = {
                 if (backToConfig == true) {
-                    /*DynamicUI.current.switchTo {
+                    DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) {
                         ConfigUI(mods[0], false)
-                    }*/
+                    }
                 } else {
-                    /*DynamicUI.current.switchTo {
+                    DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) {
                         ModsUI(false)
-                    }*/
+                    }
                 }
             }, shape = RoundedCornerShape(16.dp)) {
                 Text(if (backToConfig == true) "Back" else "Mods")

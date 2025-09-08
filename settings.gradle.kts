@@ -11,5 +11,7 @@ pluginManagement {
 
 include("SupportedVersions:1.21:1.21.4")
 include("SupportedVersions:1.21:1.21.8")
+include("SupportedVersions:1.21:1.21.1")
+include("Adapters:1.21.1")
 include("Adapters:1.21.4")
 include("Adapters:1.21.8")

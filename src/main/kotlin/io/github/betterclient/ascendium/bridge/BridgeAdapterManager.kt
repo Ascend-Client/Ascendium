@@ -63,7 +63,7 @@ val `1_21_4` = BridgeAdapter(
 val `1_21_8` = `1_21_4`.copy(
     skiaRenderAdapter = "V1218SkiaRenderAdapter",
     openglTextureAdapter = "V1218OpenGLTextureAdapter",
-    chromium = "RequireChromium",
+    //chromium = "RequireChromium",
 
     clickEventAdapter = "1218",
     splashOverlayAdapter = "1218",
@@ -76,6 +76,10 @@ val `1_21_8` = `1_21_4`.copy(
         "1218.MixinCubeMapRenderer",
         "1218.MixinDrawContext"
     )
+)
+
+val `1_21_1` = `1_21_4`.copy(
+    splashOverlayAdapter = "1211"
 )
 
 data class BridgeAdapter(
@@ -110,8 +114,9 @@ data class BridgeAdapter(
 )
 
 val adapters = mutableMapOf(
+    "1.21.1" to `1_21_1`,
     "1.21.4" to `1_21_4`,
-    "1.21.8" to `1_21_8`
+    //"1.21.8" to `1_21_8`
 )
 
 val mixinMapping = mapOf<String, (adapter: BridgeAdapter) -> String>(
