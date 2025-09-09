@@ -7,6 +7,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.SplashOverlay;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,6 +38,9 @@ public class MixinSplashOverlay {
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/SplashOverlay;renderProgressBar(Lnet/minecraft/client/gui/DrawContext;IIIIF)V"))
     public void noRender(SplashOverlay instance, DrawContext context, int minX, int minY, int maxX, int maxY, float opacity) { }
+
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIFFIIII)V"))
+    public void noRender(DrawContext instance, Identifier identifier, int i0, int i9, int i8, int i7, float v6, float v5, int i4, int i3, int i2, int i1) { }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;fill(Lnet/minecraft/client/render/RenderLayer;IIIII)V"))
     public void noRender(DrawContext instance, RenderLayer layer, int x1, int y1, int x2, int y2, int color) { }

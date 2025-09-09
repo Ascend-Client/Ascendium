@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.betterclient.ascendium.mixin",
+  "plugin": "io.github.betterclient.ascendium.bridge.BridgeMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "v1204.MixinChatHud"
+  ],
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

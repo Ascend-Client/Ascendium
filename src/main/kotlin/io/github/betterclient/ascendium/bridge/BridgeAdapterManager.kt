@@ -82,6 +82,16 @@ val `1_21_1` = `1_21_4`.copy(
     splashOverlayAdapter = "1211"
 )
 
+val `1_20_6` = `1_21_1`.copy(
+    inGameHudAdapter = "1206"
+)
+
+val `1_20_4` = `1_20_6`.copy(
+    chatHudAdapter = "1204"
+)
+
+val `1_20_1` = `1_20_4`.copy()
+
 data class BridgeAdapter(
     val keybindingBridgeAdapter: String,
     val screenBridgeAdapter: String,
@@ -114,6 +124,9 @@ data class BridgeAdapter(
 )
 
 val adapters = mutableMapOf(
+    "1.20.1" to `1_20_1`,
+    "1.20.4" to `1_20_4`,
+    "1.20.6" to `1_20_6`,
     "1.21.1" to `1_21_1`,
     "1.21.4" to `1_21_4`,
     //"1.21.8" to `1_21_8`

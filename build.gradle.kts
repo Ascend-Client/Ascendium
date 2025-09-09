@@ -74,6 +74,10 @@ loom {
             it.ideConfigGenerated(false)
         }
     }
+
+    mixin {
+        useLegacyMixinAp.set(false)
+    }
 }
 
 val transitiveInclude: Configuration by configurations.creating {
@@ -121,7 +125,7 @@ dependencies {
         }
 
         if (item.path.contains("Adapters")) {
-            include(project(item.path, "namedElements"))
+            include(item)
         }
     }
 
@@ -279,6 +283,10 @@ fun Project.setupAdapter() {
             forEach {
                 it.ideConfigGenerated(false)
             }
+        }
+
+        mixin {
+            useLegacyMixinAp.set(false)
         }
     }
 }

@@ -9,9 +9,23 @@ pluginManagement {
     }
 }
 
-include("SupportedVersions:1.21:1.21.4")
-include("SupportedVersions:1.21:1.21.8")
-include("SupportedVersions:1.21:1.21.1")
-include("Adapters:1.21.1")
-include("Adapters:1.21.4")
-include("Adapters:1.21.8")
+val SupportedVersions = arrayOf(
+    "1.20:1.20.1",
+    "1.20:1.20.4",
+    "1.20:1.20.6",
+    "1.21:1.21.1",
+    "1.21:1.21.4",
+    "1.21:1.21.8"
+)
+
+
+val Adapters = arrayOf(
+    "1.20:1.20.4",
+    "1.20:1.20.6",
+    "1.21:1.21.1",
+    "1.21:1.21.4",
+    "1.21:1.21.8"
+)
+
+SupportedVersions.forEach { include(":SupportedVersions:$it") }
+Adapters.forEach { include(":Adapters:$it") }
