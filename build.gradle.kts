@@ -9,6 +9,7 @@ plugins {
     id("org.jetbrains.compose") version "1.9.0-beta01"
     kotlin("plugin.serialization") version "2.2.0"
 }
+val compile = false //important, set to true when running "build"
 
 configurations.all {
     resolutionStrategy {
@@ -125,7 +126,11 @@ dependencies {
         }
 
         if (item.path.contains("Adapters")) {
-            include(item)
+            include(if(compile) {
+                item
+            } else {
+                project(item.path, "namedElements")
+            })
         }
     }
 

@@ -43,8 +43,7 @@ fun DropdownMenu(
     theme: ColorScheme,
     options: List<String>,
     selectedOption: MutableState<String>,
-    onOptionSelected: (String) -> Unit,
-    name: String
+    onOptionSelected: (String) -> Unit
 ) {
     var curOption by remember { mutableStateOf(selectedOption) }
     val expanded0 = remember { mutableStateOf(false) }
@@ -60,7 +59,6 @@ fun DropdownMenu(
                 value = curOption.value,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text(name) },
                 trailingIcon = { TrailingIcon(expanded) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = false,

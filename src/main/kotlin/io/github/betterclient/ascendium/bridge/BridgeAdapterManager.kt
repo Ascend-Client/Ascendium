@@ -90,7 +90,9 @@ val `1_20_4` = `1_20_6`.copy(
     chatHudAdapter = "1204"
 )
 
-val `1_20_1` = `1_20_4`.copy()
+val `1_20_1` = `1_20_4`.copy(
+    screenAdapter = "V1201BridgedScreen"
+)
 
 data class BridgeAdapter(
     val keybindingBridgeAdapter: String,

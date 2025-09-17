@@ -69,16 +69,14 @@ fun SettingEditor(setting: Setting) {
                 ResetButton { setting.reset(); selected.value = setting.value }
                 DropdownMenu(
                     modifier = Modifier.weight(1f),
-                    options = setting.options,
-                    selectedOption = selected,
-                    onOptionSelected = {
-                        selected.value = it
-                        setting.value = it
-                        ConfigManager.saveConfig()
-                    },
                     theme = AscendiumTheme.colorScheme,
-                    name = setting.name
-                )
+                    options = setting.options,
+                    selectedOption = selected
+                ) {
+                    selected.value = it
+                    setting.value = it
+                    ConfigManager.saveConfig()
+                }
             }
             is InfoSetting -> {} //name already rendered, we dont't have to do anything
         }
