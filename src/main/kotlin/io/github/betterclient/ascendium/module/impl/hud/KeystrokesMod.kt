@@ -90,7 +90,7 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(label)
+            Text(label.uppercase())
         }
     }
 
@@ -111,7 +111,7 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(label)
+            Text(label.uppercase())
         }
     }
 

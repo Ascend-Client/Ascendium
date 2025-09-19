@@ -94,6 +94,19 @@ val `1_20_1` = `1_20_4`.copy(
     screenAdapter = "V1201BridgedScreen"
 )
 
+val `1_19_4` = `1_20_1`.copy(
+    splashOverlayAdapter = "1194",
+    inGameHudAdapter = "1194",
+    screenBridgeAdapter = "Pre120BridgedScreen"
+)
+
+val `1_19_2` = `1_19_4`.copy(
+    playerEntityAdapter = "1192",
+    itemStackAdapter = "1192",
+    spriteAtlasTextureAdapter = "1192",
+    simpleResourceReloadAdapter = "disable"
+)
+
 data class BridgeAdapter(
     val keybindingBridgeAdapter: String,
     val screenBridgeAdapter: String,
@@ -126,6 +139,8 @@ data class BridgeAdapter(
 )
 
 val adapters = mutableMapOf(
+    "1.19.2" to `1_19_2`,
+    "1.19.4" to `1_19_4`,
     "1.20.1" to `1_20_1`,
     "1.20.4" to `1_20_4`,
     "1.20.6" to `1_20_6`,

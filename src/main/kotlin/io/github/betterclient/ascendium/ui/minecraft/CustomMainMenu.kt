@@ -109,9 +109,7 @@ private fun BoxScope.ModeButtons(onAscend: () -> Unit) {
         Spacer(Modifier.height(128.dp))
         Button(
             onClick = {
-                println("Click!")
                 DynamicUI.current.onRenderThread {
-                    println("onRenderThread")
                     minecraft.setScreen(MCScreen.SELECT_WORLD_SCREEN)
                 }
             },

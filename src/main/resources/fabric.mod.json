@@ -17,7 +17,9 @@
     "ascendium.adapter.1218.mixins.json",
     "ascendium.adapter.1211.mixins.json",
     "ascendium.adapter.1206.mixins.json",
-    "ascendium.adapter.1204.mixins.json"
+    "ascendium.adapter.1204.mixins.json",
+    "ascendium.adapter.1194.mixins.json",
+    "ascendium.adapter.1192.mixins.json"
   ],
   "depends": {
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
