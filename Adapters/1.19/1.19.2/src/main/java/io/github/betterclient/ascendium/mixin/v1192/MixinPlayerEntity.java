@@ -3,6 +3,7 @@ package io.github.betterclient.ascendium.mixin.v1192;
 import io.github.betterclient.ascendium.bridge.ItemStackBridge;
 import io.github.betterclient.ascendium.bridge.PlayerBridge;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.math.BlockPos;
@@ -45,5 +46,15 @@ public abstract class MixinPlayerEntity implements PlayerBridge {
             case EAST -> "East";
             default -> "Invalid";
         };
+    }
+
+    @Override
+    public float getPYaw() {
+        return ((Entity)(Object)(this)).getYaw();
+    }
+
+    @Override
+    public float getPPitch() {
+        return ((Entity)(Object)(this)).getPitch();
     }
 }
