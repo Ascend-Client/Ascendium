@@ -107,20 +107,6 @@ val `1_19_2` = `1_19_4`.copy(
     simpleResourceReloadAdapter = "disable"
 )
 
-val `1_16_5` = `1_19_2`.copy(
-    playerEntityAdapter = "1165",
-    entityAdapter = "1165",
-    itemStackAdapter = "1165",
-    minecraftClientAdapter = "1165",
-    keybindingAdapter = "1165",
-    optionsAdapter = "1165",
-    soundEngineAdapter = "1165",
-    chatHudAdapter = "1165",
-
-    screenBridgeAdapter = "V116BridgedScreen",
-    skiaRenderAdapter = "V1165SkiaRenderAdapter"
-)
-
 data class BridgeAdapter(
     val keybindingBridgeAdapter: String,
     val screenBridgeAdapter: String,
@@ -153,7 +139,6 @@ data class BridgeAdapter(
 )
 
 val adapters = mutableMapOf(
-    "1.16.5" to `1_16_5`,
     "1.19.2" to `1_19_2`,
     "1.19.4" to `1_19_4`,
     "1.20.1" to `1_20_1`,

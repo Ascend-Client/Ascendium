@@ -11,7 +11,7 @@ class V1214SkiaRenderAdapter : SkiaRenderAdapter {
     }
 
     override fun task(block: () -> Unit) {
-        block() //this is gpu rendering, not needed
+        block() //this is hardware rendering, not needed
     }
 }
 

@@ -10,8 +10,6 @@ pluginManagement {
 }
 
 val SupportedVersions = arrayOf(
-    "1.16:1.16.5",
-
     "1.19:1.19.2",
     "1.19:1.19.4",
 
@@ -26,8 +24,6 @@ val SupportedVersions = arrayOf(
 
 
 val Adapters = arrayOf(
-    "1.16:1.16.5",
-
     "1.19:1.19.2",
     "1.19:1.19.4",
 
