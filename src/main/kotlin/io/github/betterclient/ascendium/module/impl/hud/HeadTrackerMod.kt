@@ -27,6 +27,7 @@ object HeadTrackerMod : HUDModule("Mouse Tracker", "Track your mouse movements")
     var pitch by mutableStateOf(0f)
     val BALL_SIZE by number("Ball Size", 5.0, 1.0, 10.0)
     val BALL_COLOR by color("Ball color", Color.Red.rgb)
+    val TRAIL_SIZE by number("Trail size", 30.0, 0.0, 100.0)
     const val SIZE = 100
     const val SIZE_2 = 50
 
@@ -128,7 +129,7 @@ object HeadTrackerMod : HUDModule("Mouse Tracker", "Track your mouse movements")
 
         LaunchedEffect(x, y) {
             trail.add(x to y)
-            if (trail.size > 30) {
+            if (trail.size > TRAIL_SIZE) {
                 trail.removeAt(0)
             }
         }
