@@ -7,11 +7,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
 import io.github.betterclient.ascendium.Ascendium
 
-val font = FontFamily(Font(
+val font by lazy { FontFamily(Font(
     "Minecraft",
     Ascendium::class.java.getResourceAsStream("/assets/ascendium/Minecraft.ttf")!!.use { it.readAllBytes() },
     FontWeight.Medium
-))
+)) }
 
 fun TextStyle.MCFont(): TextStyle {
     return this.copy(fontFamily = font, fontSize = this.fontSize * 1.3)

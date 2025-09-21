@@ -220,7 +220,7 @@ fun Project.setupSupportedVersion() {
         modImplementation("net.fabricmc:fabric-language-kotlin:${rootProject.property("kotlin_loader_version")}")
 
         modRuntimeOnly("maven.modrinth:sodium:${project.property("sodium_ver")}")
-        modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_ver")}")
+        modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_ver")}")
         modRuntimeOnly("maven.modrinth:in-game-account-switcher:${project.property("igas_ver")}")
     }
 
@@ -232,11 +232,6 @@ fun Project.setupSupportedVersion() {
                 } else {
                     it.client()
                     it.ideConfigGenerated(true)
-                    it.programArgs(
-                        "--add-opens java.desktop/sun.awt=ALL-UNNAMED",
-                        "--add-opens java.desktop/sun.lwawt=ALL-UNNAMED",
-                        "--add-opens java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
-                    )
                     it.runDir("../../../run") //united run directory
                 }
             }
