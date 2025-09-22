@@ -32,7 +32,7 @@ object HeadTrackerMod : HUDModule("Mouse Tracker", "Track your mouse movements")
     const val SIZE_2 = 50
 
     init {
-        settings.removeIf { it.name == "Text Color" || it.name == "Background Color" } //yea
+        settings.removeIf { it.name == "Text Color" || it.name == "Use minecraft font" } //yea
     }
 
     @Composable
