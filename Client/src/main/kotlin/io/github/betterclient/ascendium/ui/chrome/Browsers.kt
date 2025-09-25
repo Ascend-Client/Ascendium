@@ -28,7 +28,7 @@ import java.awt.image.DataBufferInt
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-open class BaseBrowser(
+abstract class BaseBrowser(
     app: CefApp,
     private val url: String,
     private val transparent: Boolean = false
@@ -154,7 +154,7 @@ open class BaseBrowser(
         println("onPaintWithSharedMem received (not rendered): handle=$sharedMemHandle")
     }
 
-    open fun handleRender(image: BufferedImage) {}
+    abstract fun handleRender(image: BufferedImage)
 }
 
 class OpenGLBrowser(

@@ -6,6 +6,7 @@ pluginManagement {
             name = "Fabric"
         }
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 
@@ -38,3 +39,4 @@ val Adapters = arrayOf(
 
 SupportedVersions.forEach { include(":SupportedVersions:$it") }
 Adapters.forEach { include(":Adapters:$it") }
+include(":Client")

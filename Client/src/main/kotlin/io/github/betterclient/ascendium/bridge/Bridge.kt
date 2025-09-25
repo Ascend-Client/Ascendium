@@ -14,7 +14,7 @@ inline val minecraft: MinecraftBridge
         }
     }
 
-inline fun createOpenGLTexture(): TextureBridge {
+fun createOpenGLTexture(): TextureBridge {
     return BridgeAdapterManager.useBridgeUtil({ it.openglTextureAdapter }) as TextureBridge
 }
 

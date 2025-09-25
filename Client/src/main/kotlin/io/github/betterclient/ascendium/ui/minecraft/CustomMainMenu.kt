@@ -53,7 +53,7 @@ object CustomMainMenu : DynamicUI({
             }
         }
     }
-}, CustomMainMenuServer.serve()) {
+}, { _, _ -> ByteArray(0) }) {
     override fun shouldRenderBackground() = false
     override fun shouldCloseOnEsc() = false
 }

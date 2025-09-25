@@ -57,7 +57,7 @@ val `1_21_4` = BridgeAdapter(
     styleAdapter = "1214",
     textAdapter = "1214",
     mainAdapter = "1214",
-    mouseAdapter = "1214",
+    mouseAdapter = "1214"
 )
 
 val `1_21_8` = `1_21_4`.copy(

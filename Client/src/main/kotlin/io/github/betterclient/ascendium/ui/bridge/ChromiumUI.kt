@@ -2,7 +2,6 @@ package io.github.betterclient.ascendium.ui.bridge
 
 import io.github.betterclient.ascendium.bridge.BridgeScreen
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.jetpack.JetpackServer
 import io.github.betterclient.ascendium.ui.bridge.compose.AWTUtils
 import io.github.betterclient.ascendium.ui.bridge.compose.glfwToAwtKeyCode
 import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
@@ -39,9 +38,10 @@ abstract class ChromiumUI(val startingFile: String) : BridgeScreen() {
     init {
         if (isBrowserInitialized()) {
             //add routing manager
-            browser.client.removeRequestHandler() //we probably had a chrome ui before this, (its initialized), remove that
-            browser.client.addRequestHandler(ChromeUIRequestHandler.createHandler(this))
-            browser.setUrl("ascendium://$startingFile")
+            /*browser.client.removeRequestHandler() //we probably had a chrome ui before this, (its initialized), remove that
+            browser.client.addRequestHandler(ChromeUIRequestHandler.createHandler(this))*/
+            browser.setUrl("https://youtube.com/")
+            browser.setFocus(true)
         }
     }
 
@@ -52,10 +52,9 @@ abstract class ChromiumUI(val startingFile: String) : BridgeScreen() {
             ), Color.BLACK)
             renderUtil.text("Downloading chromium, please wait.", width / 2 - 200, height / 2 - 5, -1)
         } else if (!isBrowserInitialized() && ChromiumDownloader.app != null) {
-            browser = OpenGLBrowser(ChromiumDownloader.app!!, "ascendium://$startingFile")
-            JetpackServer.addQueryRouter(browser.client)
+            browser = OpenGLBrowser(ChromiumDownloader.app!!, "https://youtube.com")
 
-            browser.client.addRequestHandler(ChromeUIRequestHandler.createHandler(this))
+            //browser.client.addRequestHandler(ChromeUIRequestHandler.createHandler(this))
             val window = minecraft.window
             dummyComponent.setSize(window.fbWidth, window.fbHeight)
             browser.wasResized(window.fbWidth, window.fbHeight)
