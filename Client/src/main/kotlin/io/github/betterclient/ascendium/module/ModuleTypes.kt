@@ -25,22 +25,22 @@ open class Module(val name: String, val description: String) {
     open fun onEnable() {}
     open fun onDisable() {}
 
-    fun boolean(name: String, value: Boolean) =
-        BooleanSetting(name, value).apply { this@Module.settings.add(this) }.state
+    fun boolean(name: String, value: Boolean, condition: () -> Boolean = { true }) =
+        BooleanSetting(name, value, condition).apply { this@Module.settings.add(this) }.state
 
-    fun number(name: String, value: Double, min: Double = Double.NEGATIVE_INFINITY, max: Double = Double.POSITIVE_INFINITY) =
-        NumberSetting(name, value, min, max).apply { this@Module.settings.add(this) }.state
+    fun number(name: String, value: Double, min: Double = Double.NEGATIVE_INFINITY, max: Double = Double.POSITIVE_INFINITY, condition: () -> Boolean = { true }) =
+        NumberSetting(name, value, min, max, condition).apply { this@Module.settings.add(this) }.state
 
-    fun string(name: String, value: String) =
-        StringSetting(name, value).apply { this@Module.settings.add(this) }.state
+    fun string(name: String, value: String, condition: () -> Boolean = { true }) =
+        StringSetting(name, value, condition).apply { this@Module.settings.add(this) }.state
 
-    fun dropdown(name: String, value: String, vararg options: String) =
-        DropdownSetting(name, value, options.toList()).apply { this@Module.settings.add(this) }.state
+    fun dropdown(name: String, value: String, vararg options: String, condition: () -> Boolean = { true }) =
+        DropdownSetting(name, value, options.toList().let { it.toMutableList().apply { this.addFirst(value) } }, condition).apply { this@Module.settings.add(this) }.state
 
-    fun color(name: String, value: Int) =
-        ColorSetting(name, value).apply { this@Module.settings.add(this) }.state
+    fun color(name: String, value: Int, condition: () -> Boolean = { true }) =
+        ColorSetting(name, value, condition).apply { this@Module.settings.add(this) }.state
 
-    fun info(str: String) = InfoSetting(str).apply { this@Module.settings.add(this) }
+    fun info(str: String, condition: () -> Boolean = { true }) = InfoSetting(str, condition = condition).apply { this@Module.settings.add(this) }
 
     infix fun `is`(@Suppress("UNUSED_PARAMETER") state: enabled) = this.enabled
     infix fun `is`(@Suppress("UNUSED_PARAMETER") state: disabled) = !this.enabled

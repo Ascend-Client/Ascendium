@@ -9,6 +9,7 @@ import kotlinx.serialization.Transient
 @Serializable
 sealed class Setting() {
     abstract val name: String
+    abstract val condition: () -> Boolean
 
     abstract fun setFromString(json: Setting)
     protected abstract fun _reset()
@@ -24,6 +25,7 @@ class BooleanSetting(
     override val name: String,
     @Transient
     private val _defaultValue: Boolean = false,
+    @Transient override val condition: () -> Boolean = { true }
 ) : Setting() {
     @SerialName("bool_value")
     private var storedValue: Boolean = _defaultValue
@@ -62,6 +64,7 @@ class NumberSetting(
     val min: Double = Double.NEGATIVE_INFINITY,
     @Transient
     val max: Double = Double.POSITIVE_INFINITY,
+    @Transient override val condition: () -> Boolean = { true }
 ) : Setting() {
     @SerialName("number_value")
     private var storedValue: Double = _defaultValue
@@ -94,7 +97,8 @@ class NumberSetting(
 class StringSetting(
     override val name: String,
     @Transient
-    private val _defaultValue: String = ""
+    private val _defaultValue: String = "",
+    @Transient override val condition: () -> Boolean = { true }
 ) : Setting() {
     @SerialName("string_value")
     private var storedValue: String = _defaultValue
@@ -126,7 +130,8 @@ class StringSetting(
 class DropdownSetting(
     override val name: String,
     @Transient private val _defaultValue: String = "",
-    @Transient val options: List<String> = emptyList()
+    @Transient val options: List<String> = emptyList(),
+    @Transient override val condition: () -> Boolean = { true }
 ) : Setting() {
     @SerialName("dropdown_value")
     var storedValue: String = _defaultValue
@@ -166,6 +171,7 @@ class ColorSetting(
     override val name: String,
     @Transient
     private val _defaultValue: Int = -1,
+    @Transient override val condition: () -> Boolean = { true }
 ) : Setting() {
     @SerialName("color_value")
     private var storedValue: Int = _defaultValue
@@ -196,7 +202,7 @@ class ColorSetting(
     }
 }
 
-class InfoSetting(val info: String, override val name: String = info) : Setting() {
+class InfoSetting(val info: String, override val name: String = info, @Transient override val condition: () -> Boolean = { true }) : Setting() {
     override fun setFromString(json: Setting) { }
     override fun _reset() { }
 }

@@ -39,8 +39,11 @@ fun ConfigContent(preview: Boolean, mod: Module) {
             ModToggle(mod)
             Spacer(Modifier.height(4.dp))
             for (setting in mod.settings) {
-                SettingEditor(setting)
-                Spacer(Modifier.height(4.dp))
+                val visible by remember { derivedStateOf { setting.condition() } }
+                if (visible) {
+                    SettingEditor(setting)
+                    Spacer(Modifier.height(4.dp))
+                }
             }
         }
 

@@ -37,13 +37,13 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
     var heldItem: ItemStackBridge? by mutableStateOf(null)
 
     override val renderBackground by boolean("Together", false)
-    val orientation by dropdown("Orientation", "Horizontal", "Horizontal", "Vertical")
+    val orientation by dropdown("Orientation", "Horizontal", "Vertical")
     val displayCount by boolean("Item counts", true)
     val displayDurability by boolean("Item durability", true)
-    val maxDur by color("High durability", Color.Green.rgb)
-    val midDur by color("Mid durability", Color.Yellow.rgb)
-    val minDur by color("Low durability", Color.Red.rgb)
-    val durBG by color("Durability background", Color.Gray.rgb)
+    val maxDur by color("High durability", Color.Green.rgb) { displayDurability }
+    val midDur by color("Mid durability", Color.Yellow.rgb) { displayDurability }
+    val minDur by color("Low durability", Color.Red.rgb) { displayDurability }
+    val durBG by color("Durability background", Color.Gray.rgb) { displayDurability }
 
     @Composable
     override fun Render() {

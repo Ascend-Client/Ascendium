@@ -13,7 +13,9 @@ object ModManager {
         ArmorDisplayMod,
         PositionDisplayMod,
         HitHistoryMod,
-        HeadTrackerMod
+        HeadTrackerMod,
+        AccelerometerMod,
+        CompassMod
         //Notifications //remove notifications for now since we don't have any server specific notifications
     )
 
