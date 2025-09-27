@@ -2,6 +2,7 @@ package io.github.betterclient.ascendium.ui.bridge
 
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.Logger
+import io.github.betterclient.ascendium.bridge.createRawOpenGLRenderer
 import io.github.betterclient.ascendium.bridge.minecraft
 import org.jetbrains.skia.*
 import org.lwjgl.glfw.GLFW.*
@@ -16,10 +17,12 @@ import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
 
 class OffscreenSkiaRenderer : SkiaRenderAdapter {
-    var threadStarted: Boolean = false
-    var task: (Canvas) -> Unit = {}
+    @Volatile var threadStarted: Boolean = false
+    @Volatile var task: (Canvas) -> Unit = {}
     val tasks = CopyOnWriteArrayList<() -> Unit>()
     var glTexture by AtomicInteger(0).value0
+    val renderer = createRawOpenGLRenderer()
+    @Volatile var lastCall = System.currentTimeMillis()
 
     override fun withSkia(block: (Canvas) -> Unit) {
         if (!threadStarted) {
@@ -31,7 +34,8 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
 
         task = block
 
-        minecraft.render(glTexture)
+        renderer.render(glTexture)
+        lastCall = System.currentTimeMillis()
     }
 
     override fun task(block: () -> Unit) {
@@ -46,9 +50,20 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
         val dc = DirectContext.makeGL()
         var surface = createSkiaSurface(lastW, lastH, dc)
         this.glTexture = surface.textureID
-        val compatibilityMode = Ascendium.settings.uiBackend != "Offscreen" //if true, we want to use GL11.glFinish()
+        var compatibilityMode = Ascendium.settings.uiBackend != "Offscreen" //if true, we want to use GL11.glFinish()
 
         while (true) {
+            tasks.removeAll { it(); true }
+
+            if (lastCall + 5000 < System.currentTimeMillis()) {
+                //hasn't been called in 5 seconds, assume unused and yield
+                Thread.yield()
+                Thread.sleep(5)
+                continue
+            }
+
+            tasks.removeAll { it(); true }
+
             if (lastW != minecraft.window.fbWidth || lastH != minecraft.window.fbHeight) {
                 lastW = minecraft.window.fbWidth
                 lastH = minecraft.window.fbHeight
@@ -57,6 +72,7 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
                 surface = createSkiaSurface(lastW, lastH, dc)
 
                 this.glTexture = surface.textureID
+                compatibilityMode = Ascendium.settings.uiBackend != "Offscreen"
             }
 
             tasks.removeAll { it(); true }
@@ -66,6 +82,9 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
             dc.resetGLAll()
             canvas.clear(Color.TRANSPARENT)
             task(canvas)
+
+            tasks.removeAll { it(); true }
+
             if(compatibilityMode) {
                 dc.flush()
                 GL11.glFinish()

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.bridge.requireOffscreen
 import io.github.betterclient.ascendium.event.EventTarget
@@ -166,7 +167,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
 
         @OptIn(InternalComposeUiApi::class)
         fun renderAll(modules: List<ComposableHUDModule> = ModManager.getHUDModules(), hud: Boolean) {
-            if (requireOffscreen && myRenderer.adapter !is OffscreenSkiaRenderer) {
+            if (Ascendium.settings.uiBackend != "Compose" && myRenderer.adapter !is OffscreenSkiaRenderer) {
                 myRenderer = SkiaRenderer()
             }
 

@@ -35,6 +35,7 @@ val `1_21_4` = BridgeAdapter(
     screenBridgeAdapter = "Post120BridgedScreen",
     skiaRenderAdapter = "V1214SkiaRenderAdapter",
     openglTextureAdapter = "V1214OpenGLTextureAdapter",
+    rawOpenGLTextureAdapter = "V1214RawOpenGLAdapter",
     offscreen = "DontRequireOffscreen",
 
     minecraftClientAdapter = "1214",
@@ -63,6 +64,7 @@ val `1_21_4` = BridgeAdapter(
 val `1_21_8` = `1_21_4`.copy(
     skiaRenderAdapter = "V1218SkiaRenderAdapter",
     openglTextureAdapter = "V1218OpenGLTextureAdapter",
+    rawOpenGLTextureAdapter = "V1218RawOpenGLAdapter",
     offscreen = "RequireOffscreen",
 
     clickEventAdapter = "1218",
@@ -73,18 +75,20 @@ val `1_21_8` = `1_21_4`.copy(
     screenAdapter = "1218",
     mouseAdapter = "1218",
     minecraftClientAdapter = "1218",
-    applyElse = arrayOf(
+    applyElse = listOf(
         "1218.MixinCubeMapRenderer",
         "1218.MixinDrawContext"
     )
 )
 
 val `1_21_1` = `1_21_4`.copy(
-    splashOverlayAdapter = "1211"
+    splashOverlayAdapter = "1211",
+    rawOpenGLTextureAdapter = "V1211RawOpenGLAdapter"
 )
 
 val `1_20_6` = `1_21_1`.copy(
-    inGameHudAdapter = "1206"
+    inGameHudAdapter = "1206",
+    rawOpenGLTextureAdapter = "V1206RawOpenGLAdapter"
 )
 
 val `1_20_4` = `1_20_6`.copy(
@@ -92,12 +96,15 @@ val `1_20_4` = `1_20_6`.copy(
 )
 
 val `1_20_1` = `1_20_4`.copy(
-    screenAdapter = "V1201BridgedScreen"
+    screenBridgeAdapter = "V1201BridgedScreen"
 )
 
 val `1_19_4` = `1_20_1`.copy(
     splashOverlayAdapter = "1194",
     inGameHudAdapter = "1194",
+    screenAdapter = "1194",
+    unihexFontAdapter = "disable",
+
     screenBridgeAdapter = "Pre120BridgedScreen"
 )
 
@@ -105,7 +112,9 @@ val `1_19_2` = `1_19_4`.copy(
     playerEntityAdapter = "1192",
     itemStackAdapter = "1192",
     spriteAtlasTextureAdapter = "1192",
-    simpleResourceReloadAdapter = "disable"
+    simpleResourceReloadAdapter = "disable",
+
+    rawOpenGLTextureAdapter = "V1192RawOpenGLAdapter"
 )
 
 data class BridgeAdapter(
@@ -113,6 +122,7 @@ data class BridgeAdapter(
     val screenBridgeAdapter: String,
     val skiaRenderAdapter: String,
     val openglTextureAdapter: String,
+    val rawOpenGLTextureAdapter: String,
     val offscreen: String,
 
     val minecraftClientAdapter: String,
@@ -136,76 +146,8 @@ data class BridgeAdapter(
     val textAdapter: String,
     val mainAdapter: String,
     val mouseAdapter: String,
-    val applyElse: Array<String> = emptyArray()
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as BridgeAdapter
-
-        if (keybindingBridgeAdapter != other.keybindingBridgeAdapter) return false
-        if (screenBridgeAdapter != other.screenBridgeAdapter) return false
-        if (skiaRenderAdapter != other.skiaRenderAdapter) return false
-        if (openglTextureAdapter != other.openglTextureAdapter) return false
-        if (offscreen != other.offscreen) return false
-        if (minecraftClientAdapter != other.minecraftClientAdapter) return false
-        if (entityAdapter != other.entityAdapter) return false
-        if (itemStackAdapter != other.itemStackAdapter) return false
-        if (playerEntityAdapter != other.playerEntityAdapter) return false
-        if (keybindingAdapter != other.keybindingAdapter) return false
-        if (optionsAdapter != other.optionsAdapter) return false
-        if (simpleResourceReloadAdapter != other.simpleResourceReloadAdapter) return false
-        if (soundEngineAdapter != other.soundEngineAdapter) return false
-        if (spriteAtlasTextureAdapter != other.spriteAtlasTextureAdapter) return false
-        if (unihexFontAdapter != other.unihexFontAdapter) return false
-        if (inGameHudAdapter != other.inGameHudAdapter) return false
-        if (screenAdapter != other.screenAdapter) return false
-        if (splashOverlayAdapter != other.splashOverlayAdapter) return false
-        if (titleScreenAdapter != other.titleScreenAdapter) return false
-        if (windowAdapter != other.windowAdapter) return false
-        if (chatHudAdapter != other.chatHudAdapter) return false
-        if (clickEventAdapter != other.clickEventAdapter) return false
-        if (styleAdapter != other.styleAdapter) return false
-        if (textAdapter != other.textAdapter) return false
-        if (mainAdapter != other.mainAdapter) return false
-        if (mouseAdapter != other.mouseAdapter) return false
-        if (!applyElse.contentEquals(other.applyElse)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = keybindingBridgeAdapter.hashCode()
-        result = 31 * result + screenBridgeAdapter.hashCode()
-        result = 31 * result + skiaRenderAdapter.hashCode()
-        result = 31 * result + openglTextureAdapter.hashCode()
-        result = 31 * result + offscreen.hashCode()
-        result = 31 * result + minecraftClientAdapter.hashCode()
-        result = 31 * result + entityAdapter.hashCode()
-        result = 31 * result + itemStackAdapter.hashCode()
-        result = 31 * result + playerEntityAdapter.hashCode()
-        result = 31 * result + keybindingAdapter.hashCode()
-        result = 31 * result + optionsAdapter.hashCode()
-        result = 31 * result + simpleResourceReloadAdapter.hashCode()
-        result = 31 * result + soundEngineAdapter.hashCode()
-        result = 31 * result + spriteAtlasTextureAdapter.hashCode()
-        result = 31 * result + unihexFontAdapter.hashCode()
-        result = 31 * result + inGameHudAdapter.hashCode()
-        result = 31 * result + screenAdapter.hashCode()
-        result = 31 * result + splashOverlayAdapter.hashCode()
-        result = 31 * result + titleScreenAdapter.hashCode()
-        result = 31 * result + windowAdapter.hashCode()
-        result = 31 * result + chatHudAdapter.hashCode()
-        result = 31 * result + clickEventAdapter.hashCode()
-        result = 31 * result + styleAdapter.hashCode()
-        result = 31 * result + textAdapter.hashCode()
-        result = 31 * result + mainAdapter.hashCode()
-        result = 31 * result + mouseAdapter.hashCode()
-        result = 31 * result + applyElse.contentHashCode()
-        return result
-    }
-}
+    val applyElse: List<String> = emptyList()
+)
 
 val adapters = mutableMapOf(
     "1.19.2" to `1_19_2`,

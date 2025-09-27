@@ -6,7 +6,8 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "v1194.MixinSplashOverlay",
-    "v1194.MixinInGameHud"
+    "v1194.MixinInGameHud",
+    "v1194.MixinScreen"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -18,6 +18,10 @@ fun createOpenGLTexture(): TextureBridge {
     return BridgeAdapterManager.useBridgeUtil({ it.openglTextureAdapter }) as TextureBridge
 }
 
+fun createRawOpenGLRenderer(): RawTexture {
+    return BridgeAdapterManager.useBridgeUtil({ it.rawOpenGLTextureAdapter }) as RawTexture
+}
+
 inline val requireOffscreen: Boolean
     get() = (BridgeAdapterManager.useBridgeUtil({ it.offscreen }) as RequiresOffscreen).does
 
@@ -36,7 +40,6 @@ interface MinecraftBridge {
     fun setScreen(mcScreen: MCScreen)
     fun raycast(entityBridge: EntityBridge, camera: Pos3D, possibleHits: Pos3D, box: BoundingBox, id: Int, d3: Double): RaycastResultBridge?
     fun loadResource(identifier: IdentifierBridge): ByteArray?
-    fun render(glID: Int)
 }
 
 class RaycastResultBridge(val pos: Pos3D, val entity: EntityBridge?)
@@ -150,7 +153,6 @@ interface KeybindHelper {
 open class BridgeScreen {
     open var width: Int = 0
     open var height: Int = 0
-    open var renderUtil: RenderUtilBridge = NullRenderUtilBridge
 
     open fun render(mouseX: Int, mouseY: Int) {}
     open fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {}
@@ -192,19 +194,12 @@ enum class ClickEventActionBridge {
     COPY_TO_CLIPBOARD
 }
 
-interface RenderUtilBridge {
-    fun text(str: String, x: Int, y: Int, color: Int)
-    fun rect(rect: Rect, color: Int)
-}
-
-object NullRenderUtilBridge : RenderUtilBridge {
-    override fun text(str: String, x: Int, y: Int, color: Int) {}
-    override fun rect(rect: Rect, color: Int) {}
-}
-
 interface TextureBridge {
     fun update(image: BufferedImage)
     fun blit()
 }
 
 interface RequiresOffscreen { val does: Boolean }
+interface RawTexture {
+    fun render(id: Int)
+}

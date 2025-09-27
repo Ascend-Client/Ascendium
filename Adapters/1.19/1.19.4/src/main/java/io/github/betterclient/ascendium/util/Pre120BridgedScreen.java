@@ -1,14 +1,9 @@
 package io.github.betterclient.ascendium.util;
 
 import io.github.betterclient.ascendium.bridge.BridgeScreen;
-import io.github.betterclient.ascendium.bridge.RenderUtilBridge;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.skia.Rect;
 
 public class Pre120BridgedScreen extends Screen {
     public BridgeScreen screen;
@@ -22,23 +17,6 @@ public class Pre120BridgedScreen extends Screen {
     public void render(MatrixStack context, int mouseX, int mouseY, float delta) {
         if (this.screen.shouldRenderBackground()) super.renderBackground(context);
 
-        this.screen.setRenderUtil(new RenderUtilBridge() {
-            @Override
-            public void text(@NotNull String str, int x, int y, int color) {
-                MinecraftClient.getInstance().textRenderer.draw(context, str, x, y, color);
-            }
-
-            @Override
-            public void rect(@NotNull Rect rect, int color) {
-                DrawableHelper.fill(context,
-                        ((int) rect.getLeft()),
-                        ((int) rect.getTop()),
-                        ((int) rect.getRight()),
-                        ((int) rect.getBottom()),
-                        color
-                );
-            }
-        });
         this.screen.setWidth(width);
         this.screen.setHeight(height);
         this.screen.render(mouseX, mouseY);

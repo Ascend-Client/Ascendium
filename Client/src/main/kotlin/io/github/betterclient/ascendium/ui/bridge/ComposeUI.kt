@@ -13,12 +13,15 @@ import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
+import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.BridgeScreen
 import io.github.betterclient.ascendium.bridge.minecraft
+import io.github.betterclient.ascendium.module.ComposableHUDModule
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.properties.Delegates
 
 @OptIn(InternalComposeUiApi::class)
@@ -35,10 +38,14 @@ open class ComposeUI(
         lateinit var current: ComposeUI
         private val tasks = ConcurrentLinkedQueue<() -> Unit>()
 
-        val myRenderer = SkiaRenderer() //reuse
+        var myRenderer = SkiaRenderer() //reuse
     }
 
     fun init0() {
+        if (Ascendium.settings.uiBackend != "Compose" && myRenderer.adapter !is OffscreenSkiaRenderer) {
+            myRenderer = SkiaRenderer()
+        }
+
         current = this
         handle = minecraft.window.windowHandle
         if (!::scene.isInitialized) {
@@ -269,8 +276,8 @@ open class ComposeUI(
         tasks.add(function)
     }
 
-    val mouseHandlers = mutableListOf<(Offset, Offset, Int, Boolean, MouseEvent) -> Boolean>()
-    val renderHandlers = mutableListOf<(Int, Int) -> Unit>()
+    val mouseHandlers = CopyOnWriteArrayList<(Offset, Offset, Int, Boolean, MouseEvent) -> Boolean>()
+    val renderHandlers = CopyOnWriteArrayList<(Int, Int) -> Unit>()
 
     fun addMouseEventHandler(function: (x: Int, y: Int, event: MouseEvent) -> Boolean) {
         mouseHandlers.add { _, a, _, _, e ->
