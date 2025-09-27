@@ -9,7 +9,7 @@
 out/
 # mpeltonen/sbt-idea plugin
 .idea_modules/
-
+kotlin-js-store
 # JIRA plugin
 atlassian-ide-plugin.xml
 

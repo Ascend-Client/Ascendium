@@ -3,17 +3,8 @@ package io.github.betterclient.ascendium.util
 import com.mojang.blaze3d.systems.RenderSystem
 import io.github.betterclient.ascendium.bridge.RawTexture
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.render.BufferBuilderStorage
-import net.minecraft.client.render.BufferRenderer
-import net.minecraft.client.render.GameRenderer
-import net.minecraft.client.render.RenderLayer
-import net.minecraft.client.render.Tessellator
-import net.minecraft.client.render.VertexFormat
-import net.minecraft.client.render.VertexFormats
-import net.minecraft.client.texture.AbstractTexture
+import net.minecraft.client.render.*
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.resource.ResourceManager
-import net.minecraft.util.Identifier
 
 class V1211RawOpenGLAdapter() : RawTexture {
     override fun render(id: Int) {

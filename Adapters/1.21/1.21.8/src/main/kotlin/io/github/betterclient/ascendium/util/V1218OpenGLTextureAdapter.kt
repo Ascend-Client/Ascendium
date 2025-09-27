@@ -10,14 +10,12 @@ import io.github.betterclient.ascendium.bridge.minecraft
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.render.state.TexturedQuadGuiElementRenderState
-import net.minecraft.client.texture.GlTexture
 import net.minecraft.client.texture.NativeImage
 import net.minecraft.client.texture.TextureSetup
 import org.joml.Matrix3x2fStack
 import org.lwjgl.system.MemoryUtil
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
-import java.lang.reflect.Constructor
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 

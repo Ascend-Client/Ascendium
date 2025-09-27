@@ -1,6 +1,5 @@
 package io.github.betterclient.ascendium.bridge
 
-import org.jetbrains.skia.Rect
 import java.awt.image.BufferedImage
 import kotlin.math.sqrt
 

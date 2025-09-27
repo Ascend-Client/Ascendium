@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.IntSize
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.BridgeScreen
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.module.ComposableHUDModule
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
