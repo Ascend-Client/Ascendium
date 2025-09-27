@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.ui.bridge.compose
+package io.github.betterclient.ascendium.ui.bridge
 
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key

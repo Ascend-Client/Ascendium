@@ -4,12 +4,9 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.textures.FilterMode
 import com.mojang.blaze3d.textures.GpuTextureView
 import com.mojang.blaze3d.textures.TextureFormat
-import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.module.config.NumberSetting
-import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderAdapter
+import io.github.betterclient.ascendium.ui.bridge.SkiaRenderAdapter
 import kotlinx.atomicfu.locks.withLock
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.render.state.GuiRenderState

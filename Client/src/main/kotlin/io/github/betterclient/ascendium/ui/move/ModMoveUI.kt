@@ -14,17 +14,16 @@ import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ComposableHUDModule
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI
+import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import io.github.betterclient.ascendium.ui.config.ConfigUI
 import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import io.github.betterclient.ascendium.ui.utils.Center
 
-//TODO: Move module server
-class MoveModuleUI(val mods: List<ComposableHUDModule>) : DynamicUI({
+class MoveModuleUI(val mods: List<ComposableHUDModule>) : ComposeUI({
     MoveModuleUI(mods, null)
-}, { _, _ -> ByteArray(0) })
+})
 
 @Composable
 fun MoveModuleUI(mods: List<ComposableHUDModule>, backToConfig: Boolean?) {
@@ -65,11 +64,11 @@ fun MoveModuleUI(mods: List<ComposableHUDModule>, backToConfig: Boolean?) {
         Center {
             Button(onClick = {
                 if (backToConfig == true) {
-                    DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) {
+                    ComposeUI.current.switchTo {
                         ConfigUI(mods[0], false)
                     }
                 } else {
-                    DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) {
+                    ComposeUI.current.switchTo {
                         ModsUI(false)
                     }
                 }

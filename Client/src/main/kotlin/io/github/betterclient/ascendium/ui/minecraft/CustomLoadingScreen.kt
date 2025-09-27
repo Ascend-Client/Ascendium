@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.ui.bridge.compose.AWTUtils
-import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderer
+import io.github.betterclient.ascendium.ui.bridge.AWTUtils
+import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import java.awt.event.MouseEvent
 

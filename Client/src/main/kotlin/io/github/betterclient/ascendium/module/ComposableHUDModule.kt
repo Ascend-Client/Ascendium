@@ -26,14 +26,17 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.bridge.minecraft
+import io.github.betterclient.ascendium.bridge.requireOffscreen
 import io.github.betterclient.ascendium.module.config.ColorSetting
-import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderer
-import io.github.betterclient.ascendium.ui.bridge.compose.getScaled
-import io.github.betterclient.ascendium.ui.bridge.compose.getUnscaled
+import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
+import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
+import io.github.betterclient.ascendium.ui.bridge.getScaled
+import io.github.betterclient.ascendium.ui.bridge.getUnscaled
 import io.github.betterclient.ascendium.ui.utils.MCFont
 import io.github.betterclient.ascendium.ui.utils.ModifyAll
 
@@ -160,9 +163,14 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
             renderAll(hud = true)
         }
 
-        val myRenderer = SkiaRenderer()
+        var myRenderer = SkiaRenderer()
+
         @OptIn(InternalComposeUiApi::class)
         fun renderAll(modules: List<ComposableHUDModule> = ModManager.getHUDModules(), hud: Boolean) {
+            if (requireOffscreen && myRenderer.adapter !is OffscreenSkiaRenderer) {
+                myRenderer = SkiaRenderer()
+            }
+
             myRenderer.task {
                 tryInitCompose(modules, hud)
             }

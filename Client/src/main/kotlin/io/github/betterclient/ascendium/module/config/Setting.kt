@@ -130,7 +130,7 @@ class StringSetting(
 class DropdownSetting(
     override val name: String,
     @Transient private val _defaultValue: String = "",
-    @Transient val options: List<String> = emptyList(),
+    @Transient val options: MutableList<String> = mutableListOf(),
     @Transient override val condition: () -> Boolean = { true }
 ) : Setting() {
     @SerialName("dropdown_value")

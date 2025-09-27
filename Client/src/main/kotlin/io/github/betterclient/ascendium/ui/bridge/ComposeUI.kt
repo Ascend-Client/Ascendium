@@ -15,15 +15,14 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import io.github.betterclient.ascendium.bridge.BridgeScreen
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.ui.bridge.compose.AWTUtils
-import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderer
-import io.github.betterclient.ascendium.ui.bridge.compose.glfwToAwtKeyCode
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
+import java.awt.event.MouseWheelEvent
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.properties.Delegates
 
 @OptIn(InternalComposeUiApi::class)
-class ComposeUI(
+open class ComposeUI(
     content: @Composable () -> Unit
 ) : BridgeScreen() {
     private val _content = mutableStateOf(content)
@@ -32,7 +31,16 @@ class ComposeUI(
     private lateinit var scene: ComposeScene
     private var handle by Delegates.notNull<Long>()
 
+    companion object {
+        lateinit var current: ComposeUI
+        fun isInitialized() = ::current.isInitialized
+        private val tasks = ConcurrentLinkedQueue<() -> Unit>()
+
+        val myRenderer = SkiaRenderer() //reuse
+    }
+
     fun init0() {
+        current = this
         handle = minecraft.window.windowHandle
         if (!::scene.isInitialized) {
             val window = minecraft.window
@@ -66,8 +74,12 @@ class ComposeUI(
         }
     }
 
-    val myRenderer = SkiaRenderer()
     override fun render(mouseX: Int, mouseY: Int) {
+        while (true) {
+            val item = tasks.poll() ?: break
+            item()
+        }
+
         handle = minecraft.window.windowHandle
         myRenderer.task {
             init0()
@@ -76,6 +88,8 @@ class ComposeUI(
         myRenderer.withSkia {
             scene.render(it.asComposeCanvas(), System.nanoTime())
         }
+
+        renderHandlers.forEach { it(mouseX, mouseY) }
 
         myRenderer.task {
             scene.sendPointerEvent(
@@ -95,17 +109,28 @@ class ComposeUI(
     override fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {
         if (!::scene.isInitialized) return
 
+        val event = AWTUtils.MouseEvent(
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
+            AWTUtils.getAwtMods(handle),
+            button,
+            MouseEvent.MOUSE_PRESSED
+        )
+
+        val bye = mouseHandlers.any {
+            it(
+                Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+                Offset(mouseX.toFloat(), mouseY.toFloat()),
+                button, true, event
+            )
+        }
+        if (bye) return
+
         myRenderer.task {
             scene.sendPointerEvent(
                 position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
                 eventType = PointerEventType.Press,
-                nativeEvent = AWTUtils.MouseEvent(
-                    minecraft.mouse.xPos,
-                    minecraft.mouse.yPos,
-                    AWTUtils.getAwtMods(handle),
-                    button,
-                    MouseEvent.MOUSE_PRESSED
-                ),
+                nativeEvent = event,
                 button = PointerButton(button)
             )
         }
@@ -114,17 +139,28 @@ class ComposeUI(
     override fun mouseReleased(mouseX: Int, mouseY: Int, button: Int) {
         if (!::scene.isInitialized) return
 
+        val event = AWTUtils.MouseEvent(
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
+            AWTUtils.getAwtMods(handle),
+            button,
+            MouseEvent.MOUSE_RELEASED
+        )
+
+        val bye = mouseHandlers.any {
+            it(
+                Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+                Offset(mouseX.toFloat(), mouseY.toFloat()),
+                button, false, event
+            )
+        }
+        if (bye) return
+
         myRenderer.task {
             scene.sendPointerEvent(
                 position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
                 eventType = PointerEventType.Release,
-                nativeEvent = AWTUtils.MouseEvent(
-                    minecraft.mouse.xPos,
-                    minecraft.mouse.yPos,
-                    AWTUtils.getAwtMods(handle),
-                    button,
-                    MouseEvent.MOUSE_RELEASED
-                ),
+                nativeEvent = event,
                 button = PointerButton(button)
             )
         }
@@ -133,18 +169,29 @@ class ComposeUI(
     override fun mouseScrolled(mouseX: Int, mouseY: Int, scrollX: Double, scrollY: Double) {
         if (!::scene.isInitialized) return
 
+        val event = AWTUtils.MouseWheelEvent(
+            minecraft.mouse.xPos,
+            minecraft.mouse.yPos,
+            scrollY,
+            AWTUtils.getAwtMods(handle),
+            MouseEvent.MOUSE_WHEEL
+        )
+
+        val bye = mouseHandlers.any {
+            it(
+                Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
+                Offset(mouseX.toFloat(), mouseY.toFloat()),
+                -1, false, event
+            )
+        }
+        if (bye) return
+
         myRenderer.task {
             scene.sendPointerEvent(
                 position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
                 eventType = PointerEventType.Scroll,
                 scrollDelta = Offset(scrollX.toFloat(), -scrollY.toFloat()),
-                nativeEvent = AWTUtils.MouseWheelEvent(
-                    minecraft.mouse.xPos,
-                    minecraft.mouse.yPos,
-                    scrollY,
-                    AWTUtils.getAwtMods(handle),
-                    MouseEvent.MOUSE_WHEEL
-                )
+                nativeEvent = event
             )
         }
     }
@@ -209,10 +256,38 @@ class ComposeUI(
 
     fun switchTo(newContent: @Composable () -> Unit) {
         _toast.value = { } //clear toast on switch
+        renderHandlers.clear()
+        mouseHandlers.clear()
+
         _content.value = newContent
     }
 
     fun toast(content: @Composable () -> Unit) {
         _toast.value = content
+    }
+
+    fun onRenderThread(function: () -> Unit) {
+        tasks.add(function)
+    }
+
+    val mouseHandlers = mutableListOf<(Offset, Offset, Int, Boolean, MouseEvent) -> Boolean>()
+    val renderHandlers = mutableListOf<(Int, Int) -> Unit>()
+
+    fun addMouseEventHandler(function: (x: Int, y: Int, event: MouseEvent) -> Boolean) {
+        mouseHandlers.add { _, a, _, _, e ->
+            return@add function(a.x.toInt(), a.y.toInt(), e)
+        }
+    }
+
+    fun addMouseHandler(function: (composeCoords: Offset, mcMouse: Offset, button: Int, clicked: Boolean) -> Boolean) {
+        mouseHandlers.add { a, b, c, d, e ->
+            if (e is MouseWheelEvent) return@add false //not capturing
+
+            return@add function(a, b, c, d)
+        }
+    }
+
+    fun addRenderHandler(function: (Int, Int) -> Unit) {
+        renderHandlers.add(function)
     }
 }

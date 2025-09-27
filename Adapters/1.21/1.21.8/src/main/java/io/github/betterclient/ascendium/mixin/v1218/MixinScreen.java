@@ -2,7 +2,6 @@ package io.github.betterclient.ascendium.mixin.v1218;
 
 import io.github.betterclient.ascendium.event.*;
 import io.github.betterclient.ascendium.ui.bridge.ComposeUI;
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI;
 import net.minecraft.client.gui.AbstractParentElement;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -22,9 +21,6 @@ public abstract class MixinScreen extends AbstractParentElement {
 
     @Redirect(method = "renderWithTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderBackground(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
     public void onRenderBackground(Screen instance, DrawContext context, int mouseX, int mouseY, float delta) {
-        if (instance.getClass().getName().startsWith("io.github.betterclient.ascendium.util.") && DynamicUI.Companion.isInitialized() && !DynamicUI.current.shouldRenderBackground()) {
-            return;
-        }
         instance.renderBackground(context, mouseX, mouseY, delta);
     }
 

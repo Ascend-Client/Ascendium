@@ -24,7 +24,7 @@ import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI
+import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
@@ -65,8 +65,7 @@ fun ConfigUI(mod: Module, fromMods: Boolean) {
                         Row(modifier = Modifier.align(Alignment.CenterStart)) {
                             Spacer(Modifier.width(8.dp))
                             Button(onClick = {
-                                //TODO: Mods UI Server
-                                DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) { ModsUI(true) }
+                                ComposeUI.current.switchTo { ModsUI(true) }
                             }) { Text("Back", color = AscendiumTheme.colorScheme.onBackground) }
                         }
 

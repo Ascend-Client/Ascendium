@@ -18,8 +18,8 @@ fun createOpenGLTexture(): TextureBridge {
     return BridgeAdapterManager.useBridgeUtil({ it.openglTextureAdapter }) as TextureBridge
 }
 
-inline val requireChromium: Boolean
-    get() = (BridgeAdapterManager.useBridgeUtil({ it.chromium }) as RequiresChromium).does
+inline val requireOffscreen: Boolean
+    get() = (BridgeAdapterManager.useBridgeUtil({ it.offscreen }) as RequiresOffscreen).does
 
 interface MinecraftBridge {
     val screen: MCScreen?
@@ -36,6 +36,7 @@ interface MinecraftBridge {
     fun setScreen(mcScreen: MCScreen)
     fun raycast(entityBridge: EntityBridge, camera: Pos3D, possibleHits: Pos3D, box: BoundingBox, id: Int, d3: Double): RaycastResultBridge?
     fun loadResource(identifier: IdentifierBridge): ByteArray?
+    fun render(glID: Int)
 }
 
 class RaycastResultBridge(val pos: Pos3D, val entity: EntityBridge?)
@@ -206,4 +207,4 @@ interface TextureBridge {
     fun blit()
 }
 
-interface RequiresChromium { val does: Boolean }
+interface RequiresOffscreen { val does: Boolean }

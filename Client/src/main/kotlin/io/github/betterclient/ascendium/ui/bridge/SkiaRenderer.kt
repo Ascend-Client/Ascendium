@@ -1,5 +1,6 @@
-package io.github.betterclient.ascendium.ui.bridge.compose
+package io.github.betterclient.ascendium.ui.bridge
 
+import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
 import io.github.betterclient.ascendium.bridge.minecraft
 import org.jetbrains.skia.*
@@ -17,7 +18,12 @@ object ScalingUtils {
 }
 
 class SkiaRenderer {
-    val adapter = (BridgeAdapterManager.useBridgeUtil({ it.skiaRenderAdapter }) as SkiaRenderAdapter)
+    val adapter = if (Ascendium.settings.uiBackend == "Compose") {
+        (BridgeAdapterManager.useBridgeUtil({ it.skiaRenderAdapter }) as SkiaRenderAdapter)
+    } else {
+        OffscreenSkiaRenderer()
+    }
+
     fun withSkia(block: (Canvas) -> Unit) {
         adapter.withSkia(block)
     }

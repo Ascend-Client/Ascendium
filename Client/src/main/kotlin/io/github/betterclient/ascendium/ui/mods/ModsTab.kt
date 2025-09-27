@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.module.config.ConfigManager
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI
+import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import io.github.betterclient.ascendium.ui.config.ConfigUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 
@@ -81,8 +81,7 @@ private fun ModuleView(module: Module) {
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Secondary),
             onClick = {
-                //TODO: config ui server
-                DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) {
+                ComposeUI.current.switchTo {
                     ConfigUI(module, true)
                 }
             }

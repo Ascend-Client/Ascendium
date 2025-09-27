@@ -13,8 +13,8 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI
-import io.github.betterclient.ascendium.ui.bridge.compose.getScaled
+import io.github.betterclient.ascendium.ui.bridge.ComposeUI
+import io.github.betterclient.ascendium.ui.bridge.getScaled
 import org.jetbrains.skia.IRect
 import java.awt.Component
 import java.awt.event.MouseEvent
@@ -50,7 +50,7 @@ fun Modifier.detectOutsideClick(
 
             return false
         }
-        DynamicUI.current.addMouseHandler(::handler)
+        ComposeUI.current.addMouseHandler(::handler)
     }
 
     return this.onGloballyPositioned { positions ->
@@ -70,7 +70,7 @@ fun Modifier.renderWithMC(visible: State<Boolean>, block: (coords: IRect) -> Uni
     var position by remember { mutableStateOf<Rect?>(null) }
 
     LaunchedEffect(Unit) {
-        DynamicUI.current.addRenderHandler { mouseX, mouseY ->
+        ComposeUI.current.addRenderHandler { mouseX, mouseY ->
             if (position == null) return@addRenderHandler
             if (!visible.value) return@addRenderHandler
 
@@ -92,7 +92,7 @@ fun Modifier.renderWithMC(visible: State<Boolean>, block: (coords: IRect) -> Uni
 fun Modifier.detectInsideEvent(component: Component, func: (mouseX: Int, mouseY: Int, event: MouseEvent) -> Unit): Modifier {
     var position by remember { mutableStateOf<Rect?>(null) }
     LaunchedEffect(Unit) {
-        DynamicUI.current.addMouseEventHandler { x, y, event ->
+        ComposeUI.current.addMouseEventHandler { x, y, event ->
             if (position == null) return@addMouseEventHandler false
 
             if (x < position!!.left || x > position!!.right ||

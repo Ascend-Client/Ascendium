@@ -1,7 +1,7 @@
 package io.github.betterclient.ascendium.util
 
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderAdapter
+import io.github.betterclient.ascendium.ui.bridge.SkiaRenderAdapter
 import org.jetbrains.skia.*
 import org.lwjgl.opengl.GL33C
 
@@ -18,7 +18,7 @@ class V1214SkiaRenderAdapter : SkiaRenderAdapter {
 object V1214SkiaRenderAdapterObject {
     private var vpW = 0
     private var vpH = 0
-    private var context = DirectContext.makeGL()
+    var context = DirectContext.makeGL()
     private lateinit var renderTarget: BackendRenderTarget
     private lateinit var surface: Surface
 

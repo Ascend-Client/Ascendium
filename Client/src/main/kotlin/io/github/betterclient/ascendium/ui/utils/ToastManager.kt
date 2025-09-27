@@ -18,11 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI
+import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 
 fun showToast(text: String) {
-    //TODO: toast server
-    DynamicUI.current.toast {
+    ComposeUI.current.toast {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val no = false
             val yes0 = remember { mutableStateOf(no) }
@@ -40,7 +39,7 @@ fun showToast(text: String) {
                             yes = no //hehe
                             Thread {
                                 Thread.sleep(300)
-                                DynamicUI.current.toast {  }
+                                ComposeUI.current.toast {  }
                             }.start()
                         }
                         .background(darkColorScheme().primaryContainer, RoundedCornerShape(16.dp)).padding(8.dp),
@@ -56,7 +55,7 @@ fun showToast(text: String) {
                             yes = no
                             Thread {
                                 Thread.sleep(300)
-                                DynamicUI.current.toast {  }
+                                ComposeUI.current.toast {  }
                             }.start()
                         }
                     ) { Text("OK") }

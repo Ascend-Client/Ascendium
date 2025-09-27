@@ -3,6 +3,7 @@ package io.github.betterclient.ascendium.mixin.v1218;
 import io.github.betterclient.ascendium.Ascendium;
 import io.github.betterclient.ascendium.bridge.*;
 import io.github.betterclient.ascendium.event.EntityHitEvent;
+import io.github.betterclient.ascendium.util.V1218OpenGLTextureAdapterKt;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.RunArgs;
@@ -175,5 +176,10 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
             case null -> null;
             default -> MCScreen.OTHER_SCREEN;
         };
+    }
+
+    @Override
+    public void render(int glID) {
+        V1218OpenGLTextureAdapterKt.render(glID);
     }
 }

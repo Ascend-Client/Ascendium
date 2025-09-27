@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.Module
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI
+import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 
 @Composable
@@ -30,8 +30,7 @@ fun ModToggle(mod: Module) {
         if (mod is ComposableHUDModule) {
             Spacer(Modifier.width(4.dp))
             Button(onClick = {
-                //TODO: move module server
-                DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) { MoveModuleUI(listOf(mod), true) }
+                ComposeUI.current.switchTo { MoveModuleUI(listOf(mod), true) }
             }) { Text("Move") }
         }
     }

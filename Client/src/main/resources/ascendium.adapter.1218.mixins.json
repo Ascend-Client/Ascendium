@@ -13,7 +13,8 @@
     "v1218.MixinScreen",
     "v1218.MixinCubeMapRenderer",
     "v1218.MixinDrawContext",
-    "v1218.MixinMouse"
+    "v1218.MixinMouse",
+    "v1218.MixinMinecraftClient"
   ],
   "client": [],
   "injectors": {

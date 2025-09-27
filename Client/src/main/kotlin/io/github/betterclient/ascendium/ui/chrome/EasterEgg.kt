@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI
+import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import io.github.betterclient.ascendium.ui.mods.ModsUI
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 
@@ -67,8 +67,9 @@ private fun RowScope.Navigation() {
     Spacer(Modifier.width(2.dp))
 
     Button(onClick = {
-        //TODO: mods UI server
-        DynamicUI.current.switchTo({ _, _ -> ByteArray(0) }) { ModsUI(true) }
+        ComposeUI.current.switchTo {
+            ModsUI(true)
+        }
     }) { Text("Back") }
 
     IconButton(

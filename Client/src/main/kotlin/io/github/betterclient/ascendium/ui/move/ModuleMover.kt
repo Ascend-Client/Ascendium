@@ -2,11 +2,11 @@ package io.github.betterclient.ascendium.ui.move
 
 import io.github.betterclient.ascendium.module.ComposableHUDModule
 import io.github.betterclient.ascendium.module.config.ConfigManager
-import io.github.betterclient.ascendium.ui.bridge.DynamicUI
+import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import org.jetbrains.skia.Rect
 
 class ModuleMover(val mods: List<ComposableHUDModule>) {
-    val current = DynamicUI.current
+    val current = ComposeUI.current
     var isDragging = false
     var dragStartX = 0
     var dragStartY = 0

@@ -35,7 +35,7 @@ val `1_21_4` = BridgeAdapter(
     screenBridgeAdapter = "Post120BridgedScreen",
     skiaRenderAdapter = "V1214SkiaRenderAdapter",
     openglTextureAdapter = "V1214OpenGLTextureAdapter",
-    chromium = "DontRequireChromium",
+    offscreen = "DontRequireOffscreen",
 
     minecraftClientAdapter = "1214",
     entityAdapter = "1214",
@@ -63,7 +63,7 @@ val `1_21_4` = BridgeAdapter(
 val `1_21_8` = `1_21_4`.copy(
     skiaRenderAdapter = "V1218SkiaRenderAdapter",
     openglTextureAdapter = "V1218OpenGLTextureAdapter",
-    //chromium = "RequireChromium",
+    offscreen = "RequireOffscreen",
 
     clickEventAdapter = "1218",
     splashOverlayAdapter = "1218",
@@ -72,6 +72,7 @@ val `1_21_8` = `1_21_4`.copy(
     playerEntityAdapter = "1218",
     screenAdapter = "1218",
     mouseAdapter = "1218",
+    minecraftClientAdapter = "1218",
     applyElse = arrayOf(
         "1218.MixinCubeMapRenderer",
         "1218.MixinDrawContext"
@@ -112,7 +113,7 @@ data class BridgeAdapter(
     val screenBridgeAdapter: String,
     val skiaRenderAdapter: String,
     val openglTextureAdapter: String,
-    val chromium: String,
+    val offscreen: String,
 
     val minecraftClientAdapter: String,
     val entityAdapter: String,
@@ -146,7 +147,7 @@ val adapters = mutableMapOf(
     "1.20.6" to `1_20_6`,
     "1.21.1" to `1_21_1`,
     "1.21.4" to `1_21_4`,
-    //"1.21.8" to `1_21_8`
+    "1.21.8" to `1_21_8`
 )
 
 val mixinMapping = mapOf<String, (adapter: BridgeAdapter) -> String>(

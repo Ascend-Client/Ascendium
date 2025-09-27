@@ -10,9 +10,9 @@ import io.github.betterclient.ascendium.bridge.MCScreen
 import io.github.betterclient.ascendium.event.*
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.module.impl.notifications.Notifications.multipleNotifications
-import io.github.betterclient.ascendium.ui.bridge.compose.AWTUtils
-import io.github.betterclient.ascendium.ui.bridge.compose.SkiaRenderer
-import io.github.betterclient.ascendium.ui.bridge.compose.glfwToAwtKeyCode
+import io.github.betterclient.ascendium.ui.bridge.AWTUtils
+import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
+import io.github.betterclient.ascendium.ui.bridge.glfwToAwtKeyCode
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 
