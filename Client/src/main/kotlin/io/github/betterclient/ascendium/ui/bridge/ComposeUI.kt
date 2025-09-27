@@ -33,7 +33,6 @@ open class ComposeUI(
 
     companion object {
         lateinit var current: ComposeUI
-        fun isInitialized() = ::current.isInitialized
         private val tasks = ConcurrentLinkedQueue<() -> Unit>()
 
         val myRenderer = SkiaRenderer() //reuse

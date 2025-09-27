@@ -26,12 +26,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.github.betterclient.ascendium.Ascendium
+import io.github.betterclient.ascendium.bridge.minecraft
+import io.github.betterclient.ascendium.bridge.requireOffscreen
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
-import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.bridge.requireOffscreen
 import io.github.betterclient.ascendium.module.config.ColorSetting
 import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer

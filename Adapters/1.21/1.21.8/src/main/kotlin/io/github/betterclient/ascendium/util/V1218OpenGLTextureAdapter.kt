@@ -14,7 +14,6 @@ import net.minecraft.client.texture.GlTexture
 import net.minecraft.client.texture.NativeImage
 import net.minecraft.client.texture.TextureSetup
 import org.joml.Matrix3x2fStack
-import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt

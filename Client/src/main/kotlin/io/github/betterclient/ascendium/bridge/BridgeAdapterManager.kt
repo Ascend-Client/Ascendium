@@ -137,7 +137,75 @@ data class BridgeAdapter(
     val mainAdapter: String,
     val mouseAdapter: String,
     val applyElse: Array<String> = emptyArray()
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BridgeAdapter
+
+        if (keybindingBridgeAdapter != other.keybindingBridgeAdapter) return false
+        if (screenBridgeAdapter != other.screenBridgeAdapter) return false
+        if (skiaRenderAdapter != other.skiaRenderAdapter) return false
+        if (openglTextureAdapter != other.openglTextureAdapter) return false
+        if (offscreen != other.offscreen) return false
+        if (minecraftClientAdapter != other.minecraftClientAdapter) return false
+        if (entityAdapter != other.entityAdapter) return false
+        if (itemStackAdapter != other.itemStackAdapter) return false
+        if (playerEntityAdapter != other.playerEntityAdapter) return false
+        if (keybindingAdapter != other.keybindingAdapter) return false
+        if (optionsAdapter != other.optionsAdapter) return false
+        if (simpleResourceReloadAdapter != other.simpleResourceReloadAdapter) return false
+        if (soundEngineAdapter != other.soundEngineAdapter) return false
+        if (spriteAtlasTextureAdapter != other.spriteAtlasTextureAdapter) return false
+        if (unihexFontAdapter != other.unihexFontAdapter) return false
+        if (inGameHudAdapter != other.inGameHudAdapter) return false
+        if (screenAdapter != other.screenAdapter) return false
+        if (splashOverlayAdapter != other.splashOverlayAdapter) return false
+        if (titleScreenAdapter != other.titleScreenAdapter) return false
+        if (windowAdapter != other.windowAdapter) return false
+        if (chatHudAdapter != other.chatHudAdapter) return false
+        if (clickEventAdapter != other.clickEventAdapter) return false
+        if (styleAdapter != other.styleAdapter) return false
+        if (textAdapter != other.textAdapter) return false
+        if (mainAdapter != other.mainAdapter) return false
+        if (mouseAdapter != other.mouseAdapter) return false
+        if (!applyElse.contentEquals(other.applyElse)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = keybindingBridgeAdapter.hashCode()
+        result = 31 * result + screenBridgeAdapter.hashCode()
+        result = 31 * result + skiaRenderAdapter.hashCode()
+        result = 31 * result + openglTextureAdapter.hashCode()
+        result = 31 * result + offscreen.hashCode()
+        result = 31 * result + minecraftClientAdapter.hashCode()
+        result = 31 * result + entityAdapter.hashCode()
+        result = 31 * result + itemStackAdapter.hashCode()
+        result = 31 * result + playerEntityAdapter.hashCode()
+        result = 31 * result + keybindingAdapter.hashCode()
+        result = 31 * result + optionsAdapter.hashCode()
+        result = 31 * result + simpleResourceReloadAdapter.hashCode()
+        result = 31 * result + soundEngineAdapter.hashCode()
+        result = 31 * result + spriteAtlasTextureAdapter.hashCode()
+        result = 31 * result + unihexFontAdapter.hashCode()
+        result = 31 * result + inGameHudAdapter.hashCode()
+        result = 31 * result + screenAdapter.hashCode()
+        result = 31 * result + splashOverlayAdapter.hashCode()
+        result = 31 * result + titleScreenAdapter.hashCode()
+        result = 31 * result + windowAdapter.hashCode()
+        result = 31 * result + chatHudAdapter.hashCode()
+        result = 31 * result + clickEventAdapter.hashCode()
+        result = 31 * result + styleAdapter.hashCode()
+        result = 31 * result + textAdapter.hashCode()
+        result = 31 * result + mainAdapter.hashCode()
+        result = 31 * result + mouseAdapter.hashCode()
+        result = 31 * result + applyElse.contentHashCode()
+        return result
+    }
+}
 
 val adapters = mutableMapOf(
     "1.19.2" to `1_19_2`,

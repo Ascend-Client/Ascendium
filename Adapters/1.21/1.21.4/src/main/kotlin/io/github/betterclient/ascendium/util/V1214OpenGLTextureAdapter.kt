@@ -1,12 +1,10 @@
 package io.github.betterclient.ascendium.util
 
 import io.github.betterclient.ascendium.bridge.TextureBridge
-import io.github.betterclient.ascendium.bridge.minecraft
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.BufferBuilderStorage
 import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.render.RenderLayer
-import net.minecraft.client.render.RenderLayers
 import net.minecraft.client.texture.AbstractTexture
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.Identifier

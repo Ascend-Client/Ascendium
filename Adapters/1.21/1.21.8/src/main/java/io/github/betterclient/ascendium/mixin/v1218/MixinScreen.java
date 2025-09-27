@@ -1,7 +1,6 @@
 package io.github.betterclient.ascendium.mixin.v1218;
 
 import io.github.betterclient.ascendium.event.*;
-import io.github.betterclient.ascendium.ui.bridge.ComposeUI;
 import net.minecraft.client.gui.AbstractParentElement;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
