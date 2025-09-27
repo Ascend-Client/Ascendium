@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.bridge.minecraft
+import io.github.betterclient.ascendium.bridge.requireOffscreen
 import io.github.betterclient.ascendium.ui.bridge.AWTUtils
+import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
 import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
 import java.awt.event.MouseEvent
@@ -59,10 +61,10 @@ private fun LoadingScreen() {
         }
 
         if (!didAnim) {
-            val animateTransition by remember(CustomLoadingScreen.progress) { mutableStateOf(CustomLoadingScreen.progress > 0.95f) }
+            val animateTransition = CustomLoadingScreen.progress > 0.99f
             val animateProgress by animateFloatAsState(
                 if (animateTransition) 1.0f else 0.0f,
-                animationSpec = tween(500),
+                animationSpec = tween(200),
                 finishedListener = {
                     CustomLoadingScreen.progressText = "Loading"
                     didAnim = true //never again
@@ -100,8 +102,13 @@ object CustomLoadingScreen {
         }
     }
 
-    val myRenderer = SkiaRenderer()
+    var myRenderer = SkiaRenderer()
     fun render(progress: Float) {
+        if (requireOffscreen && myRenderer.adapter !is OffscreenSkiaRenderer) {
+            myRenderer = SkiaRenderer()
+            if (myRenderer.adapter !is OffscreenSkiaRenderer) return
+        }
+
         myRenderer.task {
             init() //loading screen doesn't send init's correctly?
         }

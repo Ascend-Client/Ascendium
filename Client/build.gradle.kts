@@ -10,7 +10,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
     id("org.jetbrains.compose") version "1.9.0-beta01"
 }
-val compile = false //important, set to true when running "build"
+val compile: Boolean by lazy {
+    gradle.startParameter.taskNames.any { it.contains("build", ignoreCase = true) }
+}
 
 configurations.all {
     resolutionStrategy {

@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.betterclient.ascendium.mixin",
+  "plugin": "io.github.betterclient.ascendium.bridge.BridgeMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "v1165.common.MixinPlayerEntity",
+    "v1165.common.MixinEntity",
+    "v1165.common.MixinItemStack",
+    "v1165.MixinMinecraftClient",
+    "v1165.options.MixinKeybinding",
+    "v1165.options.MixinOptions",
+    "v1165.MixinSoundEngine",
+    "v1165.MixinChatHud",
+    "v1165.MixinSplashOverlay"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

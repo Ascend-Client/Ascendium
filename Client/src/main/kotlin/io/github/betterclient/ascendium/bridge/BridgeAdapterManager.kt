@@ -117,6 +117,22 @@ val `1_19_2` = `1_19_4`.copy(
     rawOpenGLTextureAdapter = "V1192RawOpenGLAdapter"
 )
 
+val `1_16_5` = `1_19_2`.copy(
+    offscreen = "RequireOffscreen",
+    screenBridgeAdapter = "V116BridgedScreen",
+    rawOpenGLTextureAdapter = "V1165RawOpenGLAdapter",
+
+    playerEntityAdapter = "1165",
+    entityAdapter = "1165",
+    itemStackAdapter = "1165",
+    minecraftClientAdapter = "1165",
+    keybindingAdapter = "1165",
+    optionsAdapter = "1165",
+    soundEngineAdapter = "1165",
+    chatHudAdapter = "1165",
+    splashOverlayAdapter = "1165" //actually splash screen
+)
+
 data class BridgeAdapter(
     val keybindingBridgeAdapter: String,
     val screenBridgeAdapter: String,
@@ -150,6 +166,7 @@ data class BridgeAdapter(
 )
 
 val adapters = mutableMapOf(
+    "1.16.5" to `1_16_5`,
     "1.19.2" to `1_19_2`,
     "1.19.4" to `1_19_4`,
     "1.20.1" to `1_20_1`,
