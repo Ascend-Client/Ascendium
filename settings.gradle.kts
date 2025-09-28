@@ -42,4 +42,4 @@ val Adapters = arrayOf(
 
 SupportedVersions.forEach { include(":SupportedVersions:$it") }
 Adapters.forEach { include(":Adapters:$it") }
-include(":Client")
+include(":Client", ":WebDemo")

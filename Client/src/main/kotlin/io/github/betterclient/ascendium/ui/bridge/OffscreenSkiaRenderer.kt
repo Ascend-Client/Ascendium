@@ -24,6 +24,28 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
     val renderer = createRawOpenGLRenderer()
     @Volatile var lastCall = System.currentTimeMillis()
 
+    val version = GL11.glGetString(GL11.GL_VERSION)
+    val minor: Int
+    val major: Int
+    val core: Boolean
+    init {
+        var majorVer = 2
+        var minorVer = 1
+        try {
+            val parts = version!!.split(".").map { it.trim().toIntOrNull()?: 0 }
+            if (parts.size >= 2) {
+                majorVer = parts[0]
+                minorVer = parts[1]
+            }
+        } catch (_: Exception) {
+            //fallback to defaults
+        }
+
+        minor = minorVer
+        major = majorVer
+        core = (majorVer >= 3 && minorVer >= 2)
+    }
+
     override fun withSkia(block: (Canvas) -> Unit) {
         if (!threadStarted) {
             Thread(::offscreenThread).apply {
@@ -131,13 +153,15 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 
-        //ver 4.6
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6)
+        //version
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor)
 
-        //compat
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
+        //core
+        glfwWindowHint(GLFW_OPENGL_PROFILE, if (core) GLFW_OPENGL_CORE_PROFILE else GLFW_OPENGL_ANY_PROFILE)
+        if (core) {
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
+        }
 
         //share textures and stuff with the main handle
         val handle = glfwCreateWindow(1, 1, "Offscreen context", 0L, minecraft.window.windowHandle)

@@ -123,7 +123,7 @@ object AccelerometerMod : HUDModule("Accelerometer", "Track your speed") {
         speed = deltas1Sec.sumOf { it.second.absoluteValue }
         deltasMax.add(now to speed)
 
-        range = max(deltasMax.maxOfOrNull { it.second } ?: 1.0, 1.0).toFloat()
+        range = max(deltasMax.maxOfOrNull { it.second } ?: 6.0, 6.0).toFloat()
     }
 
     @Composable
