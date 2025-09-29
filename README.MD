@@ -2,7 +2,7 @@
 
 Ascendium is a modern Minecraft client built with Fabric and Jetpack Compose.
 
-## 🔧 Installation
+## Installation
 
 1. Install [fabric loader](https://fabricmc.net/) for any supported version
 2. Drop the ascendium .jar file into the `/mods` folder
