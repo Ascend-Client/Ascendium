@@ -11,6 +11,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -45,9 +46,13 @@ fun BoxScope.ModeButtons() {
         TextButton(onClick = {}, modifier = Modifier.width(512.dp)) {
             Text("Ascendium", fontSize = 72.sp)
         }
+        Button(onClick = {}, modifier = Modifier.width(256.dp).alpha(0.4f).align(Alignment.CenterHorizontally)) {
+            Text("Demo version", fontSize = 24.sp)
+        }
 
         val alpha = 0.7f //this should probably not be configurable
-        Spacer(Modifier.height(128.dp))
+        Spacer(Modifier.height(192.dp))
+
         Button(
             onClick = {
                 //SWITCH

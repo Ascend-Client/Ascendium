@@ -40,7 +40,7 @@ class V1214RawOpenGLAdapter() : RawTexture {
         val window = instance.window
 
         val consumers = instance.gameRenderer.buffers.entityVertexConsumers
-        val renderLayer = RenderLayer.getGuiOpaqueTexturedBackground(
+        val renderLayer = RenderLayer.getGuiTextured(
             cache.computeIfAbsent(id) { tex -> generateID(tex) }
         )
 

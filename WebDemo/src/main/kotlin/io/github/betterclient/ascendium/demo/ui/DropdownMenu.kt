@@ -18,8 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -33,6 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
@@ -114,5 +116,31 @@ fun DropdownMenu(
 @Composable
 fun TrailingIcon(expanded: Boolean) {
     //Copied from ExposedDropdownMenuDefaults.TrailingIcon
-    Icon(Icons.Default.ArrowDropDown, null, Modifier.rotate(if (expanded) 180f else 0f))
+    Icon(Arrow_drop_down, null, Modifier.rotate(if (expanded) 180f else 0f))
 }
+
+val Arrow_drop_down: ImageVector
+    get() {
+        if (_Arrow_drop_down != null) return _Arrow_drop_down!!
+
+        _Arrow_drop_down = ImageVector.Builder(
+            name = "Arrow_drop_down",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color(0xFF000000))
+            ) {
+                moveTo(480f, 600f)
+                lineTo(280f, 400f)
+                horizontalLineToRelative(400f)
+                close()
+            }
+        }.build()
+
+        return _Arrow_drop_down!!
+    }
+
+private var _Arrow_drop_down: ImageVector? = null

@@ -19,6 +19,6 @@ object PingMod : Module("Ping", "Display your ping", 150) {
 
     @Composable
     override fun Render() {
-        Text(FPSMod.template.replace("%PING%", "-1"))
+        Text(template.replace("%PING%", "-1"))
     }
 }

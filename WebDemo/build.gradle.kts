@@ -6,8 +6,15 @@ plugins {
 
 kotlin {
     js(IR) {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions.freeCompilerArgs.add("-Xir-minimized-member-names=false")
+            }
+        }
+
         browser {
             commonWebpackConfig {
+                mode = org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.PRODUCTION
                 outputFileName = "ascendium-webdemo.js"
             }
 
@@ -31,7 +38,6 @@ dependencies {
     implementation(compose.ui)
 
     implementation("com.github.skydoves:colorpicker-compose:1.1.2")
-    implementation(compose.materialIconsExtended)
 
     implementation(npm("esbuild", "0.20.0"))
     implementation(npm("esbuild-loader", "4.0.0"))
