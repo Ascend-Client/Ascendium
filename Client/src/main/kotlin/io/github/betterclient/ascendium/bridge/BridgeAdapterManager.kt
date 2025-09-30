@@ -81,6 +81,20 @@ val `1_21_8` = `1_21_4`.copy(
     )
 )
 
+val `1_21_9` = `1_21_8`.copy(
+    screenAdapter = "1219",
+    keybindingAdapter = "1219",
+    mouseAdapter = "1219",
+
+    screenBridgeAdapter = "V1219BridgedScreen",
+    keybindingBridgeAdapter = "V1219KeybindingHelper",
+    applyElse = listOf(
+        "1218.MixinCubeMapRenderer",
+        "1219.MixinDrawContext",
+        "1219.MixinKeybindingCategory"
+    )
+)
+
 val `1_21_1` = `1_21_4`.copy(
     splashOverlayAdapter = "1211",
     rawOpenGLTextureAdapter = "V1211RawOpenGLAdapter"
@@ -174,7 +188,8 @@ val adapters = mutableMapOf(
     "1.20.6" to `1_20_6`,
     "1.21.1" to `1_21_1`,
     "1.21.4" to `1_21_4`,
-    "1.21.8" to `1_21_8`
+    "1.21.8" to `1_21_8`,
+    "1.21.9" to `1_21_9`
 )
 
 val mixinMapping = mapOf<String, (adapter: BridgeAdapter) -> String>(

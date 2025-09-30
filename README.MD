@@ -18,8 +18,11 @@ Ascendium is a modern Minecraft client built with Fabric and Jetpack Compose.
 
 ## Supported Versions
 
+> A single **fat JAR** works across all listed versions. Versions *between* these are **not supported**.
+
 | Version | Supported |
 |---------|-----------|
+| 1.21.9  | ✅         |
 | 1.21.8  | ✅         |
 | 1.21.4  | ✅         |
 | 1.21.1  | ✅         |
@@ -29,7 +32,5 @@ Ascendium is a modern Minecraft client built with Fabric and Jetpack Compose.
 | 1.19.4  | ✅         |
 | 1.19.2  | ✅         |
 | 1.16.5  | ✅         |
-
-> A single **fat JAR** works across all listed versions. Versions *between* these are **not supported**.
 
 License: GPL v3

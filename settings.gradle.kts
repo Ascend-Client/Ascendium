@@ -22,7 +22,8 @@ val SupportedVersions = arrayOf(
 
     "1.21:1.21.1",
     "1.21:1.21.4",
-    "1.21:1.21.8"
+    "1.21:1.21.8",
+    "1.21:1.21.9"
 )
 
 val Adapters = arrayOf(
@@ -37,7 +38,8 @@ val Adapters = arrayOf(
 
     "1.21:1.21.1",
     "1.21:1.21.4",
-    "1.21:1.21.8"
+    "1.21:1.21.8",
+    "1.21:1.21.9"
 )
 
 SupportedVersions.forEach { include(":SupportedVersions:$it") }

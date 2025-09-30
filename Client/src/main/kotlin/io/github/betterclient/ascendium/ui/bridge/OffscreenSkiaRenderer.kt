@@ -10,6 +10,7 @@ import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30
+import org.lwjgl.system.MemoryUtil
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.ReadWriteProperty
@@ -48,7 +49,11 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
 
     override fun withSkia(block: (Canvas) -> Unit) {
         if (!threadStarted) {
-            Thread(::offscreenThread).apply {
+            //create the opengl handle on mc thread(windows WGL hates me)
+            val windowHandle = createGL()
+            Thread {
+                offscreenThread(windowHandle)
+            }.apply {
                 isDaemon = true
             }.start()
             threadStarted = true
@@ -64,11 +69,12 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
         tasks.add(block)
     }
 
-    fun offscreenThread() {
+    fun offscreenThread(handle: Long) {
         var lastW = minecraft.window.fbWidth
         var lastH = minecraft.window.fbHeight
 
-        val windowHandle = createGL()
+        glfwMakeContextCurrent(handle)
+        GL.createCapabilities()
         val dc = DirectContext.makeGL()
         var surface = createSkiaSurface(lastW, lastH, dc)
         this.glTexture = surface.textureID
@@ -151,28 +157,26 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
         //offscreen
         glfwDefaultWindowHints()
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
+
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API)
+        glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API)
 
         //version
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major)
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor)
 
         //core
-        glfwWindowHint(GLFW_OPENGL_PROFILE, if (core) GLFW_OPENGL_CORE_PROFILE else GLFW_OPENGL_ANY_PROFILE)
+        glfwWindowHint(GLFW_OPENGL_PROFILE, if(core) GLFW_OPENGL_CORE_PROFILE else GLFW_OPENGL_ANY_PROFILE)
         if (core) {
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
         }
 
         //share textures and stuff with the main handle
-        val handle = glfwCreateWindow(1, 1, "Offscreen context", 0L, minecraft.window.windowHandle)
+        val handle = glfwCreateWindow(1, 1, "", MemoryUtil.NULL, minecraft.window.windowHandle)
         if (handle == 0L) {
-            glfwTerminate()
             Logger.error("Failed to create offscreen window")
             exitProcess(0)
         }
-
-        glfwMakeContextCurrent(handle)
-        GL.createCapabilities()
 
         return handle
     }
