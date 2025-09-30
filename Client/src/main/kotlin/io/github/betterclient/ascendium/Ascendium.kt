@@ -32,7 +32,7 @@ object Ascendium {
         }
 
         //commenting this will also disable easter egg
-        ChromiumDownloader.download()
+        //ChromiumDownloader.download() TODO: re enable after making easter egg
 
         //colorpicker crash
         Dispatchers.setMain(Dispatchers.Default)

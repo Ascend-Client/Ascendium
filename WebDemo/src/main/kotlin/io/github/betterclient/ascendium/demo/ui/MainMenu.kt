@@ -71,7 +71,7 @@ fun BoxScope.ModeButtons() {
             onClick = {
                 //TRIGGER YOUTUBE
                 window.open(
-                    "https://www.youtube.com/watch?v=Y6VBWgT2YH4"
+                    "https://youtu.be/plZ5BHLE6k8"
                 )
             },
             modifier = Modifier
@@ -85,14 +85,14 @@ fun BoxScope.ModeButtons() {
             onClick = {
                 //TRIGGER DOWNLOAD
                 window.open(
-                    "https://github.com/Ascend-Client/Ascendium"
+                    "https://github.com/Ascend-Client/Ascendium/releases/tag/1.0"
                 )
             },
             modifier = Modifier
                 .width(512.dp)
                 .alpha(alpha)
         ) {
-            Text("Download jar", fontSize = 24.sp)
+            Text("Download", fontSize = 24.sp)
         }
     }
 }
