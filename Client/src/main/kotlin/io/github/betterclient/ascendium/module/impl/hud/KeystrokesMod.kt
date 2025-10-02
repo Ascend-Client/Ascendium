@@ -78,7 +78,16 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
 
     @Composable
     fun JoystickMovement() {
-        Box(Modifier.aspectRatio(4/3f).background(Color(unPressedColor), RoundedCornerShape(16.dp))) {
+        Box(
+            Modifier
+                .then(if (!mouseKeys && !spaceBar) Modifier.width(100.dp) else Modifier) //there's nothing to aspectRatio off of
+                .aspectRatio(4/3f)
+                .dropShadow(
+                    shape = RoundedCornerShape(8.dp),
+                    shadow = Shadow(color = Color(unPressedColor), radius = 16.dp)
+                )
+                .background(Color(unPressedColor), RoundedCornerShape(16.dp))
+        ) {
             val trail = remember { mutableStateListOf<Pair<Float, Float>>() }
 
             val xPos by animateFloatAsState(
