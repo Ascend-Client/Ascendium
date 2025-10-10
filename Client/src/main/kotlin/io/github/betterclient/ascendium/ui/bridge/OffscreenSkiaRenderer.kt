@@ -85,6 +85,7 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
 
             if (lastCall + 5000 < System.currentTimeMillis()) {
                 //hasn't been called in 5 seconds, assume unused and yield
+                glTexture = -1
                 Thread.yield()
                 Thread.sleep(5)
                 continue

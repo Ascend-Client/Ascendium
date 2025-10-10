@@ -80,44 +80,50 @@ private fun ColorPickerWindow(initial: Color, onChange: (Color) -> Unit) {
         controller.selectByColor(initial, false)
     }
 
-    Column(
+    Row(
         Modifier
-            .width(300.dp)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .width(700.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        ColorPickerSliders(controller)
+        Column(
+            Modifier
+                .weight(0.8f)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            ColorPickerSliders(controller)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                BrightnessSlider(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(35.dp),
+                    controller = controller,
+                    borderRadius = 8.dp,
+                    borderSize = 2.dp,
+                    borderColor = AscendiumTheme.colorScheme.outline
+                )
+
+                AlphaSlider(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(35.dp),
+                    controller = controller,
+                    borderRadius = 8.dp,
+                    borderSize = 2.dp,
+                    borderColor = AscendiumTheme.colorScheme.outline
+                )
+            }
+        }
 
         HsvColorPicker(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp),
+            modifier = Modifier.weight(0.2f).aspectRatio(1f).padding(end = 16.dp),
             controller = controller,
             onColorChanged = {
                 onChange(it.color)
             },
             initialColor = initial
-        )
-
-        BrightnessSlider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(35.dp),
-            controller =controller,
-            borderRadius = 8.dp,
-            borderSize = 2.dp,
-            borderColor = AscendiumTheme.colorScheme.outline
-        )
-
-        AlphaSlider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(35.dp),
-            controller = controller,
-            borderRadius = 8.dp,
-            borderSize = 2.dp,
-            borderColor = AscendiumTheme.colorScheme.outline
         )
     }
 }
@@ -126,53 +132,63 @@ private fun ColorPickerWindow(initial: Color, onChange: (Color) -> Unit) {
 private fun ColorPickerSliders(controller: ColorPickerController) {
     val color by controller.selectedColor
     val sliders = listOf(
-        "Red" to { v: Float -> color.copy(red = v) to color.red },
-        "Green" to { v: Float -> color.copy(green = v) to color.green },
-        "Blue" to { v: Float -> color.copy(blue = v) to color.blue },
-        "Alpha" to { v: Float -> color.copy(alpha = v) to color.alpha }
+        "Red" to { it: Float -> color.copy(red = it) to color.red },
+        "Blue" to { it: Float -> color.copy(blue = it) to color.blue },
+        "Green" to { it: Float -> color.copy(green = it) to color.green },
+        "Alpha" to { it: Float -> color.copy(alpha = it) to color.alpha },
     )
-    sliders.forEach { slider ->
+    val sliderRows = listOf(
+        sliders[0] to sliders[1],
+        sliders[2] to sliders[3]
+    )
+    sliderRows.forEach { row ->
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            val (label, fn) = slider
-            val (_, value) = fn(0f)
-
-            Text(label)
-            OutlinedTextField(
-                value = (fn(value).second * 255).toInt().toString(),
-                onValueChange = { input ->
-                    if (input.isBlank()) {
-                        //auto generate a 0 when all is deleted
-                        controller.selectByColor(fn(0f).first, true)
-                    } else if (fn(0f).second == 0f) {
-                        //remove auto generated 0 when user types
-                        input.replaceFirst("0", "").toIntOrNull()?.let { controller.selectByColor(fn(it.div(255f).coerceIn(0f, 1f)).first, true) }
-                    } else {
-                        input.toIntOrNull()?.let { controller.selectByColor(fn(it.div(255f).coerceIn(0f, 1f)).first, true) }
-                    }
-                },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-
-            Box(
-                Modifier
-                    .weight(1f)
-                    .border(2.dp, AscendiumTheme.colorScheme.outline, RoundedCornerShape(2.dp))
-                    .padding(4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Slider(
-                    value = value,
-                    onValueChange = { controller.selectByColor(fn(it).first, true) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            Slider(row.first, controller)
+            Slider(row.second, controller)
         }
+    }
+}
+
+@Composable
+fun RowScope.Slider(slider: Pair<String, (Float) -> Pair<Color, Float>>, controller: ColorPickerController) {
+    val (label, fn) = slider
+    val (_, value) = fn(0f)
+
+    Text(label)
+    OutlinedTextField(
+        value = (fn(value).second * 255).toInt().toString(),
+        onValueChange = { input ->
+            if (input.isBlank()) {
+                //auto generate a 0 when all is deleted
+                controller.selectByColor(fn(0f).first, true)
+            } else if (fn(0f).second == 0f) {
+                //remove auto generated 0 when user types
+                input.replaceFirst("0", "").toIntOrNull()?.let { controller.selectByColor(fn(it.div(255f).coerceIn(0f, 1f)).first, true) }
+            } else {
+                input.toIntOrNull()?.let { controller.selectByColor(fn(it.div(255f).coerceIn(0f, 1f)).first, true) }
+            }
+        },
+        modifier = Modifier.weight(1f),
+        singleLine = true
+    )
+
+    Box(
+        Modifier
+            .weight(1f)
+            .border(2.dp, AscendiumTheme.colorScheme.outline, RoundedCornerShape(2.dp))
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Slider(
+            value = value,
+            onValueChange = { controller.selectByColor(fn(it).first, true) },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

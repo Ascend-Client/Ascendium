@@ -47,6 +47,7 @@ fun SettingEditor(setting: Setting) {
             is NumberSetting -> {
                 var num by remember { mutableStateOf(setting.value) }
                 ResetButton { setting.reset(); num = setting.value }
+                Text(String.format("%.1f", num))
                 Slider(
                     num.toFloat(),
                     onValueChange = {

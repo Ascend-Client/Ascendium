@@ -9,8 +9,8 @@ import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
+import androidx.compose.ui.scene.PlatformLayersComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import io.github.betterclient.ascendium.Ascendium
@@ -50,10 +50,9 @@ open class ComposeUI(
         if (!::scene.isInitialized) {
             val window = minecraft.window
             val density = Density(window.scale.toFloat().div(2f))
-            scene = CanvasLayersComposeScene(
+            scene = PlatformLayersComposeScene(
                 density = density,
-                size = IntSize(window.fbWidth, window.fbHeight),
-                invalidate = { /* Minecraft should schedule? */ }
+                size = IntSize(window.fbWidth, window.fbHeight)
             )
 
             scene.setContent {
