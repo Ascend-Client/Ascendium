@@ -34,7 +34,7 @@ loom {
             } else {
                 it.client()
                 it.ideConfigGenerated(true)
-                it.runDir("../../../run") //united run directory
+                it.runDir("../../run") //united run directory
             }
         }
     }

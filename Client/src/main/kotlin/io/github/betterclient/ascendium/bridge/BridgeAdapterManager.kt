@@ -97,7 +97,7 @@ val `1_21_9` = `1_21_8`.copy(
 
 val `1_21_10` = `1_21_9`.copy()
 
-val `25w41a` = `1_21_10`.copy(
+val `25w42a` = `1_21_10`.copy(
     rawOpenGLTextureAdapter = "V12111RawOpenGLAdapter"
 )
 
@@ -197,7 +197,7 @@ val adapters = mutableMapOf(
     "1.21.8" to `1_21_8`,
     "1.21.9" to `1_21_9`,
     "1.21.10" to `1_21_10`,
-    "1.21.9-alpha.25.41.a" to `25w41a`
+    "1.21.11-alpha.25.42.a" to `25w42a`
 )
 
 val mixinMapping = mapOf<String, (adapter: BridgeAdapter) -> String>(

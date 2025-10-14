@@ -1,15 +1,11 @@
 package io.github.betterclient.ascendium.util
 
 import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.textures.AddressMode
-import com.mojang.blaze3d.textures.FilterMode
-import com.mojang.blaze3d.textures.GpuTexture
-import com.mojang.blaze3d.textures.GpuTextureView
-import com.mojang.blaze3d.textures.TextureFormat
+import com.mojang.blaze3d.textures.*
 import io.github.betterclient.ascendium.bridge.RawTexture
 import io.github.betterclient.ascendium.bridge.minecraft
-import net.minecraft.class_12134
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gl.GlSampler
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.render.state.GuiRenderState
 import net.minecraft.client.gui.render.state.TexturedQuadGuiElementRenderState
@@ -17,15 +13,13 @@ import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.texture.GlTexture
 import net.minecraft.client.texture.TextureSetup
 import org.joml.Matrix3x2fStack
-import java.lang.reflect.Constructor
-import java.lang.reflect.Field
 
 class V12111RawOpenGLAdapter() : RawTexture {
     companion object {
         private fun createGlTexture(glId: Int): GlTexture {
             val clazz = GlTexture::class.java
 
-            val constructor: Constructor<GlTexture> = clazz.getDeclaredConstructor(
+            val constructor = clazz.getDeclaredConstructor(
                 Int::class.javaPrimitiveType,
                 String::class.java,
                 TextureFormat::class.java,
@@ -57,7 +51,7 @@ class V12111RawOpenGLAdapter() : RawTexture {
                 return@computeIfAbsent RenderSystem.getDevice().createTextureView(
                     createGlTexture(id)
                 )
-            }, class_12134(
+            }, GlSampler(
                 AddressMode.CLAMP_TO_EDGE,
                 AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST,
@@ -88,7 +82,7 @@ class V12111RawOpenGLAdapter() : RawTexture {
 
 val GameRenderer.guiState: GuiRenderState
     get() {
-        val guiStateField: Field = GameRenderer::class.java.declaredFields
+        val guiStateField = GameRenderer::class.java.declaredFields
             .first { it.type == GuiRenderState::class.java }
         guiStateField.isAccessible = true
         return guiStateField.get(this) as GuiRenderState

@@ -26,7 +26,7 @@ val SupportedVersions = arrayOf(
     "1.21:1.21.9",
     "1.21:1.21.10",
 
-    "Snapshot_25w41a"
+    "Snapshot_25w42a"
 )
 
 val Adapters = arrayOf(
