@@ -109,7 +109,9 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
 
             dc.resetGLAll()
             canvas.clear(Color.TRANSPARENT)
-            task(canvas)
+            try {
+                task(canvas)
+            } catch (_: Exception) {  }
 
             runTasks()
 
