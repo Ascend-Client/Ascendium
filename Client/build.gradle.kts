@@ -75,7 +75,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
-    fun use(name: String) = implementation(name)?.let { transitiveInclude(it) }
+    fun use(name: String) = transitiveInclude(name)
 
     //material3 + compose
     use(compose.desktop.linux_arm64)
@@ -110,7 +110,12 @@ dependencies {
 
     var i = 0
     transitiveInclude.resolvedConfiguration.resolvedArtifacts.forEach {
+        if (it.moduleVersion.id.toString().contains("org.apache.commons")) {
+            return@forEach
+        }
+
         i++
+        implementation(it.moduleVersion.id.toString())
         include(it.moduleVersion.id.toString())
     }
     println("Bundled $i transitive dependencies.")

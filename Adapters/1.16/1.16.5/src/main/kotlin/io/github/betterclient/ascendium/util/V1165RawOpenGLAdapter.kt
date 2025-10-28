@@ -23,7 +23,7 @@ class V1165RawOpenGLAdapter() : RawTexture {
             GlStateManager.DstFactor.ZERO
         )
 
-        RenderSystem.enableAlphaTest()
+        RenderSystem.disableAlphaTest()
         RenderSystem.alphaFunc(GL11.GL_GREATER, 0.0f)
 
         RenderSystem.bindTexture(id)

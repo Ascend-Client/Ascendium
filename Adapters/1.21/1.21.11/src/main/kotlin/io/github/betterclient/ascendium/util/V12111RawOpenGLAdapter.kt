@@ -46,7 +46,7 @@ class V12111RawOpenGLAdapter() : RawTexture {
     }
 
     override fun render(id: Int) {
-        val texture = TextureSetup.withoutGlTexture(
+        val texture = TextureSetup.of(
             map.computeIfAbsent(id) { id ->
                 return@computeIfAbsent RenderSystem.getDevice().createTextureView(
                     createGlTexture(id)
@@ -55,7 +55,8 @@ class V12111RawOpenGLAdapter() : RawTexture {
                 AddressMode.CLAMP_TO_EDGE,
                 AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST,
-                FilterMode.NEAREST
+                FilterMode.NEAREST,
+                0
             )
         )
 
@@ -65,16 +66,12 @@ class V12111RawOpenGLAdapter() : RawTexture {
                 RenderPipelines.GUI_TEXTURED,
                 texture,
                 Matrix3x2fStack(),
-                0,
-                0,
+                0, 0,
                 MinecraftClient.getInstance().window.scaledWidth,
                 MinecraftClient.getInstance().window.scaledHeight,
-                0.0f,
-                1.0f,
-                0.0f,
-                1.0f,
-                -1,
-                null
+                0.0f, 1.0f,
+                0.0f, 1.0f,
+                -1, null
             )
         )
     }

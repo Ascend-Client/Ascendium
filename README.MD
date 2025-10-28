@@ -22,7 +22,7 @@ Ascendium is a modern Minecraft client built with Fabric and Jetpack Compose.
 
 | Version | Supported |
 |---------|-----------|
-| 25w41a  | ✅         |
+| 25w44a  | ✅         |
 | 1.21.10 | ✅         |
 | 1.21.9  | ✅         |
 | 1.21.8  | ✅         |
