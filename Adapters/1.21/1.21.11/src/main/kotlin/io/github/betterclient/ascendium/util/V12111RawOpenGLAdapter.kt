@@ -13,6 +13,7 @@ import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.texture.GlTexture
 import net.minecraft.client.texture.TextureSetup
 import org.joml.Matrix3x2fStack
+import java.util.OptionalDouble
 
 class V12111RawOpenGLAdapter() : RawTexture {
     companion object {
@@ -56,7 +57,7 @@ class V12111RawOpenGLAdapter() : RawTexture {
                 AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST,
                 FilterMode.NEAREST,
-                0
+                0, OptionalDouble.empty()
             )
         )
 
