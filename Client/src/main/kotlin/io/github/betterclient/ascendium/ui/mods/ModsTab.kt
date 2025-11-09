@@ -22,7 +22,7 @@ import io.github.betterclient.ascendium.module.Module
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import io.github.betterclient.ascendium.ui.config.ConfigUI
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
 
 @Composable
 fun ModsTab() {

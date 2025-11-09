@@ -78,17 +78,9 @@ dependencies {
     fun use(name: String) = transitiveInclude(name)
 
     //material3 + compose
-    use(compose.desktop.linux_arm64)
-    use(compose.desktop.linux_x64)
-    use(compose.desktop.macos_arm64)
-    use(compose.desktop.macos_x64)
-    use(compose.desktop.windows_arm64)
-    use(compose.desktop.windows_x64)
-
     use(compose.material3.replace("1.8.2", "1.9.0-beta03"))
     use(compose.uiTooling)
     use(compose.animation)
-    use(compose.materialIconsExtended)
     use("com.github.skydoves:colorpicker-compose:1.1.2")
 
     use("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")

@@ -3,8 +3,6 @@ package io.github.betterclient.ascendium.module.impl.notifications
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,7 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.module.impl.notifications.Notifications.notifications
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.Icons
 
 @Composable
 internal fun RenderNotification(notification: Notification, onDelete: () -> Unit = {}) {
@@ -33,7 +32,7 @@ internal fun RenderNotification(notification: Notification, onDelete: () -> Unit
                 .align(Alignment.TopEnd)
                 .padding(8.dp)
         ) {
-            Icon(Icons.Default.Close, contentDescription = "Close")
+            Icon(Icons.Close, contentDescription = "Close")
         }
 
         Column(

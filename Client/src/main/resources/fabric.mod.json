@@ -11,7 +11,11 @@
   "license": "MIT",
   "icon": "assets/ascendium/icon.png",
   "environment": "client",
-  "entrypoints": {},
+  "entrypoints": {
+    "preLaunch": [
+      "io.github.betterclient.ascendium.AscendiumPreLaunch"
+    ]
+  },
   "mixins": [
     "ascendium.adapter.1219.mixins.json",
     "ascendium.adapter.1218.mixins.json",

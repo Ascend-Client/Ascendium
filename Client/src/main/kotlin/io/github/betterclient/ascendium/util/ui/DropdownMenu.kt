@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.ui.utils
+package io.github.betterclient.ascendium.util.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -18,8 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -114,5 +112,5 @@ fun DropdownMenu(
 @Composable
 fun TrailingIcon(expanded: Boolean) {
     //Copied from ExposedDropdownMenuDefaults.TrailingIcon
-    Icon(Icons.Default.ArrowDropDown, null, Modifier.rotate(if (expanded) 180f else 0f))
+    Icon(Icons.ArrowDropDown, null, Modifier.rotate(if (expanded) 180f else 0f))
 }

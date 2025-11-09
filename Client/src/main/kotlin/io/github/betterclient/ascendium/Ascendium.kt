@@ -9,9 +9,11 @@ import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
+import io.github.betterclient.ascendium.util.SkiaRuntimeDownloader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.setMain
+import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint
 import org.slf4j.LoggerFactory
 
 object Ascendium {
@@ -44,6 +46,11 @@ object Ascendium {
             }
         }
     }
+
+    fun preLaunch() {
+        //load correct runtime onto classpath, this has to be blocking since the client cannot start without skia
+        SkiaRuntimeDownloader.download()
+    }
 }
 
 object Logger {
@@ -67,4 +74,8 @@ class ClientSettings {
     val uiBackend by _ui.state
 
     val settings = mutableListOf(_t, _mf, _bo, _ui)
+}
+
+class AscendiumPreLaunch() : PreLaunchEntrypoint {
+    override fun onPreLaunch() = Ascendium.preLaunch()
 }

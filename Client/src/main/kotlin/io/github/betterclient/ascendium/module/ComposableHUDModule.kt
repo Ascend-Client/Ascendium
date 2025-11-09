@@ -36,8 +36,8 @@ import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.getScaled
 import io.github.betterclient.ascendium.ui.bridge.getUnscaled
-import io.github.betterclient.ascendium.ui.utils.MCFont
-import io.github.betterclient.ascendium.ui.utils.ModifyAll
+import io.github.betterclient.ascendium.util.ui.MCFont
+import io.github.betterclient.ascendium.util.ui.ModifyAll
 
 abstract class ComposableHUDModule(name: String, description: String, val hasBackground: Boolean = true) : Module(name, description) {
     var previewHeight by mutableStateOf(150)

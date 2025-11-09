@@ -23,9 +23,9 @@ import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
 import io.github.betterclient.ascendium.ui.chrome.EasterEggUI
 import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
-import io.github.betterclient.ascendium.ui.utils.Center
-import io.github.betterclient.ascendium.ui.utils.rainbowAsState
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.Center
+import io.github.betterclient.ascendium.util.ui.rainbowAsState
 
 @Composable
 fun ModsUI(smallen: Boolean) {

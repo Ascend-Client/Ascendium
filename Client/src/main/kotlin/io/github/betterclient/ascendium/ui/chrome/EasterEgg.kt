@@ -5,10 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +17,8 @@ import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import io.github.betterclient.ascendium.ui.mods.ModsUI
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.Icons
 
 val composeBrowser = ComposeBrowser(ChromiumDownloader.app!!, "https://google.com/")
 
@@ -77,7 +74,7 @@ private fun RowScope.Navigation() {
         enabled = composeBrowser.canGoBack
     ) {
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            imageVector = Icons.ArrowBack,
             contentDescription = "Back",
             tint = AscendiumTheme.colorScheme.onBackground
         )
@@ -88,7 +85,7 @@ private fun RowScope.Navigation() {
         enabled = composeBrowser.canGoForward
     ) {
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            imageVector = Icons.ArrowForward,
             contentDescription = "Forward",
             tint = AscendiumTheme.colorScheme.onBackground
         )
@@ -110,7 +107,7 @@ private fun RowScope.Navigation() {
         composeBrowser.setUrl("https://www.google.com")
     }) {
         Icon(
-            imageVector = Icons.Default.Home,
+            imageVector = Icons.Home,
             contentDescription = null,
             tint = AscendiumTheme.colorScheme.onBackground
         )

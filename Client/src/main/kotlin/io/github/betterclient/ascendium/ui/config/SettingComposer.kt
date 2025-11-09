@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,8 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.betterclient.ascendium.module.config.*
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
-import io.github.betterclient.ascendium.ui.utils.DropdownMenu
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.DropdownMenu
+import io.github.betterclient.ascendium.util.ui.Icons
 
 @Composable
 fun SettingEditor(setting: Setting) {
@@ -79,7 +78,7 @@ fun SettingEditor(setting: Setting) {
                     ConfigManager.saveConfig()
                 }
             }
-            is InfoSetting -> {} //name already rendered, we dont't have to do anything
+            is InfoSetting -> {} //name already rendered, we don't have to do anything
         }
         Spacer(Modifier.width(32.dp))
     }
@@ -89,7 +88,7 @@ fun SettingEditor(setting: Setting) {
 fun ResetButton(onClick: () -> Unit) {
     IconButton(onClick = {
         onClick()
-    }) { Icon(imageVector = Icons.Default.Replay, contentDescription = null, modifier = Modifier.background(
+    }) { Icon(imageVector = Icons.Replay, contentDescription = null, modifier = Modifier.background(
         AscendiumTheme.colorScheme.primary,
         RoundedCornerShape(4.dp)
     ).size(20.dp)) }

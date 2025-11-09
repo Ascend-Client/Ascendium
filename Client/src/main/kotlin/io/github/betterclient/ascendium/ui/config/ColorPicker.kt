@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.github.skydoves.colorpicker.compose.*
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
-import io.github.betterclient.ascendium.ui.utils.detectOutsideClick
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.detectOutsideClick
 
 @Composable
 fun ColorPicker(initial: Color, default: Color, onChange: (Color) -> Unit) {

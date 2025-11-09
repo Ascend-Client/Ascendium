@@ -8,11 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,10 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.module.config.ConfigManager
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
-import io.github.betterclient.ascendium.ui.utils.Center
-import io.github.betterclient.ascendium.ui.utils.detectOutsideClick
-import io.github.betterclient.ascendium.ui.utils.showToast
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.Center
+import io.github.betterclient.ascendium.util.ui.Icons
+import io.github.betterclient.ascendium.util.ui.detectOutsideClick
+import io.github.betterclient.ascendium.util.ui.showToast
 import java.io.File
 
 @Composable
@@ -89,7 +85,7 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Check,
+                            imageVector = Icons.Check,
                             contentDescription = null,
                             tint = Color.Green,
                             modifier = Modifier.size(20.dp)
@@ -100,7 +96,7 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
                         onClick = { showCreate = false }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Close,
+                            imageVector = Icons.Close,
                             contentDescription = null,
                             tint = Color.Red,
                             modifier = Modifier.size(20.dp)
@@ -115,7 +111,7 @@ private fun NewConfigButton(configs1: MutableState<List<String>>) {
                 }
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = Icons.Add,
                     contentDescription = null,
                     tint = Color.Green,
                     modifier = Modifier.size(20.dp)
@@ -190,7 +186,7 @@ private fun ConfigList(configs0: MutableState<List<String>>) {
                         modifier = Modifier.size(20.dp).align(Alignment.CenterEnd),
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Remove,
+                            imageVector = Icons.Remove,
                             contentDescription = null,
                             tint = Color.Red,
                             modifier = Modifier.size(20.dp)

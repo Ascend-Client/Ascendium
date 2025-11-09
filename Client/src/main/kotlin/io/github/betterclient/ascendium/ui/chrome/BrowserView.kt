@@ -26,7 +26,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.bridge.minecraft
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
 import org.cef.CefApp
 import org.lwjgl.glfw.GLFW.glfwGetWindowPos
 import org.lwjgl.system.MemoryStack

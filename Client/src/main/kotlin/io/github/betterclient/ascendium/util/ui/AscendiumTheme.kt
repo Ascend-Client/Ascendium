@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.ui.utils
+package io.github.betterclient.ascendium.util.ui
 
 import androidx.compose.material3.*
 import androidx.compose.material3.ColorScheme

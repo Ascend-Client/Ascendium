@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.ui.utils
+package io.github.betterclient.ascendium.util.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background

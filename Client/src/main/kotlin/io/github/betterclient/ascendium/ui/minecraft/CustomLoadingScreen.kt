@@ -27,7 +27,7 @@ import io.github.betterclient.ascendium.bridge.requireOffscreen
 import io.github.betterclient.ascendium.ui.bridge.AWTUtils
 import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
 import java.awt.event.MouseEvent
 
 var didAnim by mutableStateOf(false)

@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.module.impl.notifications.Notifications.multipleNotifications
 import io.github.betterclient.ascendium.module.impl.notifications.Notifications.notifications
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
 import kotlinx.coroutines.delay
 
 @Composable

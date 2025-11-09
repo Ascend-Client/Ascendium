@@ -18,8 +18,8 @@ import io.github.betterclient.ascendium.ui.bridge.ComposeUI
 import io.github.betterclient.ascendium.ui.config.ConfigUI
 import io.github.betterclient.ascendium.ui.minecraft.ParallaxBackground
 import io.github.betterclient.ascendium.ui.mods.ModsUI
-import io.github.betterclient.ascendium.ui.utils.AscendiumTheme
-import io.github.betterclient.ascendium.ui.utils.Center
+import io.github.betterclient.ascendium.util.ui.AscendiumTheme
+import io.github.betterclient.ascendium.util.ui.Center
 
 class MoveModuleUI(val mods: List<ComposableHUDModule>) : ComposeUI({
     MoveModuleUI(mods, null)
