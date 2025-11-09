@@ -19,8 +19,8 @@ dependencies {
 
     implementation(project(":Client"))
 
-    modImplementation("net.fabricmc:fabric-loader:${rootProject.property("loader_version")}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${rootProject.property("kotlin_loader_version")}")
+    modImplementation(libs.fabric.loader)
+    modImplementation(libs.fabric.kotlin.loader)
 
     implementation("org.jetbrains.skiko:skiko-awt:0.9.22")
 }

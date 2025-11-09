@@ -1,8 +1,14 @@
 [versions]
 kotlin = "2.2.0"
 loom = "1.11-SNAPSHOT"
+fabric-loader = "0.17.2"
+fabric-kotlin-loader = "1.13.4+kotlin.2.2.0"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 fabric-loom = { id = "fabric-loom", version.ref = "loom" }
+
+[libraries]
+fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric-loader" }
+fabric-kotlin-loader = { group = "net.fabricmc", name = "fabric-language-kotlin", version.ref = "fabric-kotlin-loader" }

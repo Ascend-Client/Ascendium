@@ -16,7 +16,8 @@ object BridgeAdapterManager {
             return true //apply or else
         }
 
-        return adapterVersion?.let { className.contains("v$it") } ?: false
+        println("${adapterVersion?.let { className.contains(it) } ?: false}, $className")
+        return adapterVersion?.let { className.contains(it) } ?: false
     }
 
     fun useBridgeUtil(adapterName: (adapter: BridgeAdapter) -> String, vararg parameters: Any?): Any {
@@ -153,6 +154,14 @@ val `1_16_5` = `1_19_2`.copy(
     splashOverlayAdapter = "1165" //actually splash screen
 )
 
+val cts8c = `1_16_5`.copy(
+    minecraftClientAdapter = "cts",
+    optionsAdapter = "cts",
+    keybindingAdapter = "cts",
+    mouseAdapter = "cts",
+    keybindingBridgeAdapter = "CTSKeybindingHelper"
+)
+
 data class BridgeAdapter(
     val keybindingBridgeAdapter: String,
     val screenBridgeAdapter: String,
@@ -186,6 +195,7 @@ data class BridgeAdapter(
 )
 
 val adapters = mutableMapOf(
+    "1.16.3-combat.8.c" to cts8c,
     "1.16.5" to `1_16_5`,
     "1.19.2" to `1_19_2`,
     "1.19.4" to `1_19_4`,

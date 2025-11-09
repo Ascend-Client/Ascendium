@@ -11,6 +11,7 @@ repositories {
     maven("https://maven.google.com/")
     maven("https://api.modrinth.com/maven")
     maven("https://jogamp.org/deployment/maven")
+    maven("https://maven.rizecookey.net")
 }
 
 dependencies {
@@ -22,23 +23,20 @@ dependencies {
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.kotlin.loader)
 
-    modRuntimeOnly("maven.modrinth:sodium:${project.property("sodium_ver")}")
-    modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_ver")}")
-    modRuntimeOnly("maven.modrinth:in-game-account-switcher:${project.property("igas_ver")}")
+    implementation("org.jetbrains.skiko:skiko-awt:0.9.22")
 }
 
 loom {
+    customMinecraftManifest = "https://gist.githubusercontent.com/rizecookey/4c6142baaccc3875f9b227fe22f2ace5/raw/c8ed74b19f7a5315813c9d4b199798b692a8f359/1.16_combat-6.json"
+    intermediaryUrl = "https://maven.rizecookey.net/net/fabricmc/intermediary/1.16_combat-6/intermediary-1.16_combat-6-v2.jar"
+
     runs {
         forEach {
-            if (it.name == "server") {
-                it.ideConfigGenerated(false)
-            } else {
-                it.client()
-                it.ideConfigGenerated(true)
-                it.runDir("../../../run") //united run directory
-            }
+            it.ideConfigGenerated(false)
         }
     }
-}
 
-//you may need "-Dsodium.checks.issue2561=false"
+    mixin {
+        useLegacyMixinAp.set(false)
+    }
+}
