@@ -16,7 +16,6 @@ object BridgeAdapterManager {
             return true //apply or else
         }
 
-        println("${adapterVersion?.let { className.contains(it) } ?: false}, $className")
         return adapterVersion?.let { className.contains(it) } ?: false
     }
 

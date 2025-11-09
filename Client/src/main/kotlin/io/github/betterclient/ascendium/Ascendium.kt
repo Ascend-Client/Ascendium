@@ -8,7 +8,6 @@ import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager
 import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
-import io.github.betterclient.ascendium.ui.chrome.ChromiumDownloader
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,7 +60,7 @@ class ClientSettings {
     private val _t = DropdownSetting("Theme", "Minecraft", mutableListOf("Minecraft", "Diamond", "Dark", "Light"))
     val themeState by _t.state
 
-    private val _mf = BooleanSetting("Use minecraft font in UI's", false)
+    private val _mf = BooleanSetting("Use minecraft font in UI's", true)
     val mcFontState by _mf.state
 
     val _ui = DropdownSetting("UI Backend (changed on restart)", "Compose", mutableListOf("Compose", "Offscreen", "Offscreen (compatibility)"))
