@@ -61,17 +61,22 @@ val `1_21_4` = BridgeAdapter(
     mouseAdapter = "1214"
 )
 
-val `1_21_8` = `1_21_4`.copy(
+val `1_21_5` = `1_21_4`.copy(
+    clickEventAdapter = "1218",
+    simpleResourceReloadAdapter = "1218",
+    playerEntityAdapter = "1218",
+
+    offscreen = "RequireOffscreen",
+    rawOpenGLTextureAdapter = "V1215RawOpenGLAdapter",
+)
+
+val `1_21_8` = `1_21_5`.copy(
     skiaRenderAdapter = "V1218SkiaRenderAdapter",
     openglTextureAdapter = "V1218OpenGLTextureAdapter",
     rawOpenGLTextureAdapter = "V1218RawOpenGLAdapter",
-    offscreen = "RequireOffscreen",
 
-    clickEventAdapter = "1218",
     splashOverlayAdapter = "1218",
     windowAdapter = "1218",
-    simpleResourceReloadAdapter = "1218",
-    playerEntityAdapter = "1218",
     screenAdapter = "1218",
     mouseAdapter = "1218",
     minecraftClientAdapter = "1218",
@@ -203,6 +208,7 @@ val adapters = mutableMapOf(
     "1.20.6" to `1_20_6`,
     "1.21.1" to `1_21_1`,
     "1.21.4" to `1_21_4`,
+    "1.21.5" to `1_21_5`,
     "1.21.8" to `1_21_8`,
     "1.21.9" to `1_21_9`,
     "1.21.10" to `1_21_10`,
