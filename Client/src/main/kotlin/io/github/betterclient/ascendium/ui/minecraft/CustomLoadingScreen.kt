@@ -7,7 +7,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -16,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.platform.FrameRecomposer
 import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
 import androidx.compose.ui.unit.Density
@@ -28,6 +32,7 @@ import io.github.betterclient.ascendium.ui.bridge.AWTUtils
 import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
 import io.github.betterclient.ascendium.util.ui.AscendiumTheme
+import kotlinx.coroutines.Dispatchers
 import java.awt.event.MouseEvent
 
 var didAnim by mutableStateOf(false)
@@ -78,17 +83,22 @@ private fun LoadingScreen() {
 @OptIn(InternalComposeUiApi::class)
 object CustomLoadingScreen {
     private lateinit var scene: ComposeScene
+    private lateinit var recomposer: FrameRecomposer
     var progress by mutableStateOf(0.0f)
     var progressText by mutableStateOf("Initializing")
 
     fun init() {
         if (!::scene.isInitialized) {
+            recomposer = FrameRecomposer(
+                coroutineContext = Dispatchers.Unconfined
+            )
+
             val window = minecraft.window
             val density = Density(window.scale.toFloat())
             scene = CanvasLayersComposeScene(
                 density = density,
                 size = IntSize(window.fbWidth, window.fbHeight),
-                invalidate = {/*Minecraft should schedule?*/}
+                frameRecomposer = recomposer
             )
 
             scene.setContent {
@@ -115,7 +125,8 @@ object CustomLoadingScreen {
         this.progress = progress
         val awtMods = AWTUtils.getAwtMods(minecraft.window.windowHandle)
         myRenderer.withSkia {
-            scene.render(it.asComposeCanvas(), System.nanoTime())
+            recomposer.performFrame(System.nanoTime())
+            scene.draw(it.asComposeCanvas())
         }
 
         myRenderer.task {

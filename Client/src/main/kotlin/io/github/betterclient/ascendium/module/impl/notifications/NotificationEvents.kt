@@ -24,7 +24,8 @@ object NotificationEvents {
         multipleNotifications = minecraft.screen == MCScreen.CHAT_SCREEN
         NotificationScene.init()
         myRenderer.withSkia {
-            NotificationScene.scene.render(it.asComposeCanvas(), System.nanoTime())
+            NotificationScene.recomposer.performFrame(System.nanoTime())
+            NotificationScene.scene.draw(it.asComposeCanvas())
         }
     }
 
@@ -39,7 +40,8 @@ object NotificationEvents {
         if (minecraft.isWorldNull) return
         NotificationScene.init()
         myRenderer.withSkia {
-            NotificationScene.scene.render(it.asComposeCanvas(), System.nanoTime())
+            NotificationScene.recomposer.performFrame(System.nanoTime())
+            NotificationScene.scene.draw(it.asComposeCanvas())
         }
 
         val event = AWTUtils.MouseEvent(

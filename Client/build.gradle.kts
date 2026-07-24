@@ -7,8 +7,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.fabric.loom) apply false
 
-    id("org.jetbrains.kotlin.plugin.compose") version "2.4.10"
-    id("org.jetbrains.compose") version "1.12.0-beta02"
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.jetbrains.compose)
 }
 val compile: Boolean by lazy {
     gradle.startParameter.taskNames.any { it.contains("build", ignoreCase = true) }
@@ -75,16 +75,16 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
-    fun use(name: String) = transitiveInclude(name)
+    fun use(dep: Any) = transitiveInclude(dep)
 
     //material3 + compose
-    use("org.jetbrains.compose.material3:material3:1.9.0")
-    use("org.jetbrains.compose.ui:ui-tooling:1.12.0-beta02")
-    use("org.jetbrains.compose.animation:animation:1.12.0-beta02")
-    use("com.github.skydoves:colorpicker-compose:1.2.0")
+    use(libs.compose.material3)
+    use(libs.compose.ui.tooling)
+    use(libs.compose.animation)
+    use(libs.skydoves.colorpicker.compose)
 
-    use("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
-    use("dev.datlag:kcef:2025.03.23")
+    use(libs.kotlinx.coroutines.test)
+    use(libs.kcef)
 
     for (item in rootProject.subprojects) {
         if (item.childProjects.isNotEmpty()) {

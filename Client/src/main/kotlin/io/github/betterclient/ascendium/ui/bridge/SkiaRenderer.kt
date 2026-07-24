@@ -1,9 +1,12 @@
 package io.github.betterclient.ascendium.ui.bridge
 
+import androidx.compose.runtime.BroadcastFrameClock
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
 import io.github.betterclient.ascendium.bridge.minecraft
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.skia.*
+import kotlin.coroutines.CoroutineContext
 
 object ScalingUtils {
     fun <T : Number> getUnscaled(i: T): Float {

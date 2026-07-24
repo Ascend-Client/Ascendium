@@ -129,7 +129,11 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
     fun runTasks() {
         while (true) {
             val item = tasks.poll() ?: break
-            item()
+            try {
+                item()
+            } catch (e: Exception) {
+                Logger.error("Error executing offscreen task: ${e.message}")
+            }
         }
     }
 

@@ -4,11 +4,28 @@ loom = "1.17-SNAPSHOT"
 fabric-loader = "0.19.3"
 fabric-kotlin-loader = "1.13.13+kotlin.2.4.10"
 
+skiko = "0.150.1"
+jetbrains-compose = "1.12.0-alpha02"
+colorpicker-compose = "1.2.0"
+kotlinx-coroutines = "1.11.0"
+kcef = "2025.03.23"
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "loom" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrains-compose" }
 
 [libraries]
 fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric-loader" }
 fabric-kotlin-loader = { group = "net.fabricmc", name = "fabric-language-kotlin", version.ref = "fabric-kotlin-loader" }
+skiko-awt = { group = "org.jetbrains.skiko", name = "skiko-awt", version.ref = "skiko" }
+
+compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "jetbrains-compose" }
+compose-ui-tooling = { group = "org.jetbrains.compose.ui", name = "ui-tooling", version.ref = "jetbrains-compose" }
+compose-animation = { group = "org.jetbrains.compose.animation", name = "animation", version.ref = "jetbrains-compose" }
+
+skydoves-colorpicker-compose = { group = "com.github.skydoves", name = "colorpicker-compose", version.ref = "colorpicker-compose" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kcef = { group = "dev.datlag", name = "kcef", version.ref = "kcef" }

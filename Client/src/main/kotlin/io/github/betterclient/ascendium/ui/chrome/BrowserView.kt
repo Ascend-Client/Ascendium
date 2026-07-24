@@ -165,7 +165,7 @@ private fun PointerEvent.toAwtMouseEvent(
     val awtModifiers = this.keyboardModifiers.toAwtModifiers() or
             this.buttons.toAwtModifiers()
 
-    val awtButton = this.button?.toAwtButton() ?: this.buttons.toAwtButton()
+    val awtButton = this.buttons.toAwtButton()
 
     return MouseEvent(
         component,
@@ -178,15 +178,6 @@ private fun PointerEvent.toAwtMouseEvent(
         false,
         awtButton
     )
-}
-
-private fun PointerButton.toAwtButton(): Int {
-    return when (this.index) {
-        0 -> MouseEvent.BUTTON1
-        1 -> MouseEvent.BUTTON2
-        2 -> MouseEvent.BUTTON3
-        else -> MouseEvent.NOBUTTON
-    }
 }
 
 private fun PointerButtons.toAwtButton(): Int {

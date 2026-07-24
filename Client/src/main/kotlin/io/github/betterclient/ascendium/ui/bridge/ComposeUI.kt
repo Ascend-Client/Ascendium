@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.platform.FrameRecomposer
 import androidx.compose.ui.scene.ComposeScene
 import androidx.compose.ui.scene.PlatformLayersComposeScene
 import androidx.compose.ui.unit.Density
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.IntSize
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.BridgeScreen
 import io.github.betterclient.ascendium.bridge.minecraft
+import kotlinx.coroutines.Dispatchers
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
@@ -27,10 +29,14 @@ import kotlin.properties.Delegates
 open class ComposeUI(
     content: @Composable () -> Unit
 ) : BridgeScreen() {
+    private var lastMouseX = -1f
+    private var lastMouseY = -1f
+
     private val _content = mutableStateOf(content)
     private val _toast = mutableStateOf<@Composable () -> Unit>(value = { })
 
     private lateinit var scene: ComposeScene
+    private lateinit var recomposer: FrameRecomposer
     private var handle by Delegates.notNull<Long>()
 
     companion object {
@@ -50,9 +56,11 @@ open class ComposeUI(
         if (!::scene.isInitialized) {
             val window = minecraft.window
             val density = Density(window.scale.toFloat().div(2f))
+            recomposer = FrameRecomposer(coroutineContext = Dispatchers.Unconfined)
             scene = PlatformLayersComposeScene(
                 density = density,
-                size = IntSize(window.fbWidth, window.fbHeight)
+                size = IntSize(window.fbWidth, window.fbHeight),
+                frameRecomposer = recomposer
             )
 
             scene.setContent {
@@ -90,23 +98,32 @@ open class ComposeUI(
         }
 
         myRenderer.withSkia {
-            scene.render(it.asComposeCanvas(), System.nanoTime())
+            recomposer.performFrame(System.nanoTime())
+            scene.draw(it.asComposeCanvas())
         }
 
         renderHandlers.forEach { it(mouseX, mouseY) }
 
-        myRenderer.task {
-            scene.sendPointerEvent(
-                position = Offset(minecraft.mouse.xPos.toFloat(), minecraft.mouse.yPos.toFloat()),
-                eventType = PointerEventType.Move,
-                nativeEvent = AWTUtils.MouseEvent(
-                    minecraft.mouse.xPos,
-                    minecraft.mouse.yPos,
-                    AWTUtils.getAwtMods(handle),
-                    0, //NO BUTTON
-                    MouseEvent.MOUSE_MOVED
+        val currentX = minecraft.mouse.xPos.toFloat()
+        val currentY = minecraft.mouse.yPos.toFloat()
+
+        if (currentX != lastMouseX || currentY != lastMouseY) {
+            lastMouseX = currentX
+            lastMouseY = currentY
+
+            myRenderer.task {
+                scene.sendPointerEvent(
+                    position = Offset(currentX, currentY),
+                    eventType = PointerEventType.Move,
+                    nativeEvent = AWTUtils.MouseEvent(
+                        minecraft.mouse.xPos,
+                        minecraft.mouse.yPos,
+                        AWTUtils.getAwtMods(handle),
+                        0, //NO BUTTON
+                        MouseEvent.MOUSE_MOVED
+                    )
                 )
-            )
+            }
         }
     }
 

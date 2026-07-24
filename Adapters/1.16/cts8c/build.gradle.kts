@@ -23,7 +23,7 @@ dependencies {
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.kotlin.loader)
 
-    implementation("org.jetbrains.skiko:skiko-awt:0.9.22")
+    implementation(libs.skiko.awt)
 }
 
 loom {

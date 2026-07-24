@@ -2,10 +2,11 @@ package io.github.betterclient.ascendium.event
 
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.util.concurrent.CopyOnWriteArrayList
 
 //choo choo or whatever buses say
 object EventBus {
-    internal val subscribers = mutableListOf<MethodCaller>()
+    internal val subscribers = CopyOnWriteArrayList<MethodCaller>()
 
     fun subscribe(subscriber: Any) {
         unsubscribe(subscriber) //unsubscribe first so double events don't happen

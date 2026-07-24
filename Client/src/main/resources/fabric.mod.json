@@ -16,19 +16,7 @@
       "io.github.betterclient.ascendium.AscendiumPreLaunch"
     ]
   },
-  "mixins": [
-    "ascendium.adapter.12111.mixins.json",
-    "ascendium.adapter.1219.mixins.json",
-    "ascendium.adapter.1218.mixins.json",
-    "ascendium.adapter.1214.mixins.json",
-    "ascendium.adapter.1211.mixins.json",
-    "ascendium.adapter.1206.mixins.json",
-    "ascendium.adapter.1204.mixins.json",
-    "ascendium.adapter.1194.mixins.json",
-    "ascendium.adapter.1192.mixins.json",
-    "ascendium.adapter.1165.mixins.json",
-    "ascendium.adapter.cts.mixins.json"
-  ],
+  "mixins": [],
   "depends": {
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
     "minecraft": ">=1.14"

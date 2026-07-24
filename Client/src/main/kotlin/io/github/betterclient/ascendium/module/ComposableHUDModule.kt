@@ -19,9 +19,11 @@ import androidx.compose.ui.graphics.asComposeCanvas
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.FrameRecomposer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
+import kotlinx.coroutines.Dispatchers
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -163,6 +165,8 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
         }
 
         var myRenderer = SkiaRenderer()
+        @OptIn(InternalComposeUiApi::class)
+        private lateinit var recomposer: FrameRecomposer
 
         @OptIn(InternalComposeUiApi::class)
         fun renderAll(modules: List<ComposableHUDModule> = ModManager.getHUDModules(), hud: Boolean) {
@@ -175,7 +179,8 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
             }
 
             myRenderer.withSkia {
-                scene.render(it.asComposeCanvas(), System.nanoTime())
+                recomposer.performFrame(System.nanoTime())
+                scene.draw(it.asComposeCanvas())
             }
         }
 
@@ -189,17 +194,18 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
             modules.forEach { it.isPreview = (minecraft.isWorldNull || !hud) }
             if (!::scene.isInitialized) {
                 val density = Density(window.scale.toFloat().div(2f))
+                recomposer = FrameRecomposer(coroutineContext = Dispatchers.Unconfined)
                 scene = CanvasLayersComposeScene(
                     density = density,
                     size = IntSize(window.fbWidth, window.fbHeight),
-                    invalidate = {/*Minecraft should schedule?*/}
+                    frameRecomposer = recomposer
                 )
 
-                scene.setContent({ RenderModules(modules) })
+                scene.setContent { RenderModules(modules) }
                 modulesLast = modules
             } else {
                 if (modulesLast.map { it.name } != modules.map { it.name }) {
-                    scene.setContent({ RenderModules(modules) })
+                    scene.setContent { RenderModules(modules) }
                 }
                 if (window.fbWidth != scene.size!!.width || window.fbHeight != scene.size!!.height) {
                     val density = Density(window.scale.toFloat().div(2f))

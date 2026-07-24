@@ -16,6 +16,12 @@ subprojects {
     repositories {
         mavenCentral()
     }
+
+    configurations.all {
+        resolutionStrategy {
+            force("org.jetbrains.skiko:skiko-awt:0.150.1")
+        }
+    }
 }
 
 repositories {}

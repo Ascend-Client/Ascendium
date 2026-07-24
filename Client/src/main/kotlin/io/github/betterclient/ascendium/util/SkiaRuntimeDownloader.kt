@@ -10,7 +10,7 @@ import java.nio.file.Path
 import java.security.MessageDigest
 
 object SkiaRuntimeDownloader {
-    const val version = "0.9.30"
+    const val version = "0.150.1"
     private val platforms = listOf(
         "linux-x64",
         "linux-arm64",

@@ -1,6 +1,7 @@
 package io.github.betterclient.ascendium
 
 import androidx.compose.runtime.getValue
+import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.bridge.requireOffscreen
 import io.github.betterclient.ascendium.module.ModManager
@@ -22,7 +23,7 @@ object Ascendium {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun start() {
         Logger.info("Starting!")
-        ConfigManager
+        ConfigManager.toString() //just need the init block to run
 
         minecraft.gameOptions.addKeybinding(
             defaultKey = 344,
@@ -50,6 +51,7 @@ object Ascendium {
     fun preLaunch() {
         //load correct runtime onto classpath, this has to be blocking since the client cannot start without skia
         SkiaRuntimeDownloader.download()
+        BridgeAdapterManager.initMixins()
     }
 }
 
