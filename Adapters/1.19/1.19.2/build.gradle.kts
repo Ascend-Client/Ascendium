@@ -28,7 +28,7 @@ dependencies {
 loom {
     runs {
         forEach {
-            it.ideConfigGenerated(false)
+            it.generateRunConfig.set(false)
         }
     }
 

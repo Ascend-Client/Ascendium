@@ -102,8 +102,9 @@ val `1_21_9` = `1_21_8`.copy(
 
 val `1_21_10` = `1_21_9`.copy()
 
-val `25w45a` = `1_21_10`.copy(
-    rawOpenGLTextureAdapter = "V12111RawOpenGLAdapter"
+val `1_21_11` = `1_21_10`.copy(
+    rawOpenGLTextureAdapter = "V12111RawOpenGLAdapter",
+    spriteAtlasTextureAdapter = "12111",
 )
 
 val `1_21_1` = `1_21_4`.copy(
@@ -212,9 +213,7 @@ val adapters = mutableMapOf(
     "1.21.8" to `1_21_8`,
     "1.21.9" to `1_21_9`,
     "1.21.10" to `1_21_10`,
-    //??????????????? it seems to be 1.21.11 in prism but 1.21.9 in intellij???
-    "1.21.11-alpha.25.45.a" to `25w45a`,
-    "1.21.9-alpha.25.45.a" to `25w45a`
+    "1.21.11" to `1_21_11`
 )
 
 val mixinMapping = mapOf<String, (adapter: BridgeAdapter) -> String>(

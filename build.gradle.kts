@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.fabric.loom) apply false
 }
 
-
 subprojects {
     if(this.childProjects.isNotEmpty()) return@subprojects
     if(!(this.path.contains("Adapters") || this.path.contains("SupportedVersions") || this.path.contains("Client")))

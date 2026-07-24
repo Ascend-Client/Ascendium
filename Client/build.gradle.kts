@@ -7,8 +7,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.fabric.loom) apply false
 
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
-    id("org.jetbrains.compose") version "1.9.0-beta01"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.10"
+    id("org.jetbrains.compose") version "1.12.0-beta02"
 }
 val compile: Boolean by lazy {
     gradle.startParameter.taskNames.any { it.contains("build", ignoreCase = true) }
@@ -17,9 +17,9 @@ val compile: Boolean by lazy {
 configurations.all {
     resolutionStrategy {
         force(
-            "org.jetbrains.kotlinx:kotlinx-serialization:2.2.0",
-            "org.jetbrains.kotlinx:kotlinx-serialization-jvm:2.2.0",
-            "org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0"
+            "org.jetbrains.kotlinx:kotlinx-serialization:2.4.10",
+            "org.jetbrains.kotlinx:kotlinx-serialization-jvm:2.4.10",
+            "org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0"
         )
     }
 }
@@ -48,7 +48,7 @@ repositories {
 loom {
     runs {
         forEach {
-            it.ideConfigGenerated(false)
+            it.generateRunConfig.set(false)
         }
     }
 
@@ -57,7 +57,7 @@ loom {
     }
 }
 
-val transitiveInclude: Configuration by configurations.creating {
+val transitiveInclude: Configuration = configurations.create("transitiveInclude") {
     isTransitive = true
     attributes {
         attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
@@ -78,12 +78,12 @@ dependencies {
     fun use(name: String) = transitiveInclude(name)
 
     //material3 + compose
-    use(compose.material3.replace("1.8.2", "1.9.0-beta03"))
-    use(compose.uiTooling)
-    use(compose.animation)
-    use("com.github.skydoves:colorpicker-compose:1.1.2")
+    use("org.jetbrains.compose.material3:material3:1.9.0")
+    use("org.jetbrains.compose.ui:ui-tooling:1.12.0-beta02")
+    use("org.jetbrains.compose.animation:animation:1.12.0-beta02")
+    use("com.github.skydoves:colorpicker-compose:1.2.0")
 
-    use("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    use("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     use("dev.datlag:kcef:2025.03.23")
 
     for (item in rootProject.subprojects) {
@@ -122,9 +122,9 @@ tasks.processResources {
     filesMatching("fabric.mod.json") {
         expand(
             "version" to project.version,
-            "minecraft_version" to project.property("minecraft_version"),
-            "loader_version" to project.property("loader_version"),
-            "kotlin_loader_version" to project.property("kotlin_loader_version")
+            "minecraft_version" to project.property("minecraft_version")!!,
+            "loader_version" to project.property("loader_version")!!,
+            "kotlin_loader_version" to project.property("kotlin_loader_version")!!
         )
     }
 }

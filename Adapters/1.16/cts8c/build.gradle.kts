@@ -27,12 +27,12 @@ dependencies {
 }
 
 loom {
-    customMinecraftManifest = "https://gist.githubusercontent.com/rizecookey/4c6142baaccc3875f9b227fe22f2ace5/raw/c8ed74b19f7a5315813c9d4b199798b692a8f359/1.16_combat-6.json"
+    customMinecraftMetadata.set("https://gist.githubusercontent.com/rizecookey/4c6142baaccc3875f9b227fe22f2ace5/raw/c8ed74b19f7a5315813c9d4b199798b692a8f359/1.16_combat-6.json")
     intermediaryUrl = "https://maven.rizecookey.net/net/fabricmc/intermediary/1.16_combat-6/intermediary-1.16_combat-6-v2.jar"
 
     runs {
         forEach {
-            it.ideConfigGenerated(false)
+            it.generateRunConfig.set(false)
         }
     }
 

@@ -17,6 +17,7 @@
     ]
   },
   "mixins": [
+    "ascendium.adapter.12111.mixins.json",
     "ascendium.adapter.1219.mixins.json",
     "ascendium.adapter.1218.mixins.json",
     "ascendium.adapter.1214.mixins.json",

@@ -31,11 +31,11 @@ loom {
     runs {
         forEach {
             if (it.name == "server") {
-                it.ideConfigGenerated(false)
+                it.generateRunConfig.set(false)
             } else {
                 it.client()
-                it.ideConfigGenerated(true)
-                it.runDir("../../../run") //united run directory
+                it.generateRunConfig.set(true)
+                it.runDirectory.set(File("../../../run")) //united run directory
             }
         }
     }
