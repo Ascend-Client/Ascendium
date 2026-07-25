@@ -195,7 +195,7 @@ val `26_1_2` = BridgeAdapter(
     isObfuscated = false,
     keybindingBridgeAdapter = "V2612KeybindingHelper",
     screenBridgeAdapter = "V2612BridgedScreen",
-    skiaRenderAdapter = "V2612SkiaRenderAdapter",
+    skiaRenderAdapter = "DisabledSkiaAdapter",
     openglTextureAdapter = "V2612OpenGLTextureAdapter",
     rawOpenGLTextureAdapter = "V2612RawOpenGLAdapter",
     offscreen = "RequireOffscreen",
@@ -225,6 +225,15 @@ val `26_1_2` = BridgeAdapter(
     applyElse = listOf(
         "2612.options.MixinKeybindingCategory"
     )
+)
+
+val `26_2` = `26_1_2`.copy(
+    mixinName = "26.2",
+    minecraftClientAdapter = "262",
+    inGameHudAdapter = "262",
+
+    openglTextureAdapter = "V262OpenGLTextureAdapter",
+    rawOpenGLTextureAdapter = "V262RawOpenGLAdapter",
 )
 
 data class BridgeAdapter(
@@ -277,6 +286,7 @@ val adapters = mutableMapOf(
     "1.21.10" to `1_21_10`,
     "1.21.11" to `1_21_11`,
     "26.1.2" to `26_1_2`,
+    "26.2" to `26_2`,
 )
 
 val mixinMapping = mapOf<String, (adapter: BridgeAdapter) -> String>(

@@ -1,5 +1,6 @@
 package io.github.betterclient.ascendium.util
 
+import com.mojang.blaze3d.GpuFormat
 import com.mojang.blaze3d.opengl.GlSampler
 import com.mojang.blaze3d.platform.NativeImage
 import com.mojang.blaze3d.systems.RenderSystem
@@ -7,7 +8,6 @@ import com.mojang.blaze3d.textures.AddressMode
 import com.mojang.blaze3d.textures.FilterMode
 import com.mojang.blaze3d.textures.GpuTexture
 import com.mojang.blaze3d.textures.GpuTextureView
-import com.mojang.blaze3d.textures.TextureFormat
 import io.github.betterclient.ascendium.bridge.TextureBridge
 import io.github.betterclient.ascendium.bridge.minecraft
 import net.minecraft.client.Minecraft
@@ -20,10 +20,9 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.util.OptionalDouble
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.compareTo
 import kotlin.concurrent.withLock
 
-class V2612OpenGLTextureAdapter() : TextureBridge {
+class V262OpenGLTextureAdapter() : TextureBridge {
     lateinit var texture: GpuTextureView
     var frontImage: NativeImage? = null
     var backImage: NativeImage? = null
@@ -99,7 +98,7 @@ class V2612OpenGLTextureAdapter() : TextureBridge {
             }
         }
 
-        Minecraft.getInstance().gameRenderer.gameRenderState.guiRenderState.also {
+        Minecraft.getInstance().gameRenderer.gameRenderState().guiRenderState.also {
             it.up()
         }.addBlitToCurrentLayer(
             BlitRenderState(
@@ -144,7 +143,7 @@ class V2612OpenGLTextureAdapter() : TextureBridge {
                 RenderSystem.getDevice().createTexture(
                     "SkiaBuffer",
                     GpuTexture.USAGE_COPY_DST + GpuTexture.USAGE_TEXTURE_BINDING + GpuTexture.USAGE_RENDER_ATTACHMENT,
-                    TextureFormat.RGBA8,
+                    GpuFormat.RGBA8_UNORM,
                     vpW, vpH, 1, 1
                 )
             )
