@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.bridge.requireOffscreen
+import io.github.betterclient.ascendium.bridge.vulkanChecker
 import io.github.betterclient.ascendium.module.ModManager
 import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ConfigManager
@@ -46,6 +47,14 @@ object Ascendium {
                 settings._ui.set("Offscreen")
             }
         }
+
+        if (vulkanChecker.isVulkan) {
+            settings._ui.options.clear()
+            settings._ui.options.add("Vulkan")
+            settings._ui.set("Vulkan")
+        } else {
+            settings._ui.options.remove("Vulkan")
+        }
     }
 
     fun preLaunch() {
@@ -72,7 +81,7 @@ class ClientSettings {
     private val _mf = BooleanSetting("Use minecraft font in UI's", true)
     val mcFontState by _mf.state
 
-    val _ui = DropdownSetting("UI Backend (changed on restart)", "Compose", mutableListOf("Compose", "Offscreen", "Offscreen (compatibility)"))
+    val _ui = DropdownSetting("UI Backend (changed on restart)", "Compose", mutableListOf("Compose", "Vulkan", "Offscreen", "Offscreen (compatibility)"))
     val uiBackend by _ui.state
 
     val settings = mutableListOf(_t, _mf, _bo, _ui)

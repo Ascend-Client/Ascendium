@@ -47,7 +47,7 @@ open class ComposeUI(
     }
 
     fun init0() {
-        if (Ascendium.settings.uiBackend != "Compose" && myRenderer.adapter !is OffscreenSkiaRenderer) {
+        if (Ascendium.settings.uiBackend != "Compose" && (myRenderer.adapter !is OffscreenSkiaRenderer && myRenderer.adapter !is VulkanSkiaRenderer)) {
             myRenderer = SkiaRenderer()
         }
 

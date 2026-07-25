@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.render.TextureSetup
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.client.renderer.state.gui.BlitRenderState
+import org.jetbrains.skia.BackendRenderTarget
 import org.joml.Matrix3x2fStack
 import org.lwjgl.system.MemoryUtil
 import java.awt.image.BufferedImage
@@ -149,5 +150,15 @@ class V2612OpenGLTextureAdapter() : TextureBridge {
                 )
             )
         }
+    }
+
+    override fun close() {
+        if (::texture.isInitialized) texture.close()
+        frontImage?.close()
+        backImage?.close()
+    }
+
+    override fun toBackendRenderTarget(): BackendRenderTarget {
+        throw UnsupportedOperationException()
     }
 }

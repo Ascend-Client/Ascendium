@@ -1,5 +1,6 @@
 package io.github.betterclient.ascendium.bridge
 
+import org.jetbrains.skia.BackendRenderTarget
 import java.awt.image.BufferedImage
 import kotlin.math.sqrt
 
@@ -19,11 +20,15 @@ val minecraft: MinecraftBridge by lazy {
 }
 
 fun createOpenGLTexture(): TextureBridge {
-    return BridgeAdapterManager.useBridgeUtil({ it.openglTextureAdapter }) as TextureBridge
+    return BridgeAdapterManager.useBridgeUtil({ it.openglTextureAdapter }) as TextureBridge //the 26.2 implementation of OpenGLTexture should work on vulkan aswell
 }
 
 fun createRawOpenGLRenderer(): RawTexture {
     return BridgeAdapterManager.useBridgeUtil({ it.rawOpenGLTextureAdapter }) as RawTexture
+}
+
+val vulkanChecker by lazy {
+    BridgeAdapterManager.useBridgeUtil({ it.vulkanChecker }) as VulkanChecker
 }
 
 inline val requireOffscreen: Boolean
@@ -201,6 +206,8 @@ enum class ClickEventActionBridge {
 interface TextureBridge {
     fun update(image: BufferedImage)
     fun blit()
+    fun close()
+    fun toBackendRenderTarget(): BackendRenderTarget?
 }
 
 interface RequiresOffscreen { val does: Boolean }
@@ -208,6 +215,19 @@ interface RawTexture {
     fun render(id: Int)
 }
 
-interface VulkanRenderer {
+interface VulkanChecker {
+    fun getVulkanContext(): VulkanContext
+
     val isVulkan: Boolean
 }
+
+data class VulkanContext(
+    val instancePtr: Long,
+    val devicePtr: Long,
+    val physicalDevicePtr: Long,
+    val queuePtr: Long,
+    val graphicsQueueIndex: Int,
+    val instanceProcAddr: Long,
+    val deviceProcAddr: Long,
+    val apiVersion: Int
+)

@@ -36,6 +36,7 @@ import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.module.config.ColorSetting
 import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
+import io.github.betterclient.ascendium.ui.bridge.VulkanSkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.getScaled
 import io.github.betterclient.ascendium.ui.bridge.getUnscaled
 import io.github.betterclient.ascendium.util.ui.MCFont
@@ -170,7 +171,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
 
         @OptIn(InternalComposeUiApi::class)
         fun renderAll(modules: List<ComposableHUDModule> = ModManager.getHUDModules(), hud: Boolean) {
-            if (Ascendium.settings.uiBackend != "Compose" && myRenderer.adapter !is OffscreenSkiaRenderer) {
+            if (Ascendium.settings.uiBackend != "Compose" && (myRenderer.adapter !is OffscreenSkiaRenderer && myRenderer.adapter !is VulkanSkiaRenderer)) {
                 myRenderer = SkiaRenderer()
             }
 

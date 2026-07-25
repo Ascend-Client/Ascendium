@@ -10,7 +10,10 @@ import java.nio.file.Path
 import java.security.MessageDigest
 
 object SkiaRuntimeDownloader {
-    const val version = "0.150.1"
+    private const val GITHUB_RELEASE_URL = "https://github.com/Ascend-Client/Ascendium/releases/download/vulkan"
+    private const val MAVEN_CENTRAL_REPO = "https://repo1.maven.org/maven2"
+
+    const val version = "0.150.1-vulkan-SNAPSHOT"
     private val platforms = listOf(
         "linux-x64",
         "linux-arm64",
@@ -21,7 +24,8 @@ object SkiaRuntimeDownloader {
     )
     private fun buildUrl(platform: String, suffix: String): String {
         val artifact = "skiko-awt-runtime-$platform"
-        return "https://repo1.maven.org/maven2/org/jetbrains/skiko/$artifact/$version/$artifact-$version$suffix"
+        return "$GITHUB_RELEASE_URL/$artifact-$version$suffix"
+        //return "$MAVEN_CENTRAL_REPO/org/jetbrains/skiko/$artifact/$version/$artifact-$version$suffix"
     }
 
     private val runtimes: Map<String, String> = platforms.associateWith { platform ->
@@ -51,6 +55,11 @@ object SkiaRuntimeDownloader {
     private fun getRuntimeForCurrentPlatform(cacheDirectory: Path, log: (String) -> Unit, n: Int = 0): Path {
         val currentPlatform = detectCurrentPlatform()
         log("Detected platform: $currentPlatform")
+
+        findInMavenLocal(currentPlatform)?.let { local ->
+            log("Found runtime in Maven local: $local")
+            return local
+        }
 
         val downloadUrl = runtimes[currentPlatform]
             ?: throw IllegalStateException("No runtime URL found for platform '$currentPlatform'")
@@ -103,6 +112,29 @@ object SkiaRuntimeDownloader {
                 throw IOException("No internet connection, and the required runtime is not cached.", e)
             }
         }
+    }
+
+    private fun mavenLocalRepo(): Path {
+        val custom = System.getProperty("maven.repo.local")
+        return if (custom != null && custom.isNotBlank()) {
+            Path.of(custom)
+        } else {
+            Path.of(System.getProperty("user.home"), ".m2", "repository")
+        }
+    }
+
+    private fun findInMavenLocal(platform: String): Path? {
+        val artifact = "skiko-awt-runtime-$platform"
+        val repo = mavenLocalRepo()
+
+        val exact = repo.resolve("org/jetbrains/skiko")
+            .resolve(artifact)
+            .resolve(version)
+            .resolve("$artifact-$version.jar")
+
+        if (Files.exists(exact)) return exact
+
+        return null
     }
 
     private fun detectCurrentPlatform(): String {

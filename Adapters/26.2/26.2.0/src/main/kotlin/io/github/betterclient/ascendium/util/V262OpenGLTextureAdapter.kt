@@ -1,21 +1,25 @@
 package io.github.betterclient.ascendium.util
 
 import com.mojang.blaze3d.GpuFormat
-import com.mojang.blaze3d.opengl.GlSampler
 import com.mojang.blaze3d.platform.NativeImage
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.textures.AddressMode
 import com.mojang.blaze3d.textures.FilterMode
+import com.mojang.blaze3d.textures.GpuSampler
 import com.mojang.blaze3d.textures.GpuTexture
 import com.mojang.blaze3d.textures.GpuTextureView
+import com.mojang.blaze3d.vulkan.VulkanConst
+import com.mojang.blaze3d.vulkan.VulkanGpuTexture
 import io.github.betterclient.ascendium.bridge.TextureBridge
 import io.github.betterclient.ascendium.bridge.minecraft
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.render.TextureSetup
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.client.renderer.state.gui.BlitRenderState
+import org.jetbrains.skia.BackendRenderTarget
 import org.joml.Matrix3x2fStack
 import org.lwjgl.system.MemoryUtil
+import org.lwjgl.vulkan.VK10
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.util.OptionalDouble
@@ -26,6 +30,7 @@ class V262OpenGLTextureAdapter() : TextureBridge {
     lateinit var texture: GpuTextureView
     var frontImage: NativeImage? = null
     var backImage: NativeImage? = null
+    lateinit var sampler: GpuSampler
     val lock = ReentrantLock()
 
     override fun update(image: BufferedImage) {
@@ -89,6 +94,17 @@ class V262OpenGLTextureAdapter() : TextureBridge {
     }
 
     override fun blit() {
+        if (!::sampler.isInitialized) {
+            sampler = RenderSystem.getDevice().createSampler(
+                AddressMode.REPEAT,
+                AddressMode.REPEAT,
+                FilterMode.NEAREST,
+                FilterMode.NEAREST,
+                1,
+                OptionalDouble.empty()
+            )
+        }
+
         initTexture()
         lock.withLock {
             frontImage?.let {
@@ -98,19 +114,10 @@ class V262OpenGLTextureAdapter() : TextureBridge {
             }
         }
 
-        Minecraft.getInstance().gameRenderer.gameRenderState().guiRenderState.also {
-            it.up()
-        }.addBlitToCurrentLayer(
+        Minecraft.getInstance().gameRenderer.gameRenderState().guiRenderState.addBlitToCurrentLayer(
             BlitRenderState(
                 RenderPipelines.GUI_TEXTURED,
-                TextureSetup.singleTexture(texture, GlSampler(
-                    AddressMode.REPEAT,
-                    AddressMode.REPEAT,
-                    FilterMode.NEAREST,
-                    FilterMode.NEAREST,
-                    1,
-                    OptionalDouble.empty()
-                )),
+                TextureSetup.singleTexture(texture, sampler),
                 Matrix3x2fStack(),
                 0,
                 0,
@@ -142,11 +149,36 @@ class V262OpenGLTextureAdapter() : TextureBridge {
             texture = RenderSystem.getDevice().createTextureView(
                 RenderSystem.getDevice().createTexture(
                     "SkiaBuffer",
-                    GpuTexture.USAGE_COPY_DST + GpuTexture.USAGE_TEXTURE_BINDING + GpuTexture.USAGE_RENDER_ATTACHMENT,
+                    GpuTexture.USAGE_RENDER_ATTACHMENT + GpuTexture.USAGE_TEXTURE_BINDING + GpuTexture.USAGE_COPY_SRC + GpuTexture.USAGE_COPY_DST,
                     GpuFormat.RGBA8_UNORM,
                     vpW, vpH, 1, 1
                 )
             )
         }
+    }
+
+    override fun close() {
+        if (::texture.isInitialized) texture.close()
+        frontImage?.close()
+        backImage?.close()
+    }
+
+    override fun toBackendRenderTarget(): BackendRenderTarget? {
+        if (!::texture.isInitialized) initTexture()
+        if (!::texture.isInitialized) return null
+
+        val text = texture.texture() as? VulkanGpuTexture ?: throw UnsupportedOperationException("Texture is not a VulkanGpuTexture!")
+
+        return BackendRenderTarget.makeVulkan(
+            width = text.getWidth(0),
+            height = text.getHeight(0),
+            imagePtr = text.vkImage(),
+            imageTiling = VK10.VK_IMAGE_TILING_OPTIMAL,
+            imageLayout = VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            format = VulkanConst.toVk(text.format),
+            imageUsageFlags = VulkanConst.textureUsageToVk(text.usage(), text.format),
+            sampleCnt = 1,
+            levelCnt = text.mipLevels
+        )
     }
 }

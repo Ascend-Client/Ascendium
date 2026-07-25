@@ -4,8 +4,9 @@ loom = "1.17-SNAPSHOT"
 fabric-loader = "0.19.3"
 fabric-kotlin-loader = "1.13.13+kotlin.2.4.10"
 
-skiko = "0.150.1"
-jetbrains-compose = "1.12.0-alpha02"
+skiko = "0.150.1-vulkan-SNAPSHOT"
+jetbrains-compose = "1.12.0-beta01"
+material3 = "1.12.0-alpha03"
 colorpicker-compose = "1.2.0"
 kotlinx-coroutines = "1.11.0"
 kcef = "2025.03.23"
@@ -22,7 +23,7 @@ fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = 
 fabric-kotlin-loader = { group = "net.fabricmc", name = "fabric-language-kotlin", version.ref = "fabric-kotlin-loader" }
 skiko-awt = { group = "org.jetbrains.skiko", name = "skiko-awt", version.ref = "skiko" }
 
-compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "jetbrains-compose" }
+compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "material3" }
 compose-ui-tooling = { group = "org.jetbrains.compose.ui", name = "ui-tooling", version.ref = "jetbrains-compose" }
 compose-animation = { group = "org.jetbrains.compose.animation", name = "animation", version.ref = "jetbrains-compose" }
 

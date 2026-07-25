@@ -21,10 +21,16 @@ object ScalingUtils {
 }
 
 class SkiaRenderer {
-    val adapter = if (Ascendium.settings.uiBackend == "Compose") {
-        (BridgeAdapterManager.useBridgeUtil({ it.skiaRenderAdapter }) as SkiaRenderAdapter)
-    } else {
-        OffscreenSkiaRenderer()
+    val adapter = when (Ascendium.settings.uiBackend) {
+        "Compose" -> {
+            (BridgeAdapterManager.useBridgeUtil({ it.skiaRenderAdapter }) as SkiaRenderAdapter)
+        }
+        "Vulkan" -> {
+            VulkanSkiaRenderer()
+        }
+        else -> {
+            OffscreenSkiaRenderer()
+        }
     }
 
     fun withSkia(block: (Canvas) -> Unit) {

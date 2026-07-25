@@ -37,6 +37,7 @@ java {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jetbrainsCompose
     google()

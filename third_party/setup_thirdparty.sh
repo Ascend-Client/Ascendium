@@ -6,28 +6,39 @@ PROJECT_ROOT="$(cd "$THIRD_PARTY_DIR/.." && pwd)"
 SKIA_DIR="$THIRD_PARTY_DIR/skia"
 SKIKO_DIR="$THIRD_PARTY_DIR/skiko"
 PATCHES_DIR="$THIRD_PARTY_DIR/patches"
-SKIKO_VERSION="${1:-0.150.1-vulkan}"
+
+SKIA_REF="skiko-m149"
+SKIKO_REF="v0.149.0"
+
+VERSION="0.150.1-vulkan"
+SKIKO_VERSION="$VERSION-SNAPSHOT"
 
 apply_patches() {
     local target_dir="$1"
+
     if [[ -d "$target_dir" ]]; then
         shopt -s nullglob
+
         for patch in "$target_dir"/*.patch "$target_dir"/*.diff; do
             echo "Applying patch: $(basename "$patch")"
             git apply --3way "$patch"
         done
+
         shopt -u nullglob
     fi
 }
 
 echo "=== [1/5] Updating Git Submodules ==="
-git -C "$PROJECT_ROOT" submodule update --init --recursive
+git -C "$PROJECT_ROOT" submodule update --force --init --recursive
 
 echo "=== [2/5] Resetting & Patching Skia ==="
 (
     cd "$SKIA_DIR"
-    git reset --hard HEAD
+
+    git fetch origin "$SKIA_REF"
+    git reset --hard FETCH_HEAD
     git clean -fd
+
     apply_patches "$PATCHES_DIR/skia"
 
     echo "Syncing Skia C++ third-party dependencies..."
@@ -38,6 +49,7 @@ echo "=== [2/5] Resetting & Patching Skia ==="
 echo "=== [3/5] Compiling Skia C++ with Vulkan ==="
 (
     cd "$SKIA_DIR"
+
     bin/gn gen out/Release-linux-x64 --args='
       is_official_build=true
       is_component_build=false
@@ -52,27 +64,33 @@ echo "=== [3/5] Compiling Skia C++ with Vulkan ==="
       skia_use_system_zlib=false
       skia_use_system_harfbuzz=false
       skia_use_system_icu=false
-      extra_cflags=["-DSK_USE_VULKAN"]
+      extra_cflags=["-DSK_VULKAN", "-D_GLIBCXX_USE_CXX11_ABI=0"]
     '
+
     ninja -C out/Release-linux-x64 skia modules skia_ganesh_ext
 )
 
 echo "=== [4/5] Resetting & Patching Skiko ==="
 (
     cd "$SKIKO_DIR"
-    git reset --hard HEAD
+
+    git fetch origin "$SKIKO_REF"
+    git reset --hard FETCH_HEAD
     git clean -fd
-    apply_patches "$PATCHES_DIR/skiko"
+
+    apply_patches "$PATCHES_DIR/skiko" || true
 )
 
 echo "=== [5/5] Compiling Skiko & Publishing to mavenLocal ==="
 (
     cd "$SKIKO_DIR"
+
     export SKIA_DIR
     export SKIA_OUT_DIR="$SKIA_DIR/out/Release-linux-x64"
 
     ./gradlew :skiko:publishToMavenLocal \
-        -Pversion="$SKIKO_VERSION" \
+        -Pdeploy.version="$VERSION" \
+        -Pversion="$VERSION" \
         -Pskia.dir="$SKIA_DIR"
 )
 

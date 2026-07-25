@@ -14,12 +14,14 @@ subprojects {
     apply(plugin = "fabric-loom")
 
     repositories {
+        mavenLocal()
         mavenCentral()
     }
 
     configurations.all {
         resolutionStrategy {
-            force("org.jetbrains.skiko:skiko-awt:0.150.1")
+            force("org.jetbrains.skiko:skiko-awt:0.150.1-vulkan-SNAPSHOT")
+            force("org.jetbrains.skiko:skiko:0.150.1-vulkan-SNAPSHOT")
         }
     }
 }

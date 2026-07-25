@@ -26,7 +26,6 @@ object BridgeAdapterManager {
             return true //apply or else
         }
 
-        println("Apply $className with ${adapter.mixinName}, ${adapterVersion?.let { className.contains(it) }}")
         return adapterVersion?.let { className.contains(it) } ?: false
     }
 
@@ -71,7 +70,7 @@ val `1_21_4` = BridgeAdapter(
     mainAdapter = "1214",
     mouseAdapter = "1214",
 
-    vulkanRenderer = "UnsupportedVulkanRenderer" //TODO: check for vulkanmod
+    vulkanChecker = "VulkanModChecker"
 )
 
 val `1_21_5` = `1_21_4`.copy(
@@ -227,7 +226,7 @@ val `26_1_2` = BridgeAdapter(
     applyElse = listOf(
         "2612.options.MixinKeybindingCategory"
     ),
-    vulkanRenderer = "UnsupportedVulkanRenderer" //TODO: vulkanmod
+    vulkanChecker = "VulkanModChecker"
 )
 
 val `26_2` = `26_1_2`.copy(
@@ -238,7 +237,12 @@ val `26_2` = `26_1_2`.copy(
     openglTextureAdapter = "V262OpenGLTextureAdapter",
     rawOpenGLTextureAdapter = "V262RawOpenGLAdapter",
 
-    vulkanRenderer = "V262VulkanRenderer",
+    vulkanChecker = "V262VulkanChecker",
+
+    applyElse = listOf(
+        "2612.options.MixinKeybindingCategory",
+        "262.MixinGuiGraphicsExtractor"
+    )
 )
 
 data class BridgeAdapter(
@@ -250,7 +254,7 @@ data class BridgeAdapter(
     val openglTextureAdapter: String,
     val rawOpenGLTextureAdapter: String,
     val offscreen: String,
-    val vulkanRenderer: String,
+    val vulkanChecker: String,
 
     val minecraftClientAdapter: String,
     val entityAdapter: String,
