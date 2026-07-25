@@ -164,7 +164,7 @@ class V262OpenGLTextureAdapter() : TextureBridge {
     }
 
     override fun toBackendRenderTarget(): BackendRenderTarget? {
-        if (!::texture.isInitialized) initTexture()
+        initTexture()
         if (!::texture.isInitialized) return null
 
         val text = texture.texture() as? VulkanGpuTexture ?: throw UnsupportedOperationException("Texture is not a VulkanGpuTexture!")

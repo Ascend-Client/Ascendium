@@ -31,6 +31,7 @@ import io.github.betterclient.ascendium.bridge.requireOffscreen
 import io.github.betterclient.ascendium.ui.bridge.AWTUtils
 import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
+import io.github.betterclient.ascendium.ui.bridge.VulkanSkiaRenderer
 import io.github.betterclient.ascendium.util.ui.AscendiumTheme
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.skiko.node.RenderNodeContext
@@ -115,9 +116,9 @@ object CustomLoadingScreen {
 
     var myRenderer = SkiaRenderer()
     fun render(progress: Float) {
-        if (requireOffscreen && myRenderer.adapter !is OffscreenSkiaRenderer) {
+        if (requireOffscreen && (myRenderer.adapter !is OffscreenSkiaRenderer && myRenderer.adapter !is VulkanSkiaRenderer)) {
             myRenderer = SkiaRenderer()
-            if (myRenderer.adapter !is OffscreenSkiaRenderer) return
+            if (myRenderer.adapter !is OffscreenSkiaRenderer && myRenderer.adapter !is VulkanSkiaRenderer) return
         }
 
         myRenderer.task {

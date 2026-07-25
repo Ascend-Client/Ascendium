@@ -62,6 +62,9 @@ val transitiveInclude: Configuration = configurations.create("transitiveInclude"
     isTransitive = true
     attributes {
         attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
+        attribute(TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE, objects.named(TargetJvmEnvironment.STANDARD_JVM))
     }
 
     exclude(group = "com.mojang")
@@ -76,12 +79,16 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
-    fun use(dep: Any) = transitiveInclude(dep)
+    fun use(dep: Any) {
+        transitiveInclude(dep)
+        implementation(dep)
+    }
 
     //material3 + compose
     use(libs.compose.material3)
     use(libs.compose.ui.tooling)
     use(libs.compose.animation)
+    use(libs.compose.runtime)
     use(libs.skydoves.colorpicker.compose)
 
     use(libs.kotlinx.coroutines.test)
@@ -104,16 +111,16 @@ dependencies {
             }
         }
     }
+}
 
+project.afterEvaluate {
     var i = 0
-    transitiveInclude.resolvedConfiguration.resolvedArtifacts.forEach {
-        if (it.moduleVersion.id.toString().contains("org.apache.commons")) {
-            return@forEach
+    transitiveInclude.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
+        val id = artifact.moduleVersion.id.toString()
+        if (!id.contains("org.apache.commons")) {
+            dependencies.add("include", id)
         }
-
         i++
-        implementation(it.moduleVersion.id.toString())
-        include(it.moduleVersion.id.toString())
     }
     println("Bundled $i transitive dependencies.")
 }

@@ -224,7 +224,8 @@ val `26_1_2` = BridgeAdapter(
     mainAdapter = "2612",
 
     applyElse = listOf(
-        "2612.options.MixinKeybindingCategory"
+        "2612.options.MixinKeybindingCategory",
+        "2612.render.MixinGuiGraphicsExtractor"
     ),
     vulkanChecker = "VulkanModChecker"
 )
@@ -238,11 +239,6 @@ val `26_2` = `26_1_2`.copy(
     rawOpenGLTextureAdapter = "V262RawOpenGLAdapter",
 
     vulkanChecker = "V262VulkanChecker",
-
-    applyElse = listOf(
-        "2612.options.MixinKeybindingCategory",
-        "262.MixinGuiGraphicsExtractor"
-    )
 )
 
 data class BridgeAdapter(

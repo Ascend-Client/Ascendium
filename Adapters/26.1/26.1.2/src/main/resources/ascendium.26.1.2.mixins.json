@@ -28,6 +28,7 @@
     "render.MixinSplashOverlay",
     "render.MixinTitleScreen",
     "render.MixinWindow",
+    "render.MixinGuiGraphicsExtractor",
     "texture.MixinSpriteAtlasTexture"
   ],
   "injectors": {

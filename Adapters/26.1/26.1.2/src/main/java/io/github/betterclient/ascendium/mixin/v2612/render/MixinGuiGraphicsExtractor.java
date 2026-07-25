@@ -1,4 +1,4 @@
-package io.github.betterclient.ascendium.mixin.v262;
+package io.github.betterclient.ascendium.mixin.v2612.render;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.textures.GpuSampler;
