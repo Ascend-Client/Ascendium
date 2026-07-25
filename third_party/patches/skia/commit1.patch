@@ -1,0 +1,21 @@
+From 67e288bb7a2cc9728aa88830c50f1e9a3e318666 Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Thu, 21 May 2026 18:05:21 +0530
+Subject: [PATCH] feat: build with vulkan
+
+---
+ tools/skia_release/build.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tools/skia_release/build.py b/tools/skia_release/build.py
+index 65ab6c66e806..378440184669 100755
+--- a/tools/skia_release/build.py
++++ b/tools/skia_release/build.py
+@@ -154,6 +154,7 @@ def main():
+       args += ['dawn_enable_d3d11=true', 'dawn_enable_d3d12=true']
+     args += [
+         'skia_use_direct3d=true',
++        'skia_use_vulkan=true',
+         'extra_cflags+=["-DSK_FONT_HOST_USE_SYSTEM_SETTINGS"]',
+     ]
+     if host == 'windows':

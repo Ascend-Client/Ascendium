@@ -1,0 +1,22 @@
+From 397e8b2ac7a4517891d67e7c2b56fcf9086aa16d Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Thu, 21 May 2026 19:39:11 +0530
+Subject: [PATCH] fix: add vulkan to macOS as well
+
+---
+ tools/skia_release/build.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/skia_release/build.py b/tools/skia_release/build.py
+index 378440184669..48c4d472a974 100755
+--- a/tools/skia_release/build.py
++++ b/tools/skia_release/build.py
+@@ -110,7 +110,7 @@ def main():
+ 
+   if is_macos or is_ios or is_tvos:
+     if is_macos:
+-      args += ['skia_use_fonthost_mac=true']
++      args += ['skia_use_fonthost_mac=true', 'skia_use_vulkan=true']
+       if enable_graphite_dawn:
+         args += ['dawn_enable_metal=true']
+     args += ['extra_cflags_cc+=["-frtti"]']

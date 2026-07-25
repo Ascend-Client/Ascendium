@@ -1,0 +1,1910 @@
+From 2bf17eddf65d4c771dfdd1e9fdf9312a32c61bd6 Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Thu, 21 May 2026 16:12:59 +0530
+Subject: [PATCH 1/9] Implement support for Vulkan
+
+---
+ .../configuration/CommonTasksConfiguration.kt | 13 +++--
+ .../org/jetbrains/skiko/Actuals.android.kt    |  5 +-
+ .../kotlin/org/jetbrains/skiko/Actuals.awt.kt |  3 +
+ .../org/jetbrains/skia/BackendRenderTarget.kt | 52 +++++++++++++++++
+ .../org/jetbrains/skia/DirectContext.kt       | 58 +++++++++++++++++++
+ .../jvmMain/cpp/common/BackendRenderTarget.cc | 24 ++++++++
+ skiko/src/jvmMain/cpp/common/DirectContext.cc | 33 +++++++++++
+ .../jetbrains/skia/VulkanInteropTest.jvm.kt   | 47 +++++++++++++++
+ .../nativeJsMain/cpp/BackendRenderTarget.cc   | 29 ++++++++++
+ skiko/src/nativeJsMain/cpp/DirectContext.cc   | 37 ++++++++++++
+ 10 files changed, 296 insertions(+), 5 deletions(-)
+ create mode 100644 skiko/src/jvmTest/kotlin/org/jetbrains/skia/VulkanInteropTest.jvm.kt
+
+diff --git a/skiko/buildSrc/src/main/kotlin/tasks/configuration/CommonTasksConfiguration.kt b/skiko/buildSrc/src/main/kotlin/tasks/configuration/CommonTasksConfiguration.kt
+index cd03def172..5aefcee4c9 100644
+--- a/skiko/buildSrc/src/main/kotlin/tasks/configuration/CommonTasksConfiguration.kt
++++ b/skiko/buildSrc/src/main/kotlin/tasks/configuration/CommonTasksConfiguration.kt
+@@ -43,6 +43,7 @@ fun skiaHeadersDirs(skiaDir: File): List<File> =
+     listOf(
+         skiaDir,
+         skiaDir.resolve("include"),
++        skiaDir.resolve("include/third_party/vulkan"),
+         skiaDir.resolve("include/core"),
+         skiaDir.resolve("include/gpu"),
+         skiaDir.resolve("include/effects"),
+@@ -93,7 +94,8 @@ fun skiaPreprocessorFlags(os: OS, buildType: SkiaBuildType): Array<String> {
+         OS.MacOS -> listOf(
+             "-DSK_SHAPER_CORETEXT_AVAILABLE",
+             "-DSK_BUILD_FOR_MAC",
+-            "-DSK_METAL"
++            "-DSK_METAL",
++            "-DSK_VULKAN"
+         )
+         OS.IOS -> listOf(
+             "-DSK_BUILD_FOR_IOS",
+@@ -114,18 +116,21 @@ fun skiaPreprocessorFlags(os: OS, buildType: SkiaBuildType): Array<String> {
+             "-DNOMINMAX",
+             "-DSK_GAMMA_APPLY_TO_A8",
+             "-DSK_DIRECT3D",
+-            "-DSK_ANGLE"
++            "-DSK_ANGLE",
++            "-DSK_VULKAN"
+         )
+         OS.Linux -> listOf(
+             "-DSK_BUILD_FOR_LINUX",
+-            "-D_GLIBCXX_USE_CXX11_ABI=0"
++            "-D_GLIBCXX_USE_CXX11_ABI=0",
++            "-DSK_VULKAN"
+         )
+         OS.Wasm -> listOf(
+             "-DSKIKO_WASM",
+             "-sSUPPORT_LONGJMP=wasm"
+         )
+         OS.Android -> listOf(
+-            "-DSK_BUILD_FOR_ANDROID"
++            "-DSK_BUILD_FOR_ANDROID",
++            "-DSK_VULKAN"
+         )
+     }
+ 
+diff --git a/skiko/src/androidMain/kotlin/org/jetbrains/skiko/Actuals.android.kt b/skiko/src/androidMain/kotlin/org/jetbrains/skiko/Actuals.android.kt
+index e4997944fd..5647f5726f 100644
+--- a/skiko/src/androidMain/kotlin/org/jetbrains/skiko/Actuals.android.kt
++++ b/skiko/src/androidMain/kotlin/org/jetbrains/skiko/Actuals.android.kt
+@@ -29,7 +29,10 @@ internal actual fun makeDefaultRenderFactory(): RenderFactory {
+             analytics: SkiaLayerAnalytics,
+             properties: SkiaLayerProperties
+         ): Redrawer = when (hostOs) {
+-            OS.Android -> AndroidOpenGLRedrawer(layer, properties)
++            OS.Android -> when (renderApi) {
++                GraphicsApi.OPENGL -> AndroidOpenGLRedrawer(layer, properties)
++                else -> throw UnsupportedOperationException("Android doesn't support $renderApi redrawers")
++            }
+             else -> throw IllegalArgumentException("Must not happen")
+         }
+     }
+diff --git a/skiko/src/awtMain/kotlin/org/jetbrains/skiko/Actuals.awt.kt b/skiko/src/awtMain/kotlin/org/jetbrains/skiko/Actuals.awt.kt
+index 0f439dc175..d25a5c2be4 100644
+--- a/skiko/src/awtMain/kotlin/org/jetbrains/skiko/Actuals.awt.kt
++++ b/skiko/src/awtMain/kotlin/org/jetbrains/skiko/Actuals.awt.kt
+@@ -10,6 +10,7 @@ internal actual fun makeDefaultRenderFactory(): RenderFactory =
+         when (hostOs) {
+             OS.MacOS -> when (renderApi) {
+                 GraphicsApi.SOFTWARE_COMPAT, GraphicsApi.SOFTWARE_FAST -> SoftwareRedrawer(layer, analytics, properties)
++                GraphicsApi.VULKAN -> throw UnsupportedOperationException("AWT doesn't support Vulkan redrawers")
+                 else -> MetalRedrawer(layer, analytics, properties)
+             }
+             OS.Windows -> when (renderApi) {
+@@ -17,11 +18,13 @@ internal actual fun makeDefaultRenderFactory(): RenderFactory =
+                 GraphicsApi.SOFTWARE_FAST -> WindowsSoftwareRedrawer(layer, analytics, properties)
+                 GraphicsApi.OPENGL -> WindowsOpenGLRedrawer(layer, analytics, properties)
+                 GraphicsApi.ANGLE -> AngleRedrawer(layer, analytics, properties)
++                GraphicsApi.VULKAN -> throw UnsupportedOperationException("AWT doesn't support Vulkan redrawers")
+                 else -> Direct3DRedrawer(layer, analytics, properties)
+             }
+             OS.Linux -> when (renderApi) {
+                 GraphicsApi.SOFTWARE_COMPAT -> SoftwareRedrawer(layer, analytics, properties)
+                 GraphicsApi.SOFTWARE_FAST -> LinuxSoftwareRedrawer(layer, analytics, properties)
++                GraphicsApi.VULKAN -> throw UnsupportedOperationException("AWT doesn't support Vulkan redrawers")
+                 else -> LinuxOpenGLRedrawer(layer, analytics, properties)
+             }
+             else -> throw UnsupportedOperationException("AWT doesn't support $hostOs")
+diff --git a/skiko/src/commonMain/kotlin/org/jetbrains/skia/BackendRenderTarget.kt b/skiko/src/commonMain/kotlin/org/jetbrains/skia/BackendRenderTarget.kt
+index 2c3aa9df6d..4499e3dc44 100644
+--- a/skiko/src/commonMain/kotlin/org/jetbrains/skia/BackendRenderTarget.kt
++++ b/skiko/src/commonMain/kotlin/org/jetbrains/skia/BackendRenderTarget.kt
+@@ -2,6 +2,7 @@ package org.jetbrains.skia
+ 
+ import org.jetbrains.skia.impl.Library.Companion.staticLoad
+ import org.jetbrains.skia.impl.Managed
++import org.jetbrains.skia.impl.Native.Companion.NullPointer
+ import org.jetbrains.skia.impl.NativePointer
+ import org.jetbrains.skia.impl.Stats
+ import org.jetbrains.skiko.RenderException
+@@ -60,6 +61,44 @@ class BackendRenderTarget internal constructor(ptr: NativePointer) : Managed(ptr
+             return BackendRenderTarget(_nMakeDirect3D(width, height, texturePtr, format, sampleCnt, levelCnt))
+         }
+ 
++        /**
++         * Creates Vulkan backend render target from a Vulkan image.
++         *
++         * Caller must keep the underlying VkImage valid for the lifetime of the resulting backend render target.
++         */
++        fun makeVulkan(
++            width: Int,
++            height: Int,
++            imagePtr: NativePointer,
++            imageTiling: Int,
++            imageLayout: Int,
++            format: Int,
++            imageUsageFlags: Int,
++            sampleCnt: Int,
++            levelCnt: Int
++        ): BackendRenderTarget {
++            require(width > 0) { "width must be positive" }
++            require(height > 0) { "height must be positive" }
++            require(imagePtr != NullPointer) { "imagePtr must not be null" }
++            require(sampleCnt > 0) { "sampleCnt must be positive" }
++            require(levelCnt > 0) { "levelCnt must be positive" }
++
++            Stats.onNativeCall()
++            val ptr = _nMakeVulkan(
++                width,
++                height,
++                imagePtr,
++                imageTiling,
++                imageLayout,
++                format,
++                imageUsageFlags,
++                sampleCnt,
++                levelCnt
++            )
++            if (ptr == NullPointer) throw RenderException("Can't create Vulkan BackendRenderTarget")
++            return BackendRenderTarget(ptr)
++        }
++
+         init {
+             staticLoad()
+         }
+@@ -88,3 +127,16 @@ private external fun _nMakeDirect3D(
+     sampleCnt: Int,
+     levelCnt: Int
+ ): NativePointer
++
++@ExternalSymbolName("org_jetbrains_skia_BackendRenderTarget__1nMakeVulkan")
++private external fun _nMakeVulkan(
++    width: Int,
++    height: Int,
++    imagePtr: NativePointer,
++    imageTiling: Int,
++    imageLayout: Int,
++    format: Int,
++    imageUsageFlags: Int,
++    sampleCnt: Int,
++    levelCnt: Int
++): NativePointer
+diff --git a/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt b/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
+index 15dad4fff7..17ca4e807c 100644
+--- a/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
++++ b/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
+@@ -2,6 +2,7 @@ package org.jetbrains.skia
+ 
+ import org.jetbrains.skia.impl.*
+ import org.jetbrains.skia.impl.Library.Companion.staticLoad
++import org.jetbrains.skia.impl.Native.Companion.NullPointer
+ import org.jetbrains.skiko.RenderException
+ import org.jetbrains.skiko.loadOpenGLLibrary
+ 
+@@ -38,6 +39,51 @@ class DirectContext internal constructor(ptr: NativePointer) : RefCnt(ptr) {
+             return DirectContext(_nMakeDirect3D(adapterPtr, devicePtr, queuePtr))
+         }
+ 
++        /**
++         * Creates Vulkan direct rendering context from Vulkan native objects.
++         *
++         * @param instancePtr pointer to VkInstance; must not be null
++         * @param physicalDevicePtr pointer to VkPhysicalDevice; must not be null
++         * @param devicePtr pointer to VkDevice; must not be null
++         * @param queuePtr pointer to VkQueue; must not be null
++         * @param graphicsQueueIndex index of the graphics queue used for rendering
++         * @param instanceProcAddr pointer to vkGetInstanceProcAddr; must not be null
++         * @param deviceProcAddr pointer to vkGetDeviceProcAddr; must not be null
++         * @param apiVersion Vulkan API version
++         */
++        fun makeVulkan(
++            instancePtr: NativePointer,
++            physicalDevicePtr: NativePointer,
++            devicePtr: NativePointer,
++            queuePtr: NativePointer,
++            graphicsQueueIndex: Int,
++            instanceProcAddr: NativePointer,
++            deviceProcAddr: NativePointer,
++            apiVersion: Int
++        ): DirectContext {
++            require(instancePtr != NullPointer) { "instancePtr must not be null" }
++            require(physicalDevicePtr != NullPointer) { "physicalDevicePtr must not be null" }
++            require(devicePtr != NullPointer) { "devicePtr must not be null" }
++            require(queuePtr != NullPointer) { "queuePtr must not be null" }
++            require(graphicsQueueIndex >= 0) { "graphicsQueueIndex must be non-negative" }
++            require(instanceProcAddr != NullPointer) { "instanceProcAddr must not be null" }
++            require(deviceProcAddr != NullPointer) { "deviceProcAddr must not be null" }
++
++            Stats.onNativeCall()
++            val ptr = _nMakeVulkan(
++                instancePtr,
++                physicalDevicePtr,
++                devicePtr,
++                queuePtr,
++                graphicsQueueIndex,
++                instanceProcAddr,
++                deviceProcAddr,
++                apiVersion
++            )
++            if (ptr == NullPointer) throw RenderException("Can't create Vulkan DirectContext")
++            return DirectContext(ptr)
++        }
++
+         init {
+             staticLoad()
+         }
+@@ -176,6 +222,18 @@ private external fun _nMakeMetal(devicePtr: NativePointer, queuePtr: NativePoint
+ @ExternalSymbolName("org_jetbrains_skia_DirectContext__1nMakeDirect3D")
+ private external fun _nMakeDirect3D(adapterPtr: NativePointer, devicePtr: NativePointer, queuePtr: NativePointer): NativePointer
+ 
++@ExternalSymbolName("org_jetbrains_skia_DirectContext__1nMakeVulkan")
++private external fun _nMakeVulkan(
++    instancePtr: NativePointer,
++    physicalDevicePtr: NativePointer,
++    devicePtr: NativePointer,
++    queuePtr: NativePointer,
++    graphicsQueueIndex: Int,
++    instanceProcAddr: NativePointer,
++    deviceProcAddr: NativePointer,
++    apiVersion: Int
++): NativePointer
++
+ @ExternalSymbolName("org_jetbrains_skia_DirectContext__1nSubmit")
+ private external fun _nSubmit(ptr: NativePointer, syncCpu: Boolean)
+ 
+diff --git a/skiko/src/jvmMain/cpp/common/BackendRenderTarget.cc b/skiko/src/jvmMain/cpp/common/BackendRenderTarget.cc
+index 45fcd68c79..1af07f9b52 100644
+--- a/skiko/src/jvmMain/cpp/common/BackendRenderTarget.cc
++++ b/skiko/src/jvmMain/cpp/common/BackendRenderTarget.cc
+@@ -56,3 +56,27 @@ extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_BackendRenderTargetKt
+     return reinterpret_cast<jlong>(instance);
+ }
+ #endif //SK_DIRECT3D
++
++#ifdef SK_VULKAN
++#include "include/gpu/ganesh/vk/GrVkBackendSurface.h"
++#include "include/gpu/ganesh/vk/GrVkTypes.h"
++
++extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_BackendRenderTargetKt__1nMakeVulkan
++  (JNIEnv* env, jclass jclass, jint width, jint height, jlong imagePtr, jint imageTiling, jint imageLayout, jint format, jint imageUsageFlags, jint sampleCnt, jint levelCnt) {
++    GrVkImageInfo vkInfo = {};
++    vkInfo.fImage = reinterpret_cast<VkImage>(static_cast<uintptr_t>(imagePtr));
++    vkInfo.fImageTiling = static_cast<VkImageTiling>(imageTiling);
++    vkInfo.fImageLayout = static_cast<VkImageLayout>(imageLayout);
++    vkInfo.fFormat = static_cast<VkFormat>(format);
++    vkInfo.fImageUsageFlags = static_cast<VkImageUsageFlags>(imageUsageFlags);
++    vkInfo.fSampleCount = static_cast<uint32_t>(sampleCnt);
++    vkInfo.fLevelCount = static_cast<uint32_t>(levelCnt);
++
++    GrBackendRenderTarget backendRenderTarget = GrBackendRenderTargets::MakeVk(width, height, vkInfo);
++    if (!backendRenderTarget.isValid()) {
++        return 0;
++    }
++    GrBackendRenderTarget* instance = new GrBackendRenderTarget(backendRenderTarget);
++    return reinterpret_cast<jlong>(instance);
++}
++#endif // SK_VULKAN
+diff --git a/skiko/src/jvmMain/cpp/common/DirectContext.cc b/skiko/src/jvmMain/cpp/common/DirectContext.cc
+index 789a01c39d..3625ea8b80 100644
+--- a/skiko/src/jvmMain/cpp/common/DirectContext.cc
++++ b/skiko/src/jvmMain/cpp/common/DirectContext.cc
+@@ -50,6 +50,39 @@ extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_DirectContextKt__1nMa
+ }
+ #endif //SK_DIRECT3D
+ 
++#ifdef SK_VULKAN
++#include "include/gpu/ganesh/vk/GrVkDirectContext.h"
++#include "include/gpu/ganesh/vk/GrVkTypes.h"
++#include "include/gpu/vk/VulkanBackendContext.h"
++#include "include/gpu/vk/VulkanExtensions.h"
++
++extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_DirectContextKt__1nMakeVulkan
++  (JNIEnv* env, jclass jclass, jlong instancePtr, jlong physicalDevicePtr, jlong devicePtr, jlong queuePtr, jint graphicsQueueIndex, jlong instanceProcAddr, jlong deviceProcAddr, jint apiVersion) {
++    skgpu::VulkanBackendContext backendContext = {};
++    backendContext.fInstance = reinterpret_cast<VkInstance>(static_cast<uintptr_t>(instancePtr));
++    backendContext.fPhysicalDevice = reinterpret_cast<VkPhysicalDevice>(static_cast<uintptr_t>(physicalDevicePtr));
++    backendContext.fDevice = reinterpret_cast<VkDevice>(static_cast<uintptr_t>(devicePtr));
++    backendContext.fQueue = reinterpret_cast<VkQueue>(static_cast<uintptr_t>(queuePtr));
++    backendContext.fGraphicsQueueIndex = static_cast<uint32_t>(graphicsQueueIndex);
++    backendContext.fGetProc = [instanceProcAddr, deviceProcAddr](const char* name, VkInstance instance, VkDevice device) -> PFN_vkVoidFunction {
++        if (device != VK_NULL_HANDLE) {
++            return reinterpret_cast<PFN_vkGetDeviceProcAddr>(static_cast<uintptr_t>(deviceProcAddr))(device, name);
++        }
++        return reinterpret_cast<PFN_vkGetInstanceProcAddr>(static_cast<uintptr_t>(instanceProcAddr))(instance, name);
++    };
++
++    skgpu::VulkanExtensions extensions;
++    if (!extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice, 0, nullptr, 0, nullptr)) {
++        return 0;
++    }
++    backendContext.fVkExtensions = &extensions;
++    backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
++
++    sk_sp<GrDirectContext> directContext = GrDirectContexts::MakeVulkan(backendContext);
++    return reinterpret_cast<jlong>(directContext.release());
++}
++#endif // SK_VULKAN
++
+ extern "C" JNIEXPORT void JNICALL Java_org_jetbrains_skia_DirectContextKt_DirectContext_1nFlushDefault
+   (JNIEnv* env, jclass jclass, jlong ptr) {
+   GrDirectContext* context = reinterpret_cast<GrDirectContext*>(static_cast<uintptr_t>(ptr));
+diff --git a/skiko/src/jvmTest/kotlin/org/jetbrains/skia/VulkanInteropTest.jvm.kt b/skiko/src/jvmTest/kotlin/org/jetbrains/skia/VulkanInteropTest.jvm.kt
+new file mode 100644
+index 0000000000..6e168b9422
+--- /dev/null
++++ b/skiko/src/jvmTest/kotlin/org/jetbrains/skia/VulkanInteropTest.jvm.kt
+@@ -0,0 +1,47 @@
++package org.jetbrains.skia
++
++import org.jetbrains.skia.impl.Native.Companion.NullPointer
++import org.jetbrains.skiko.Library
++import kotlin.test.Test
++import kotlin.test.assertFailsWith
++
++class VulkanInteropTest {
++    private companion object {
++        init {
++            Library.load()
++        }
++    }
++
++    @Test
++    fun `makeVulkan validates required handles`() {
++        assertFailsWith<IllegalArgumentException> {
++            DirectContext.makeVulkan(
++                instancePtr = NullPointer,
++                physicalDevicePtr = 1L,
++                devicePtr = 2L,
++                queuePtr = 3L,
++                graphicsQueueIndex = 0,
++                instanceProcAddr = 4L,
++                deviceProcAddr = 5L,
++                apiVersion = 1
++            )
++        }
++    }
++
++    @Test
++    fun `makeVulkan backend render target validates required arguments`() {
++        assertFailsWith<IllegalArgumentException> {
++            BackendRenderTarget.makeVulkan(
++                width = 1,
++                height = 1,
++                imagePtr = NullPointer,
++                imageTiling = 0,
++                imageLayout = 0,
++                format = 0,
++                imageUsageFlags = 0,
++                sampleCnt = 1,
++                levelCnt = 1
++            )
++        }
++    }
++}
+diff --git a/skiko/src/nativeJsMain/cpp/BackendRenderTarget.cc b/skiko/src/nativeJsMain/cpp/BackendRenderTarget.cc
+index 84ddad8778..b03d99daba 100644
+--- a/skiko/src/nativeJsMain/cpp/BackendRenderTarget.cc
++++ b/skiko/src/nativeJsMain/cpp/BackendRenderTarget.cc
+@@ -9,6 +9,11 @@
+ #include "ganesh/mtl/GrMtlTypes.h"
+ #endif
+ 
++#ifdef SK_VULKAN
++#include "include/gpu/ganesh/vk/GrVkBackendSurface.h"
++#include "include/gpu/ganesh/vk/GrVkTypes.h"
++#endif
++
+ static void deleteBackendRenderTarget(GrBackendRenderTarget* rt) {
+     delete rt;
+ }
+@@ -61,3 +66,27 @@ SKIKO_EXPORT KNativePointer BackendRenderTarget_MakeDirect3D
+     return 0;
+ #endif
+ }
++
++SKIKO_EXPORT KNativePointer org_jetbrains_skia_BackendRenderTarget__1nMakeVulkan
++  (KInt width, KInt height, KNativePointer imagePtr, KInt imageTiling, KInt imageLayout, KInt format, KInt imageUsageFlags, KInt sampleCnt, KInt levelCnt) {
++#ifdef SK_VULKAN
++    GrVkImageInfo vkInfo = {};
++    vkInfo.fImage = reinterpret_cast<VkImage>(imagePtr);
++    vkInfo.fImageTiling = static_cast<VkImageTiling>(imageTiling);
++    vkInfo.fImageLayout = static_cast<VkImageLayout>(imageLayout);
++    vkInfo.fFormat = static_cast<VkFormat>(format);
++    vkInfo.fImageUsageFlags = static_cast<VkImageUsageFlags>(imageUsageFlags);
++    vkInfo.fSampleCount = static_cast<uint32_t>(sampleCnt);
++    vkInfo.fLevelCount = static_cast<uint32_t>(levelCnt);
++
++    GrBackendRenderTarget backendRenderTarget = GrBackendRenderTargets::MakeVk(width, height, vkInfo);
++    if (!backendRenderTarget.isValid()) {
++        return nullptr;
++    }
++
++    GrBackendRenderTarget* instance = new GrBackendRenderTarget(backendRenderTarget);
++    return instance;
++#else
++    return nullptr;
++#endif // SK_VULKAN
++}
+diff --git a/skiko/src/nativeJsMain/cpp/DirectContext.cc b/skiko/src/nativeJsMain/cpp/DirectContext.cc
+index b209896999..fa99d2c675 100644
+--- a/skiko/src/nativeJsMain/cpp/DirectContext.cc
++++ b/skiko/src/nativeJsMain/cpp/DirectContext.cc
+@@ -13,6 +13,13 @@
+ #include "ganesh/d3d/GrD3DDirectContext.h"
+ #endif
+ 
++#ifdef SK_VULKAN
++#include "include/gpu/ganesh/vk/GrVkDirectContext.h"
++#include "include/gpu/ganesh/vk/GrVkTypes.h"
++#include "include/gpu/vk/VulkanBackendContext.h"
++#include "include/gpu/vk/VulkanExtensions.h"
++#endif
++
+ SKIKO_EXPORT KNativePointer org_jetbrains_skia_DirectContext__1nMakeGL
+   () {
+     return static_cast<KNativePointer>(GrDirectContexts::MakeGL().release());
+@@ -56,6 +63,36 @@ SKIKO_EXPORT KNativePointer org_jetbrains_skia_DirectContext__1nMakeDirect3D
+ #endif // SK_DIRECT3D
+ }
+ 
++SKIKO_EXPORT KNativePointer org_jetbrains_skia_DirectContext__1nMakeVulkan
++  (KNativePointer instancePtr, KNativePointer physicalDevicePtr, KNativePointer devicePtr, KNativePointer queuePtr, KInt graphicsQueueIndex, KNativePointer instanceProcAddr, KNativePointer deviceProcAddr, KInt apiVersion) {
++#ifdef SK_VULKAN
++    skgpu::VulkanBackendContext backendContext = {};
++    backendContext.fInstance = reinterpret_cast<VkInstance>(instancePtr);
++    backendContext.fPhysicalDevice = reinterpret_cast<VkPhysicalDevice>(physicalDevicePtr);
++    backendContext.fDevice = reinterpret_cast<VkDevice>(devicePtr);
++    backendContext.fQueue = reinterpret_cast<VkQueue>(queuePtr);
++    backendContext.fGraphicsQueueIndex = static_cast<uint32_t>(graphicsQueueIndex);
++    backendContext.fGetProc = [instanceProcAddr, deviceProcAddr](const char* name, VkInstance instance, VkDevice device) -> PFN_vkVoidFunction {
++        if (device != VK_NULL_HANDLE) {
++            return reinterpret_cast<PFN_vkGetDeviceProcAddr>(deviceProcAddr)(device, name);
++        }
++        return reinterpret_cast<PFN_vkGetInstanceProcAddr>(instanceProcAddr)(instance, name);
++    };
++
++    skgpu::VulkanExtensions extensions;
++    if (!extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice, 0, nullptr, 0, nullptr)) {
++        return nullptr;
++    }
++    backendContext.fVkExtensions = &extensions;
++    backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
++
++    sk_sp<GrDirectContext> instance = GrDirectContexts::MakeVulkan(backendContext);
++    return static_cast<KNativePointer>(instance.release());
++#else
++    return nullptr;
++#endif // SK_VULKAN
++}
++
+ SKIKO_EXPORT void org_jetbrains_skia_DirectContext__1nFlushDefault
+   (KNativePointer ptr) {
+     GrDirectContext* context = reinterpret_cast<GrDirectContext*>((ptr));
+
+From ee6888945c686877b27e80a4da6bc1ce890b77e5 Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Thu, 21 May 2026 17:39:22 +0530
+Subject: [PATCH 2/9] Update Vulkan support to work with Skia m148
+
+---
+ skiko/src/jvmMain/cpp/common/DirectContext.cc | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/skiko/src/jvmMain/cpp/common/DirectContext.cc b/skiko/src/jvmMain/cpp/common/DirectContext.cc
+index 3625ea8b80..3326a97da0 100644
+--- a/skiko/src/jvmMain/cpp/common/DirectContext.cc
++++ b/skiko/src/jvmMain/cpp/common/DirectContext.cc
+@@ -72,9 +72,7 @@ extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_DirectContextKt__1nMa
+     };
+ 
+     skgpu::VulkanExtensions extensions;
+-    if (!extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice, 0, nullptr, 0, nullptr)) {
+-        return 0;
+-    }
++    extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice, 0, nullptr, 0, nullptr);
+     backendContext.fVkExtensions = &extensions;
+     backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
+ 
+
+From 1a2aaccffc3d7ccc1e8f42e159433ac658028554 Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Thu, 21 May 2026 19:28:53 +0530
+Subject: [PATCH 3/9] Temporarily change skia urls to LunasaVT/skia (has VK
+ enabled builds)
+
+---
+ skiko/buildSrc/src/main/kotlin/SkikoProjectContext.kt | 2 +-
+ skiko/gradle.properties                               | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/skiko/buildSrc/src/main/kotlin/SkikoProjectContext.kt b/skiko/buildSrc/src/main/kotlin/SkikoProjectContext.kt
+index 30a18501b5..6f517e74dc 100644
+--- a/skiko/buildSrc/src/main/kotlin/SkikoProjectContext.kt
++++ b/skiko/buildSrc/src/main/kotlin/SkikoProjectContext.kt
+@@ -46,7 +46,7 @@ fun SkikoProjectContext.declareSkiaTasks() {
+ 
+             val skiaReleaseTag = project.skiaVersion(target)
+ 
+-            val skiaBaseUrl = "https://github.com/JetBrains/skia/releases/download/$skiaReleaseTag"
++            val skiaBaseUrl = "https://github.com/LunasaVT/skia/releases/download/$skiaReleaseTag"
+ 
+             val artifactId = "Skia-${skiaReleaseTag}-${config}-$buildType-${arch}"
+ 
+diff --git a/skiko/gradle.properties b/skiko/gradle.properties
+index e3569c4804..f624e43ef2 100644
+--- a/skiko/gradle.properties
++++ b/skiko/gradle.properties
+@@ -7,7 +7,7 @@ kotlin.mpp.enableCInteropCommonization=true
+ deploy.version=0.0.0
+ 
+ # a tag from https://github.com/JetBrains/skia/releases
+-dependencies.skia=m148-8967a2e80c
++dependencies.skia=m149-67e288bb7a
+ 
+ # a tag from https://github.com/JetBrains/angle-pack
+ dependencies.angle=ec4d8f8e4d
+
+From 8335d94a618b3dd8016ab9212c3bca9a722737a1 Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Thu, 21 May 2026 23:40:49 +0530
+Subject: [PATCH 4/9] Fix JS bindings
+
+---
+ skiko/src/nativeJsMain/cpp/DirectContext.cc | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/skiko/src/nativeJsMain/cpp/DirectContext.cc b/skiko/src/nativeJsMain/cpp/DirectContext.cc
+index fa99d2c675..dd17f9ddf6 100644
+--- a/skiko/src/nativeJsMain/cpp/DirectContext.cc
++++ b/skiko/src/nativeJsMain/cpp/DirectContext.cc
+@@ -80,9 +80,7 @@ SKIKO_EXPORT KNativePointer org_jetbrains_skia_DirectContext__1nMakeVulkan
+     };
+ 
+     skgpu::VulkanExtensions extensions;
+-    if (!extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice, 0, nullptr, 0, nullptr)) {
+-        return nullptr;
+-    }
++    extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice, 0, nullptr, 0, nullptr);
+     backendContext.fVkExtensions = &extensions;
+     backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
+ 
+
+From 0e5ff4a4f7657ffba37a72def29a2c72fa9b963b Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Wed, 27 May 2026 00:57:50 +0530
+Subject: [PATCH 5/9] Update skia tag
+
+---
+ skiko/gradle.properties | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/skiko/gradle.properties b/skiko/gradle.properties
+index f624e43ef2..af302b3b59 100644
+--- a/skiko/gradle.properties
++++ b/skiko/gradle.properties
+@@ -7,7 +7,7 @@ kotlin.mpp.enableCInteropCommonization=true
+ deploy.version=0.0.0
+ 
+ # a tag from https://github.com/JetBrains/skia/releases
+-dependencies.skia=m149-67e288bb7a
++dependencies.skia=m149-397e8b2ac7
+ 
+ # a tag from https://github.com/JetBrains/angle-pack
+ dependencies.angle=ec4d8f8e4d
+
+From 5084dbc2c3d7976bfed5037fe36acb4e910c42d5 Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Wed, 27 May 2026 02:48:02 +0530
+Subject: [PATCH 6/9] Support for custom Vulkan memory allocators
+
+---
+ .../org/jetbrains/skia/DirectContext.kt       |  11 +-
+ .../jetbrains/skia/VulkanMemoryAllocator.kt   | 143 +++++++
+ skiko/src/jvmMain/cpp/common/DirectContext.cc | 371 +++++++++++++++++-
+ skiko/src/nativeJsMain/cpp/DirectContext.cc   | 123 +++++-
+ 4 files changed, 624 insertions(+), 24 deletions(-)
+ create mode 100644 skiko/src/commonMain/kotlin/org/jetbrains/skia/VulkanMemoryAllocator.kt
+
+diff --git a/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt b/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
+index 17ca4e807c..f2a59d2f20 100644
+--- a/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
++++ b/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
+@@ -50,6 +50,8 @@ class DirectContext internal constructor(ptr: NativePointer) : RefCnt(ptr) {
+          * @param instanceProcAddr pointer to vkGetInstanceProcAddr; must not be null
+          * @param deviceProcAddr pointer to vkGetDeviceProcAddr; must not be null
+          * @param apiVersion Vulkan API version
++         * @param memoryAllocator custom allocator for Vulkan device memory, or null to use
++         *                        the built-in per-allocation allocator
+          */
+         fun makeVulkan(
+             instancePtr: NativePointer,
+@@ -59,7 +61,8 @@ class DirectContext internal constructor(ptr: NativePointer) : RefCnt(ptr) {
+             graphicsQueueIndex: Int,
+             instanceProcAddr: NativePointer,
+             deviceProcAddr: NativePointer,
+-            apiVersion: Int
++            apiVersion: Int,
++            memoryAllocator: VulkanMemoryAllocator? = null
+         ): DirectContext {
+             require(instancePtr != NullPointer) { "instancePtr must not be null" }
+             require(physicalDevicePtr != NullPointer) { "physicalDevicePtr must not be null" }
+@@ -78,7 +81,8 @@ class DirectContext internal constructor(ptr: NativePointer) : RefCnt(ptr) {
+                 graphicsQueueIndex,
+                 instanceProcAddr,
+                 deviceProcAddr,
+-                apiVersion
++                apiVersion,
++                memoryAllocator
+             )
+             if (ptr == NullPointer) throw RenderException("Can't create Vulkan DirectContext")
+             return DirectContext(ptr)
+@@ -231,7 +235,8 @@ private external fun _nMakeVulkan(
+     graphicsQueueIndex: Int,
+     instanceProcAddr: NativePointer,
+     deviceProcAddr: NativePointer,
+-    apiVersion: Int
++    apiVersion: Int,
++    memoryAllocator: VulkanMemoryAllocator?
+ ): NativePointer
+ 
+ @ExternalSymbolName("org_jetbrains_skia_DirectContext__1nSubmit")
+diff --git a/skiko/src/commonMain/kotlin/org/jetbrains/skia/VulkanMemoryAllocator.kt b/skiko/src/commonMain/kotlin/org/jetbrains/skia/VulkanMemoryAllocator.kt
+new file mode 100644
+index 0000000000..26db4d80b0
+--- /dev/null
++++ b/skiko/src/commonMain/kotlin/org/jetbrains/skia/VulkanMemoryAllocator.kt
+@@ -0,0 +1,143 @@
++package org.jetbrains.skia
++
++/**
++ * Controls how Skia allocates Vulkan device memory.
++ *
++ * You may pass an implementation of this class to [DirectContext.makeVulkan].
++ * When omitted, a built-in per-allocation allocator is used that is always functional, however,
++ * it does not do any sub-allocations.
++ */
++abstract class VulkanMemoryAllocator {
++
++    /**
++     * Describes how Skia intends to use a buffer allocation.
++     */
++    enum class BufferUsage(internal val ordinalValue: Int) {
++        /**
++         * Accessed only on the GPU. This is always device local.
++         */
++        GPU_ONLY(0),
++
++        /**
++         * Frequently updated by the CPU, read by the GPU.
++         */
++        CPU_WRITES_GPU_READS(1),
++
++        /**
++         * Staging buffer for CPU-to-GPU transfers. Must be host-visible and host-coherent.
++         */
++        TRANSFERS_FROM_CPU_TO_GPU(2),
++
++        /**
++         * Buffer written by the GPU and read back on the CPU. Must be host-visible.
++         */
++        TRANSFERS_FROM_GPU_TO_CPU(3);
++    }
++
++    /**
++     * The result of a successful allocation.
++     *
++     * @param deviceMemory    The allocated `VkDeviceMemory` handle (as a [Long]).
++     * @param offset          Byte offset within [deviceMemory]; 0 for dedicated allocations.
++     * @param size            Size of this allocation in bytes.
++     * @param memoryTypeIndex Index into `VkPhysicalDeviceMemoryProperties.memoryTypes` that
++     *                        was used. The allocator bridge uses this to determine coherency
++     *                        and mappability flags for Skia.
++     */
++    data class Allocation(
++        val deviceMemory: Long,
++        val offset: Long,
++        val size: Long,
++        val memoryTypeIndex: Int
++    )
++
++    /**
++     * Allocate device memory for [image].
++     *
++     * @param image                  `VkImage` handle (as [Long]) that needs memory.
++     * @param allocationPropertyFlags Hints from Skia; combination of [ALLOCATION_FLAG_*] constants.
++     */
++    abstract fun allocateImageMemory(image: Long, allocationPropertyFlags: Int): Allocation?
++
++    /**
++     * Allocate device memory for [buffer].
++     *
++     * @param buffer                 `VkBuffer` handle (as [Long]) that needs memory.
++     * @param usage                  How Skia intends to use this buffer — drives memory type choice.
++     * @param allocationPropertyFlags Hints from Skia; combination of [ALLOCATION_FLAG_*] constants.
++     */
++    abstract fun allocateBufferMemory(buffer: Long, usage: BufferUsage, allocationPropertyFlags: Int): Allocation?
++
++    /**
++     * Map [deviceMemory] for CPU access and return the mapped address as a [Long],
++     * or 0 if the memory cannot be or was not mapped.
++     *
++     * Only called for host-visible (mappable) memory. The default implementation returns 0.
++     */
++    open fun mapMemory(deviceMemory: Long): Long = 0L
++
++    /**
++     * Unmap [deviceMemory] previously returned by [mapMemory].
++     */
++    open fun unmapMemory(deviceMemory: Long) {}
++
++    /**
++     * Flush [size] bytes starting at [offset] within [deviceMemory] to make CPU writes
++     * visible to the GPU.  Only called for non-coherent memory.
++     *
++     * @return a `VkResult` value (0 = `VK_SUCCESS`).
++     */
++    open fun flushMemory(deviceMemory: Long, offset: Long, size: Long): Int = 0
++
++    /**
++     * Invalidate [size] bytes starting at [offset] within [deviceMemory] so GPU writes
++     * become visible to the CPU. Only called for non-coherent memory.
++     *
++     * @return a `VkResult` value (0 = `VK_SUCCESS`).
++     */
++    open fun invalidateMemory(deviceMemory: Long, offset: Long, size: Long): Int = 0
++
++    /**
++     * Free a [deviceMemory] handle previously returned by [allocateImageMemory] or
++     * [allocateBufferMemory].
++     */
++    abstract fun freeMemory(deviceMemory: Long)
++
++    /**
++     * @return `(totalAllocated, totalUsed)` byte counts for diagnostic purposes.
++     * Both may be 0 if tracking is not implemented.
++     */
++    open fun totalAllocatedAndUsedMemory(): Pair<Long, Long> = Pair(0L, 0L)
++
++    @Suppress("unused")
++    protected fun allocateBufferMemoryBridge(
++        buffer: Long,
++        usageOrdinal: Int,
++        allocationPropertyFlags: Int
++    ): Allocation? {
++        val usage = BufferUsage.entries.getOrNull(usageOrdinal) ?: return null
++        return allocateBufferMemory(buffer, usage, allocationPropertyFlags)
++    }
++
++    companion object {
++        /**
++         * Place allocation in its own `VkDeviceMemory`
++         */
++        const val ALLOCATION_FLAG_DEDICATED: Int = 0b0001
++
++        /**
++         * Lazily allocated and device-only, may be unavailable until accessed.
++         */
++        const val ALLOCATION_FLAG_LAZY: Int = 0b0010
++
++        /**
++         * Keep this memory persistently mapped (host-visible allocations only).
++         */
++        const val ALLOCATION_FLAG_PERSISTENTLY_MAPPED: Int = 0b0100
++
++        /**
++         * Allocate in a protected memory region.
++         */
++        const val ALLOCATION_FLAG_PROTECTED: Int = 0b1000
++    }
++}
+\ No newline at end of file
+diff --git a/skiko/src/jvmMain/cpp/common/DirectContext.cc b/skiko/src/jvmMain/cpp/common/DirectContext.cc
+index 3326a97da0..adbe3cb71c 100644
+--- a/skiko/src/jvmMain/cpp/common/DirectContext.cc
++++ b/skiko/src/jvmMain/cpp/common/DirectContext.cc
+@@ -55,26 +55,377 @@ extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_DirectContextKt__1nMa
+ #include "include/gpu/ganesh/vk/GrVkTypes.h"
+ #include "include/gpu/vk/VulkanBackendContext.h"
+ #include "include/gpu/vk/VulkanExtensions.h"
++#include "include/gpu/vk/VulkanMemoryAllocator.h"
++
++// simple built-in per-allocation allocator
++// this is always expected to be functional
++class SimpleVkAllocator : public skgpu::VulkanMemoryAllocator {
++public:
++    struct Alloc {
++        VkDeviceMemory memory;
++        VkDeviceSize   size;
++        uint32_t       flags; // skgpu::VulkanAlloc flag bits
++    };
++
++    SimpleVkAllocator(VkPhysicalDevice physDev, VkDevice device, VkInstance instance,
++                       const skgpu::VulkanGetProc& getProc)
++        : fPhysDev(physDev), fDevice(device) {
++        fGetMemProps = (PFN_vkGetPhysicalDeviceMemoryProperties)
++            getProc("vkGetPhysicalDeviceMemoryProperties", instance, VK_NULL_HANDLE);
++        fAllocMem   = (PFN_vkAllocateMemory)               getProc("vkAllocateMemory",               VK_NULL_HANDLE, device);
++        fFreeMem    = (PFN_vkFreeMemory)                   getProc("vkFreeMemory",                   VK_NULL_HANDLE, device);
++        fMapMem     = (PFN_vkMapMemory)                    getProc("vkMapMemory",                    VK_NULL_HANDLE, device);
++        fUnmapMem   = (PFN_vkUnmapMemory)                  getProc("vkUnmapMemory",                  VK_NULL_HANDLE, device);
++        fFlush      = (PFN_vkFlushMappedMemoryRanges)      getProc("vkFlushMappedMemoryRanges",      VK_NULL_HANDLE, device);
++        fInvalidate = (PFN_vkInvalidateMappedMemoryRanges) getProc("vkInvalidateMappedMemoryRanges", VK_NULL_HANDLE, device);
++        fGetImgReqs = (PFN_vkGetImageMemoryRequirements)   getProc("vkGetImageMemoryRequirements",   VK_NULL_HANDLE, device);
++        fGetBufReqs = (PFN_vkGetBufferMemoryRequirements)  getProc("vkGetBufferMemoryRequirements",  VK_NULL_HANDLE, device);
++    }
++
++    VkResult allocateImageMemory(VkImage image, uint32_t /*propFlags*/,
++                                   skgpu::VulkanBackendMemory* out) override {
++        VkMemoryRequirements reqs;
++        fGetImgReqs(fDevice, image, &reqs);
++        return doAlloc(reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, out);
++    }
++
++    VkResult allocateBufferMemory(VkBuffer buffer, BufferUsage usage, uint32_t /*propFlags*/,
++                                    skgpu::VulkanBackendMemory* out) override {
++        VkMemoryRequirements reqs;
++        fGetBufReqs(fDevice, buffer, &reqs);
++        return doAlloc(reqs, bufferProps(usage), out);
++    }
++
++    void getAllocInfo(const skgpu::VulkanBackendMemory& mem, skgpu::VulkanAlloc* out) const override {
++        const Alloc* a = reinterpret_cast<const Alloc*>(mem);
++        out->fMemory        = a->memory;
++        out->fOffset        = 0;
++        out->fSize          = a->size;
++        out->fFlags         = a->flags;
++        out->fBackendMemory = mem;
++    }
++
++    VkResult mapMemory(const skgpu::VulkanBackendMemory& mem, void** data) override {
++        return fMapMem(fDevice, reinterpret_cast<const Alloc*>(mem)->memory, 0, VK_WHOLE_SIZE, 0, data);
++    }
++    void unmapMemory(const skgpu::VulkanBackendMemory& mem) override {
++        fUnmapMem(fDevice, reinterpret_cast<const Alloc*>(mem)->memory);
++    }
++    VkResult flushMemory(const skgpu::VulkanBackendMemory& mem, VkDeviceSize off, VkDeviceSize sz) override {
++        VkMappedMemoryRange r = {};
++        r.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
++        r.memory = reinterpret_cast<const Alloc*>(mem)->memory;
++        r.offset = off; r.size = sz;
++        return fFlush(fDevice, 1, &r);
++    }
++    VkResult invalidateMemory(const skgpu::VulkanBackendMemory& mem, VkDeviceSize off, VkDeviceSize sz) override {
++        VkMappedMemoryRange r = {};
++        r.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
++        r.memory = reinterpret_cast<const Alloc*>(mem)->memory;
++        r.offset = off; r.size = sz;
++        return fInvalidate(fDevice, 1, &r);
++    }
++    void freeMemory(const skgpu::VulkanBackendMemory& mem) override {
++        const Alloc* a = reinterpret_cast<const Alloc*>(mem);
++        fFreeMem(fDevice, a->memory, nullptr);
++        delete a;
++    }
++    std::pair<uint64_t, uint64_t> totalAllocatedAndUsedMemory() const override { return {0, 0}; }
++
++private:
++    VkPhysicalDevice fPhysDev;
++    VkDevice         fDevice;
++    PFN_vkGetPhysicalDeviceMemoryProperties  fGetMemProps = nullptr;
++    PFN_vkAllocateMemory                     fAllocMem    = nullptr;
++    PFN_vkFreeMemory                         fFreeMem     = nullptr;
++    PFN_vkMapMemory                          fMapMem      = nullptr;
++    PFN_vkUnmapMemory                        fUnmapMem    = nullptr;
++    PFN_vkFlushMappedMemoryRanges            fFlush       = nullptr;
++    PFN_vkInvalidateMappedMemoryRanges       fInvalidate  = nullptr;
++    PFN_vkGetImageMemoryRequirements         fGetImgReqs  = nullptr;
++    PFN_vkGetBufferMemoryRequirements        fGetBufReqs  = nullptr;
++
++    uint32_t findMemType(uint32_t bits, VkMemoryPropertyFlags required) const {
++        VkPhysicalDeviceMemoryProperties mp = {};
++        fGetMemProps(fPhysDev, &mp);
++        for (uint32_t i = 0; i < mp.memoryTypeCount; i++) {
++            if ((bits & (1u << i)) && (mp.memoryTypes[i].propertyFlags & required) == required)
++                return i;
++        }
++        return ~0u;
++    }
++
++    static VkMemoryPropertyFlags bufferProps(BufferUsage u) {
++        switch (u) {
++            case BufferUsage::kGpuOnly:               return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
++            case BufferUsage::kCpuWritesGpuReads:
++            case BufferUsage::kTransfersFromCpuToGpu: return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
++            case BufferUsage::kTransfersFromGpuToCpu: return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
++            default:                                  return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
++        }
++    }
++
++    VkResult doAlloc(const VkMemoryRequirements& reqs, VkMemoryPropertyFlags preferred,
++                      skgpu::VulkanBackendMemory* out) {
++        uint32_t idx = findMemType(reqs.memoryTypeBits, preferred);
++        if (idx == ~0u) idx = findMemType(reqs.memoryTypeBits, 0);
++        if (idx == ~0u) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
++
++        VkMemoryAllocateInfo ai = {};
++        ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
++        ai.allocationSize  = reqs.size;
++        ai.memoryTypeIndex = idx;
++
++        VkDeviceMemory mem;
++        VkResult r = fAllocMem(fDevice, &ai, nullptr, &mem);
++        if (r != VK_SUCCESS) return r;
++
++        VkPhysicalDeviceMemoryProperties mp = {};
++        fGetMemProps(fPhysDev, &mp);
++        VkMemoryPropertyFlags props = mp.memoryTypes[idx].propertyFlags;
++
++        uint32_t flags = 0;
++        if (!(props & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))   flags |= skgpu::VulkanAlloc::kNoncoherent_Flag;
++        if (  props & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)     flags |= skgpu::VulkanAlloc::kMappable_Flag;
++        if (  props & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) flags |= skgpu::VulkanAlloc::kLazilyAllocated_Flag;
++
++        *out = reinterpret_cast<skgpu::VulkanBackendMemory>(new Alloc{mem, reqs.size, flags});
++        return VK_SUCCESS;
++    }
++};
++
++// calls back to the jvm
++class JvmVkAllocator : public skgpu::VulkanMemoryAllocator {
++public:
++    struct AllocRecord {
++        VkDeviceMemory memory;
++        VkDeviceSize   offset;
++        VkDeviceSize   size;
++        uint32_t       flags;
++    };
++
++    JvmVkAllocator(JNIEnv* env, jobject allocatorObj, VkPhysicalDevice physDev,
++                    VkInstance instance, const skgpu::VulkanGetProc& getProc)
++        : fPhysDev(physDev) {
++        env->GetJavaVM(&fJvm);
++        fAllocatorObj = env->NewGlobalRef(allocatorObj);
++
++        fGetMemProps = (PFN_vkGetPhysicalDeviceMemoryProperties)
++            getProc("vkGetPhysicalDeviceMemoryProperties", instance, VK_NULL_HANDLE);
++
++        jclass cls = env->GetObjectClass(allocatorObj);
++
++        // allocateImageMemory(Long, Int): Allocation?
++        fAllocImageId = env->GetMethodID(cls, "allocateImageMemory",
++            "(JI)Lorg/jetbrains/skia/VulkanMemoryAllocator$Allocation;");
++        // allocateBufferMemoryBridge(Long, Int, Int): Allocation?
++        fAllocBufferId = env->GetMethodID(cls, "allocateBufferMemoryBridge",
++            "(JII)Lorg/jetbrains/skia/VulkanMemoryAllocator$Allocation;");
++        fMapMemId        = env->GetMethodID(cls, "mapMemory",        "(J)J");
++        fUnmapMemId      = env->GetMethodID(cls, "unmapMemory",      "(J)V");
++        fFlushMemId      = env->GetMethodID(cls, "flushMemory",      "(JJJ)I");
++        fInvalidateMemId = env->GetMethodID(cls, "invalidateMemory", "(JJJ)I");
++        fFreeMemId       = env->GetMethodID(cls, "freeMemory",       "(J)V");
++        fTotalAllocId    = env->GetMethodID(cls, "totalAllocatedAndUsedMemory", "()Lkotlin/Pair;");
++        env->DeleteLocalRef(cls);
++
++        jclass allocCls = env->FindClass("org/jetbrains/skia/VulkanMemoryAllocator$Allocation");
++        fGetDeviceMem  = env->GetMethodID(allocCls, "getDeviceMemory",    "()J");
++        fGetOffset     = env->GetMethodID(allocCls, "getOffset",          "()J");
++        fGetSize       = env->GetMethodID(allocCls, "getSize",            "()J");
++        fGetMemTypeIdx = env->GetMethodID(allocCls, "getMemoryTypeIndex", "()I");
++        env->DeleteLocalRef(allocCls);
++
++        jclass pairCls = env->FindClass("kotlin/Pair");
++        fPairFirst  = env->GetMethodID(pairCls, "getFirst",  "()Ljava/lang/Object;");
++        fPairSecond = env->GetMethodID(pairCls, "getSecond", "()Ljava/lang/Object;");
++        env->DeleteLocalRef(pairCls);
++
++        jclass longCls = env->FindClass("java/lang/Long");
++        fLongValue = env->GetMethodID(longCls, "longValue", "()J");
++        env->DeleteLocalRef(longCls);
++    }
++
++    ~JvmVkAllocator() override {
++        JNIEnv* env = getEnv();
++        if (env) env->DeleteGlobalRef(fAllocatorObj);
++    }
++
++    VkResult allocateImageMemory(VkImage image, uint32_t propFlags,
++                                   skgpu::VulkanBackendMemory* out) override {
++        JNIEnv* env = getEnv();
++        if (!env) return VK_ERROR_DEVICE_LOST;
++        jobject result = env->CallObjectMethod(fAllocatorObj, fAllocImageId,
++            (jlong)(uintptr_t)image, (jint)propFlags);
++        return unpackAllocation(env, result, out);
++    }
++
++    VkResult allocateBufferMemory(VkBuffer buffer, BufferUsage usage, uint32_t propFlags,
++                                    skgpu::VulkanBackendMemory* out) override {
++        JNIEnv* env = getEnv();
++        if (!env) return VK_ERROR_DEVICE_LOST;
++        jobject result = env->CallObjectMethod(fAllocatorObj, fAllocBufferId,
++            (jlong)(uintptr_t)buffer, (jint)usage, (jint)propFlags);
++        return unpackAllocation(env, result, out);
++    }
++
++    void getAllocInfo(const skgpu::VulkanBackendMemory& mem, skgpu::VulkanAlloc* out) const override {
++        const AllocRecord* r = reinterpret_cast<const AllocRecord*>(mem);
++        out->fMemory        = r->memory;
++        out->fOffset        = r->offset;
++        out->fSize          = r->size;
++        out->fFlags         = r->flags;
++        out->fBackendMemory = mem;
++    }
++
++    VkResult mapMemory(const skgpu::VulkanBackendMemory& mem, void** data) override {
++        JNIEnv* env = getEnv();
++        if (!env) return VK_ERROR_DEVICE_LOST;
++        const AllocRecord* r = reinterpret_cast<const AllocRecord*>(mem);
++        jlong ptr = env->CallLongMethod(fAllocatorObj, fMapMemId, (jlong)(uintptr_t)r->memory);
++        *data = reinterpret_cast<void*>(static_cast<uintptr_t>(ptr));
++        return ptr ? VK_SUCCESS : VK_ERROR_MEMORY_MAP_FAILED;
++    }
++    void unmapMemory(const skgpu::VulkanBackendMemory& mem) override {
++        JNIEnv* env = getEnv();
++        if (!env) return;
++        const AllocRecord* r = reinterpret_cast<const AllocRecord*>(mem);
++        env->CallVoidMethod(fAllocatorObj, fUnmapMemId, (jlong)(uintptr_t)r->memory);
++    }
++    VkResult flushMemory(const skgpu::VulkanBackendMemory& mem, VkDeviceSize off, VkDeviceSize sz) override {
++        JNIEnv* env = getEnv();
++        if (!env) return VK_SUCCESS;
++        const AllocRecord* r = reinterpret_cast<const AllocRecord*>(mem);
++        return (VkResult)env->CallIntMethod(fAllocatorObj, fFlushMemId,
++            (jlong)(uintptr_t)r->memory, (jlong)off, (jlong)sz);
++    }
++    VkResult invalidateMemory(const skgpu::VulkanBackendMemory& mem, VkDeviceSize off, VkDeviceSize sz) override {
++        JNIEnv* env = getEnv();
++        if (!env) return VK_SUCCESS;
++        const AllocRecord* r = reinterpret_cast<const AllocRecord*>(mem);
++        return (VkResult)env->CallIntMethod(fAllocatorObj, fInvalidateMemId,
++            (jlong)(uintptr_t)r->memory, (jlong)off, (jlong)sz);
++    }
++    void freeMemory(const skgpu::VulkanBackendMemory& mem) override {
++        JNIEnv* env = getEnv();
++        AllocRecord* r = reinterpret_cast<AllocRecord*>(mem);
++        if (env) env->CallVoidMethod(fAllocatorObj, fFreeMemId, (jlong)(uintptr_t)r->memory);
++        delete r;
++    }
++    std::pair<uint64_t, uint64_t> totalAllocatedAndUsedMemory() const override {
++        JNIEnv* env = getEnv();
++        if (!env) return {0, 0};
++        jobject pair = env->CallObjectMethod(fAllocatorObj, fTotalAllocId);
++        if (!pair) return {0, 0};
++        jobject first  = env->CallObjectMethod(pair, fPairFirst);
++        jobject second = env->CallObjectMethod(pair, fPairSecond);
++        jlong total = env->CallLongMethod(first, fLongValue);
++        jlong used  = env->CallLongMethod(second, fLongValue);
++        env->DeleteLocalRef(first);
++        env->DeleteLocalRef(second);
++        env->DeleteLocalRef(pair);
++        return {(uint64_t)total, (uint64_t)used};
++    }
++
++private:
++    JavaVM*          fJvm          = nullptr;
++    jobject          fAllocatorObj = nullptr; // global ref
++    VkPhysicalDevice fPhysDev;
++    PFN_vkGetPhysicalDeviceMemoryProperties fGetMemProps = nullptr;
++
++    jmethodID fAllocImageId    = nullptr;
++    jmethodID fAllocBufferId   = nullptr;
++    jmethodID fMapMemId        = nullptr;
++    jmethodID fUnmapMemId      = nullptr;
++    jmethodID fFlushMemId      = nullptr;
++    jmethodID fInvalidateMemId = nullptr;
++    jmethodID fFreeMemId       = nullptr;
++    jmethodID fTotalAllocId    = nullptr;
++    jmethodID fGetDeviceMem    = nullptr;
++    jmethodID fGetOffset       = nullptr;
++    jmethodID fGetSize         = nullptr;
++    jmethodID fGetMemTypeIdx   = nullptr;
++    jmethodID fPairFirst       = nullptr;
++    jmethodID fPairSecond      = nullptr;
++    jmethodID fLongValue       = nullptr;
++
++    JNIEnv* getEnv() const {
++        JNIEnv* env = nullptr;
++        if (fJvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) == JNI_OK) return env;
++        if (fJvm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr) == JNI_OK) return env;
++        return nullptr;
++    }
++
++    uint32_t flagsForMemType(uint32_t memTypeIndex) const {
++        VkPhysicalDeviceMemoryProperties mp = {};
++        fGetMemProps(fPhysDev, &mp);
++        if (memTypeIndex >= mp.memoryTypeCount) return 0;
++        VkMemoryPropertyFlags props = mp.memoryTypes[memTypeIndex].propertyFlags;
++        uint32_t flags = 0;
++        if (!(props & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))   flags |= skgpu::VulkanAlloc::kNoncoherent_Flag;
++        if (  props & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)     flags |= skgpu::VulkanAlloc::kMappable_Flag;
++        if (  props & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) flags |= skgpu::VulkanAlloc::kLazilyAllocated_Flag;
++        return flags;
++    }
++
++    VkResult unpackAllocation(JNIEnv* env, jobject resultObj, skgpu::VulkanBackendMemory* out) {
++        if (!resultObj) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
++        jlong  devMem   = env->CallLongMethod(resultObj, fGetDeviceMem);
++        jlong  offset   = env->CallLongMethod(resultObj, fGetOffset);
++        jlong  size     = env->CallLongMethod(resultObj, fGetSize);
++        jint   memType  = env->CallIntMethod (resultObj, fGetMemTypeIdx);
++        env->DeleteLocalRef(resultObj);
++        if (!devMem) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
++        auto* rec = new AllocRecord{
++            reinterpret_cast<VkDeviceMemory>(static_cast<uintptr_t>(devMem)),
++            static_cast<VkDeviceSize>(offset),
++            static_cast<VkDeviceSize>(size),
++            flagsForMemType(static_cast<uint32_t>(memType))
++        };
++        *out = reinterpret_cast<skgpu::VulkanBackendMemory>(rec);
++        return VK_SUCCESS;
++    }
++};
+ 
+ extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_DirectContextKt__1nMakeVulkan
+-  (JNIEnv* env, jclass jclass, jlong instancePtr, jlong physicalDevicePtr, jlong devicePtr, jlong queuePtr, jint graphicsQueueIndex, jlong instanceProcAddr, jlong deviceProcAddr, jint apiVersion) {
++  (JNIEnv* env, jclass jclass,
++   jlong instancePtr, jlong physicalDevicePtr, jlong devicePtr, jlong queuePtr,
++   jint graphicsQueueIndex, jlong instanceProcAddr, jlong deviceProcAddr, jint apiVersion,
++   jobject allocatorObj) {
++
+     skgpu::VulkanBackendContext backendContext = {};
+-    backendContext.fInstance = reinterpret_cast<VkInstance>(static_cast<uintptr_t>(instancePtr));
++    backendContext.fInstance       = reinterpret_cast<VkInstance>      (static_cast<uintptr_t>(instancePtr));
+     backendContext.fPhysicalDevice = reinterpret_cast<VkPhysicalDevice>(static_cast<uintptr_t>(physicalDevicePtr));
+-    backendContext.fDevice = reinterpret_cast<VkDevice>(static_cast<uintptr_t>(devicePtr));
+-    backendContext.fQueue = reinterpret_cast<VkQueue>(static_cast<uintptr_t>(queuePtr));
++    backendContext.fDevice         = reinterpret_cast<VkDevice>        (static_cast<uintptr_t>(devicePtr));
++    backendContext.fQueue          = reinterpret_cast<VkQueue>         (static_cast<uintptr_t>(queuePtr));
+     backendContext.fGraphicsQueueIndex = static_cast<uint32_t>(graphicsQueueIndex);
+     backendContext.fGetProc = [instanceProcAddr, deviceProcAddr](const char* name, VkInstance instance, VkDevice device) -> PFN_vkVoidFunction {
+-        if (device != VK_NULL_HANDLE) {
+-            return reinterpret_cast<PFN_vkGetDeviceProcAddr>(static_cast<uintptr_t>(deviceProcAddr))(device, name);
+-        }
+-        return reinterpret_cast<PFN_vkGetInstanceProcAddr>(static_cast<uintptr_t>(instanceProcAddr))(instance, name);
++        if (device != VK_NULL_HANDLE)
++            return reinterpret_cast<PFN_vkGetDeviceProcAddr>  (static_cast<uintptr_t>(deviceProcAddr))  (device, name);
++        return     reinterpret_cast<PFN_vkGetInstanceProcAddr>(static_cast<uintptr_t>(instanceProcAddr))(instance, name);
+     };
++    backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
+ 
+     skgpu::VulkanExtensions extensions;
+-    extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice, 0, nullptr, 0, nullptr);
++    extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice,
++                    0, nullptr, 0, nullptr);
+     backendContext.fVkExtensions = &extensions;
+-    backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
++
++    if (allocatorObj) {
++        backendContext.fMemoryAllocator = sk_make_sp<JvmVkAllocator>(
++            env, allocatorObj,
++            backendContext.fPhysicalDevice,
++            backendContext.fInstance,
++            backendContext.fGetProc
++        );
++    } else {
++        backendContext.fMemoryAllocator = sk_make_sp<SimpleVkAllocator>(
++            backendContext.fPhysicalDevice,
++            backendContext.fDevice,
++            backendContext.fInstance,
++            backendContext.fGetProc
++        );
++    }
+ 
+     sk_sp<GrDirectContext> directContext = GrDirectContexts::MakeVulkan(backendContext);
+     return reinterpret_cast<jlong>(directContext.release());
+diff --git a/skiko/src/nativeJsMain/cpp/DirectContext.cc b/skiko/src/nativeJsMain/cpp/DirectContext.cc
+index dd17f9ddf6..a04ea37ad7 100644
+--- a/skiko/src/nativeJsMain/cpp/DirectContext.cc
++++ b/skiko/src/nativeJsMain/cpp/DirectContext.cc
+@@ -18,7 +18,100 @@
+ #include "include/gpu/ganesh/vk/GrVkTypes.h"
+ #include "include/gpu/vk/VulkanBackendContext.h"
+ #include "include/gpu/vk/VulkanExtensions.h"
+-#endif
++#include "include/gpu/vk/VulkanMemoryAllocator.h"
++
++// simple built-in per-allocation allocator
++// this is always expected to be functional
++class SimpleVkAllocator : public skgpu::VulkanMemoryAllocator {
++public:
++    struct Alloc { VkDeviceMemory memory; VkDeviceSize size; uint32_t flags; };
++
++    SimpleVkAllocator(VkPhysicalDevice physDev, VkDevice device, VkInstance instance,
++                       const skgpu::VulkanGetProc& getProc)
++        : fPhysDev(physDev), fDevice(device) {
++        fGetMemProps = (PFN_vkGetPhysicalDeviceMemoryProperties)
++            getProc("vkGetPhysicalDeviceMemoryProperties", instance, VK_NULL_HANDLE);
++        fAllocMem   = (PFN_vkAllocateMemory)               getProc("vkAllocateMemory",               VK_NULL_HANDLE, device);
++        fFreeMem    = (PFN_vkFreeMemory)                   getProc("vkFreeMemory",                   VK_NULL_HANDLE, device);
++        fMapMem     = (PFN_vkMapMemory)                    getProc("vkMapMemory",                    VK_NULL_HANDLE, device);
++        fUnmapMem   = (PFN_vkUnmapMemory)                  getProc("vkUnmapMemory",                  VK_NULL_HANDLE, device);
++        fFlush      = (PFN_vkFlushMappedMemoryRanges)      getProc("vkFlushMappedMemoryRanges",      VK_NULL_HANDLE, device);
++        fInvalidate = (PFN_vkInvalidateMappedMemoryRanges) getProc("vkInvalidateMappedMemoryRanges", VK_NULL_HANDLE, device);
++        fGetImgReqs = (PFN_vkGetImageMemoryRequirements)   getProc("vkGetImageMemoryRequirements",   VK_NULL_HANDLE, device);
++        fGetBufReqs = (PFN_vkGetBufferMemoryRequirements)  getProc("vkGetBufferMemoryRequirements",  VK_NULL_HANDLE, device);
++    }
++    VkResult allocateImageMemory(VkImage image, uint32_t, skgpu::VulkanBackendMemory* out) override {
++        VkMemoryRequirements r; fGetImgReqs(fDevice, image, &r);
++        return doAlloc(r, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, out);
++    }
++    VkResult allocateBufferMemory(VkBuffer buf, BufferUsage u, uint32_t, skgpu::VulkanBackendMemory* out) override {
++        VkMemoryRequirements r; fGetBufReqs(fDevice, buf, &r);
++        VkMemoryPropertyFlags p = (u == BufferUsage::kGpuOnly) ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
++            : (u == BufferUsage::kTransfersFromGpuToCpu) ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
++            : (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
++        return doAlloc(r, p, out);
++    }
++    void getAllocInfo(const skgpu::VulkanBackendMemory& m, skgpu::VulkanAlloc* o) const override {
++        auto* a = reinterpret_cast<const Alloc*>(m);
++        o->fMemory = a->memory; o->fOffset = 0; o->fSize = a->size;
++        o->fFlags = a->flags; o->fBackendMemory = m;
++    }
++    VkResult mapMemory(const skgpu::VulkanBackendMemory& m, void** d) override {
++        return fMapMem(fDevice, reinterpret_cast<const Alloc*>(m)->memory, 0, VK_WHOLE_SIZE, 0, d);
++    }
++    void unmapMemory(const skgpu::VulkanBackendMemory& m) override {
++        fUnmapMem(fDevice, reinterpret_cast<const Alloc*>(m)->memory);
++    }
++    VkResult flushMemory(const skgpu::VulkanBackendMemory& m, VkDeviceSize o, VkDeviceSize s) override {
++        VkMappedMemoryRange r = {VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, nullptr,
++                                  reinterpret_cast<const Alloc*>(m)->memory, o, s};
++        return fFlush(fDevice, 1, &r);
++    }
++    VkResult invalidateMemory(const skgpu::VulkanBackendMemory& m, VkDeviceSize o, VkDeviceSize s) override {
++        VkMappedMemoryRange r = {VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, nullptr,
++                                  reinterpret_cast<const Alloc*>(m)->memory, o, s};
++        return fInvalidate(fDevice, 1, &r);
++    }
++    void freeMemory(const skgpu::VulkanBackendMemory& m) override {
++        auto* a = reinterpret_cast<const Alloc*>(m);
++        fFreeMem(fDevice, a->memory, nullptr); delete a;
++    }
++    std::pair<uint64_t, uint64_t> totalAllocatedAndUsedMemory() const override { return {0,0}; }
++private:
++    VkPhysicalDevice fPhysDev; VkDevice fDevice;
++    PFN_vkGetPhysicalDeviceMemoryProperties  fGetMemProps = nullptr;
++    PFN_vkAllocateMemory fAllocMem = nullptr; PFN_vkFreeMemory fFreeMem = nullptr;
++    PFN_vkMapMemory fMapMem = nullptr; PFN_vkUnmapMemory fUnmapMem = nullptr;
++    PFN_vkFlushMappedMemoryRanges fFlush = nullptr;
++    PFN_vkInvalidateMappedMemoryRanges fInvalidate = nullptr;
++    PFN_vkGetImageMemoryRequirements fGetImgReqs = nullptr;
++    PFN_vkGetBufferMemoryRequirements fGetBufReqs = nullptr;
++
++    uint32_t findMemType(uint32_t bits, VkMemoryPropertyFlags req) const {
++        VkPhysicalDeviceMemoryProperties mp = {}; fGetMemProps(fPhysDev, &mp);
++        for (uint32_t i = 0; i < mp.memoryTypeCount; i++)
++            if ((bits & (1u<<i)) && (mp.memoryTypes[i].propertyFlags & req) == req) return i;
++        return ~0u;
++    }
++    VkResult doAlloc(const VkMemoryRequirements& reqs, VkMemoryPropertyFlags pref,
++                      skgpu::VulkanBackendMemory* out) {
++        uint32_t idx = findMemType(reqs.memoryTypeBits, pref);
++        if (idx == ~0u) idx = findMemType(reqs.memoryTypeBits, 0);
++        if (idx == ~0u) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
++        VkMemoryAllocateInfo ai = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, nullptr, reqs.size, idx};
++        VkDeviceMemory mem; VkResult r = fAllocMem(fDevice, &ai, nullptr, &mem);
++        if (r != VK_SUCCESS) return r;
++        VkPhysicalDeviceMemoryProperties mp = {}; fGetMemProps(fPhysDev, &mp);
++        VkMemoryPropertyFlags props = mp.memoryTypes[idx].propertyFlags;
++        uint32_t flags = 0;
++        if (!(props & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))   flags |= skgpu::VulkanAlloc::kNoncoherent_Flag;
++        if (  props & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)     flags |= skgpu::VulkanAlloc::kMappable_Flag;
++        if (  props & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) flags |= skgpu::VulkanAlloc::kLazilyAllocated_Flag;
++        *out = reinterpret_cast<skgpu::VulkanBackendMemory>(new Alloc{mem, reqs.size, flags});
++        return VK_SUCCESS;
++    }
++};
++#endif // SK_VULKAN
+ 
+ SKIKO_EXPORT KNativePointer org_jetbrains_skia_DirectContext__1nMakeGL
+   () {
+@@ -64,25 +157,33 @@ SKIKO_EXPORT KNativePointer org_jetbrains_skia_DirectContext__1nMakeDirect3D
+ }
+ 
+ SKIKO_EXPORT KNativePointer org_jetbrains_skia_DirectContext__1nMakeVulkan
+-  (KNativePointer instancePtr, KNativePointer physicalDevicePtr, KNativePointer devicePtr, KNativePointer queuePtr, KInt graphicsQueueIndex, KNativePointer instanceProcAddr, KNativePointer deviceProcAddr, KInt apiVersion) {
++  (KNativePointer instancePtr, KNativePointer physicalDevicePtr, KNativePointer devicePtr,
++   KNativePointer queuePtr, KInt graphicsQueueIndex,
++   KNativePointer instanceProcAddr, KNativePointer deviceProcAddr, KInt apiVersion,
++   KNativePointer /*allocatorPtr*/) {
+ #ifdef SK_VULKAN
+     skgpu::VulkanBackendContext backendContext = {};
+-    backendContext.fInstance = reinterpret_cast<VkInstance>(instancePtr);
++    backendContext.fInstance       = reinterpret_cast<VkInstance>      (instancePtr);
+     backendContext.fPhysicalDevice = reinterpret_cast<VkPhysicalDevice>(physicalDevicePtr);
+-    backendContext.fDevice = reinterpret_cast<VkDevice>(devicePtr);
+-    backendContext.fQueue = reinterpret_cast<VkQueue>(queuePtr);
++    backendContext.fDevice         = reinterpret_cast<VkDevice>        (devicePtr);
++    backendContext.fQueue          = reinterpret_cast<VkQueue>         (queuePtr);
+     backendContext.fGraphicsQueueIndex = static_cast<uint32_t>(graphicsQueueIndex);
+     backendContext.fGetProc = [instanceProcAddr, deviceProcAddr](const char* name, VkInstance instance, VkDevice device) -> PFN_vkVoidFunction {
+-        if (device != VK_NULL_HANDLE) {
+-            return reinterpret_cast<PFN_vkGetDeviceProcAddr>(deviceProcAddr)(device, name);
+-        }
+-        return reinterpret_cast<PFN_vkGetInstanceProcAddr>(instanceProcAddr)(instance, name);
++        if (device != VK_NULL_HANDLE)
++            return reinterpret_cast<PFN_vkGetDeviceProcAddr>  (deviceProcAddr)  (device, name);
++        return     reinterpret_cast<PFN_vkGetInstanceProcAddr>(instanceProcAddr)(instance, name);
+     };
++    backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
+ 
+     skgpu::VulkanExtensions extensions;
+-    extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice, 0, nullptr, 0, nullptr);
++    extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice,
++                    0, nullptr, 0, nullptr);
+     backendContext.fVkExtensions = &extensions;
+-    backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
++
++    backendContext.fMemoryAllocator = sk_make_sp<SimpleVkAllocator>(
++        backendContext.fPhysicalDevice, backendContext.fDevice,
++        backendContext.fInstance, backendContext.fGetProc
++    );
+ 
+     sk_sp<GrDirectContext> instance = GrDirectContexts::MakeVulkan(backendContext);
+     return static_cast<KNativePointer>(instance.release());
+
+From a97db179a671c1ef608c5f81925fd462a6f920b2 Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Wed, 27 May 2026 14:23:36 +0530
+Subject: [PATCH 7/9] Fix custom allocator support for web and native
+
+---
+ .../org/jetbrains/skia/DirectContext.kt       |  6 +--
+ .../kotlin/org/jetbrains/skia/Expects.kt      | 16 +++++-
+ skiko/src/jvmMain/cpp/common/DirectContext.cc | 49 +++++++++++++++++++
+ .../org/jetbrains/skia/DirectContext.jvm.kt   | 28 +++++++++++
+ .../org/jetbrains/skia/Actuals.native.kt      | 18 +++++++
+ .../kotlin/org/jetbrains/skia/Actuals.web.kt  | 18 +++++++
+ 6 files changed, 131 insertions(+), 4 deletions(-)
+
+diff --git a/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt b/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
+index f2a59d2f20..935a74f231 100644
+--- a/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
++++ b/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
+@@ -73,7 +73,7 @@ class DirectContext internal constructor(ptr: NativePointer) : RefCnt(ptr) {
+             require(deviceProcAddr != NullPointer) { "deviceProcAddr must not be null" }
+ 
+             Stats.onNativeCall()
+-            val ptr = _nMakeVulkan(
++            val ptr = nMakeVulkanImpl(
+                 instancePtr,
+                 physicalDevicePtr,
+                 devicePtr,
+@@ -227,7 +227,7 @@ private external fun _nMakeMetal(devicePtr: NativePointer, queuePtr: NativePoint
+ private external fun _nMakeDirect3D(adapterPtr: NativePointer, devicePtr: NativePointer, queuePtr: NativePointer): NativePointer
+ 
+ @ExternalSymbolName("org_jetbrains_skia_DirectContext__1nMakeVulkan")
+-private external fun _nMakeVulkan(
++internal external fun _nMakeVulkan(
+     instancePtr: NativePointer,
+     physicalDevicePtr: NativePointer,
+     devicePtr: NativePointer,
+@@ -236,7 +236,7 @@ private external fun _nMakeVulkan(
+     instanceProcAddr: NativePointer,
+     deviceProcAddr: NativePointer,
+     apiVersion: Int,
+-    memoryAllocator: VulkanMemoryAllocator?
++    memoryAllocatorPtr: NativePointer
+ ): NativePointer
+ 
+ @ExternalSymbolName("org_jetbrains_skia_DirectContext__1nSubmit")
+diff --git a/skiko/src/commonMain/kotlin/org/jetbrains/skia/Expects.kt b/skiko/src/commonMain/kotlin/org/jetbrains/skia/Expects.kt
+index 44369523ce..8ebc8787d0 100644
+--- a/skiko/src/commonMain/kotlin/org/jetbrains/skia/Expects.kt
++++ b/skiko/src/commonMain/kotlin/org/jetbrains/skia/Expects.kt
+@@ -1,5 +1,7 @@
+ package org.jetbrains.skia
+ 
++import org.jetbrains.skia.impl.NativePointer
++
+ internal expect fun <R> commonSynchronized(lock: Any, block: () -> R)
+ 
+ internal expect fun defaultLanguageTag(): String
+@@ -19,4 +21,16 @@ internal expect fun compilePattern(regex: String): Pattern
+ 
+ @OptIn(ExperimentalMultiplatform::class)
+ @OptionalExpectation
+-expect annotation class ExternalSymbolName(val name: String)
+\ No newline at end of file
++expect annotation class ExternalSymbolName(val name: String)
++
++internal expect fun nMakeVulkanImpl(
++    instancePtr: NativePointer,
++    physicalDevicePtr: NativePointer,
++    devicePtr: NativePointer,
++    queuePtr: NativePointer,
++    graphicsQueueIndex: Int,
++    instanceProcAddr: NativePointer,
++    deviceProcAddr: NativePointer,
++    apiVersion: Int,
++    memoryAllocator: VulkanMemoryAllocator?
++): NativePointer
+\ No newline at end of file
+diff --git a/skiko/src/jvmMain/cpp/common/DirectContext.cc b/skiko/src/jvmMain/cpp/common/DirectContext.cc
+index adbe3cb71c..87a3f1cf52 100644
+--- a/skiko/src/jvmMain/cpp/common/DirectContext.cc
++++ b/skiko/src/jvmMain/cpp/common/DirectContext.cc
+@@ -352,7 +352,11 @@ class JvmVkAllocator : public skgpu::VulkanMemoryAllocator {
+     JNIEnv* getEnv() const {
+         JNIEnv* env = nullptr;
+         if (fJvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) == JNI_OK) return env;
++#ifdef __ANDROID__
++        if (fJvm->AttachCurrentThread(&env, nullptr) == JNI_OK) return env;
++#else
+         if (fJvm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr) == JNI_OK) return env;
++#endif
+         return nullptr;
+     }
+ 
+@@ -388,6 +392,51 @@ class JvmVkAllocator : public skgpu::VulkanMemoryAllocator {
+ };
+ 
+ extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_DirectContextKt__1nMakeVulkan
++  (JNIEnv* env, jclass jclass,
++   jlong instancePtr, jlong physicalDevicePtr, jlong devicePtr, jlong queuePtr,
++   jint graphicsQueueIndex, jlong instanceProcAddr, jlong deviceProcAddr, jint apiVersion,
++   jlong allocatorPtr) {
++
++    skgpu::VulkanBackendContext backendContext = {};
++    backendContext.fInstance       = reinterpret_cast<VkInstance>      (static_cast<uintptr_t>(instancePtr));
++    backendContext.fPhysicalDevice = reinterpret_cast<VkPhysicalDevice>(static_cast<uintptr_t>(physicalDevicePtr));
++    backendContext.fDevice         = reinterpret_cast<VkDevice>        (static_cast<uintptr_t>(devicePtr));
++    backendContext.fQueue          = reinterpret_cast<VkQueue>         (static_cast<uintptr_t>(queuePtr));
++    backendContext.fGraphicsQueueIndex = static_cast<uint32_t>(graphicsQueueIndex);
++    backendContext.fGetProc = [instanceProcAddr, deviceProcAddr](const char* name, VkInstance instance, VkDevice device) -> PFN_vkVoidFunction {
++        if (device != VK_NULL_HANDLE)
++            return reinterpret_cast<PFN_vkGetDeviceProcAddr>  (static_cast<uintptr_t>(deviceProcAddr))  (device, name);
++        return     reinterpret_cast<PFN_vkGetInstanceProcAddr>(static_cast<uintptr_t>(instanceProcAddr))(instance, name);
++    };
++    backendContext.fMaxAPIVersion = static_cast<uint32_t>(apiVersion);
++
++    skgpu::VulkanExtensions extensions;
++    extensions.init(backendContext.fGetProc, backendContext.fInstance, backendContext.fPhysicalDevice,
++                    0, nullptr, 0, nullptr);
++    backendContext.fVkExtensions = &extensions;
++
++    if (allocatorPtr) {
++        jobject allocatorObj = reinterpret_cast<jobject>(static_cast<uintptr_t>(allocatorPtr));
++        backendContext.fMemoryAllocator = sk_make_sp<JvmVkAllocator>(
++            env, allocatorObj,
++            backendContext.fPhysicalDevice,
++            backendContext.fInstance,
++            backendContext.fGetProc
++        );
++    } else {
++        backendContext.fMemoryAllocator = sk_make_sp<SimpleVkAllocator>(
++            backendContext.fPhysicalDevice,
++            backendContext.fDevice,
++            backendContext.fInstance,
++            backendContext.fGetProc
++        );
++    }
++
++    sk_sp<GrDirectContext> directContext = GrDirectContexts::MakeVulkan(backendContext);
++    return reinterpret_cast<jlong>(directContext.release());
++}
++
++extern "C" JNIEXPORT jlong JNICALL Java_org_jetbrains_skia_DirectContext_1jvmKt__1nMakeVulkanJvmAllocator
+   (JNIEnv* env, jclass jclass,
+    jlong instancePtr, jlong physicalDevicePtr, jlong devicePtr, jlong queuePtr,
+    jint graphicsQueueIndex, jlong instanceProcAddr, jlong deviceProcAddr, jint apiVersion,
+diff --git a/skiko/src/jvmMain/kotlin/org/jetbrains/skia/DirectContext.jvm.kt b/skiko/src/jvmMain/kotlin/org/jetbrains/skia/DirectContext.jvm.kt
+index 2d8bc64c07..59f811cc9a 100644
+--- a/skiko/src/jvmMain/kotlin/org/jetbrains/skia/DirectContext.jvm.kt
++++ b/skiko/src/jvmMain/kotlin/org/jetbrains/skia/DirectContext.jvm.kt
+@@ -5,6 +5,34 @@ import org.jetbrains.skia.impl.NativePointer
+ import org.jetbrains.skia.impl.Stats
+ import org.jetbrains.skiko.RenderException
+ 
++internal actual fun nMakeVulkanImpl(
++    instancePtr: NativePointer,
++    physicalDevicePtr: NativePointer,
++    devicePtr: NativePointer,
++    queuePtr: NativePointer,
++    graphicsQueueIndex: Int,
++    instanceProcAddr: NativePointer,
++    deviceProcAddr: NativePointer,
++    apiVersion: Int,
++    memoryAllocator: VulkanMemoryAllocator?
++): NativePointer = _nMakeVulkanJvmAllocator(
++    instancePtr, physicalDevicePtr, devicePtr, queuePtr,
++    graphicsQueueIndex, instanceProcAddr, deviceProcAddr, apiVersion,
++    memoryAllocator
++)
++
++private external fun _nMakeVulkanJvmAllocator(
++    instancePtr: NativePointer,
++    physicalDevicePtr: NativePointer,
++    devicePtr: NativePointer,
++    queuePtr: NativePointer,
++    graphicsQueueIndex: Int,
++    instanceProcAddr: NativePointer,
++    deviceProcAddr: NativePointer,
++    apiVersion: Int,
++    allocator: VulkanMemoryAllocator?
++): NativePointer
++
+ /**
+  * Creates OpenGL [DirectContext] using the provided interface.
+  * This allows usage of different OpenGL interfaces (e.g., EGL).
+diff --git a/skiko/src/nativeMain/kotlin/org/jetbrains/skia/Actuals.native.kt b/skiko/src/nativeMain/kotlin/org/jetbrains/skia/Actuals.native.kt
+index 89f7327862..d6337d94ce 100644
+--- a/skiko/src/nativeMain/kotlin/org/jetbrains/skia/Actuals.native.kt
++++ b/skiko/src/nativeMain/kotlin/org/jetbrains/skia/Actuals.native.kt
+@@ -3,6 +3,8 @@ package org.jetbrains.skia
+ import kotlinx.cinterop.ByteVar
+ import kotlinx.cinterop.CPointer
+ import org.jetbrains.skia.impl.InteropPointer
++import org.jetbrains.skia.impl.Native.Companion.NullPointer
++import org.jetbrains.skia.impl.NativePointer
+ import org.jetbrains.skia.impl.withResult
+ 
+ internal actual fun <R> commonSynchronized(lock: Any, block: () -> R) {
+@@ -44,6 +46,22 @@ internal actual fun compilePattern(regex: String): Pattern = Pattern(regex)
+ 
+ actual typealias ExternalSymbolName = kotlin.native.SymbolName
+ 
++internal actual fun nMakeVulkanImpl(
++    instancePtr: NativePointer,
++    physicalDevicePtr: NativePointer,
++    devicePtr: NativePointer,
++    queuePtr: NativePointer,
++    graphicsQueueIndex: Int,
++    instanceProcAddr: NativePointer,
++    deviceProcAddr: NativePointer,
++    apiVersion: Int,
++    memoryAllocator: VulkanMemoryAllocator?
++): NativePointer = _nMakeVulkan(
++    instancePtr, physicalDevicePtr, devicePtr, queuePtr,
++    graphicsQueueIndex, instanceProcAddr, deviceProcAddr, apiVersion,
++    NullPointer
++)
++
+ @SymbolName("uloc_getDefault_skiko")
+ private external fun uloc_getDefault(): CPointer<ByteVar>
+ @SymbolName("uloc_toLanguageTag_skiko")
+diff --git a/skiko/src/webMain/kotlin/org/jetbrains/skia/Actuals.web.kt b/skiko/src/webMain/kotlin/org/jetbrains/skia/Actuals.web.kt
+index ca84c49e09..bee8f36c69 100644
+--- a/skiko/src/webMain/kotlin/org/jetbrains/skia/Actuals.web.kt
++++ b/skiko/src/webMain/kotlin/org/jetbrains/skia/Actuals.web.kt
+@@ -1,6 +1,8 @@
+ package org.jetbrains.skia
+ 
+ import kotlinx.browser.window
++import org.jetbrains.skia.impl.Native.Companion.NullPointer
++import org.jetbrains.skia.impl.NativePointer
+ 
+ internal actual fun <R> commonSynchronized(lock: Any, block: () -> R) {
+     block()
+@@ -34,3 +36,19 @@ val LANG: String by lazy {
+ actual fun defaultLanguageTag(): String = LANG
+ 
+ actual fun compilePattern(regex: String): Pattern = Pattern(regex)
++
++internal actual fun nMakeVulkanImpl(
++    instancePtr: NativePointer,
++    physicalDevicePtr: NativePointer,
++    devicePtr: NativePointer,
++    queuePtr: NativePointer,
++    graphicsQueueIndex: Int,
++    instanceProcAddr: NativePointer,
++    deviceProcAddr: NativePointer,
++    apiVersion: Int,
++    memoryAllocator: VulkanMemoryAllocator?
++): NativePointer = _nMakeVulkan(
++    instancePtr, physicalDevicePtr, devicePtr, queuePtr,
++    graphicsQueueIndex, instanceProcAddr, deviceProcAddr, apiVersion,
++    NullPointer
++)
+
+From e71a24aa5d20c4257e6bbdfddd622d39b51b0c0c Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Wed, 27 May 2026 14:35:39 +0530
+Subject: [PATCH 8/9] Fix conflict
+
+---
+ .../kotlin/org/jetbrains/skia/DirectContext.kt  | 17 ++++++++++++++++-
+ .../kotlin/org/jetbrains/skia/Actuals.native.kt |  6 ++----
+ .../kotlin/org/jetbrains/skia/Actuals.web.kt    |  6 ++----
+ 3 files changed, 20 insertions(+), 9 deletions(-)
+
+diff --git a/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt b/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
+index 935a74f231..2203752f33 100644
+--- a/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
++++ b/skiko/src/commonMain/kotlin/org/jetbrains/skia/DirectContext.kt
+@@ -227,7 +227,7 @@ private external fun _nMakeMetal(devicePtr: NativePointer, queuePtr: NativePoint
+ private external fun _nMakeDirect3D(adapterPtr: NativePointer, devicePtr: NativePointer, queuePtr: NativePointer): NativePointer
+ 
+ @ExternalSymbolName("org_jetbrains_skia_DirectContext__1nMakeVulkan")
+-internal external fun _nMakeVulkan(
++private external fun _nMakeVulkan(
+     instancePtr: NativePointer,
+     physicalDevicePtr: NativePointer,
+     devicePtr: NativePointer,
+@@ -250,3 +250,18 @@ private external fun _nReset(ptr: NativePointer, flags: Int)
+ 
+ @ExternalSymbolName("org_jetbrains_skia_DirectContext__1nAbandon")
+ private external fun _nAbandon(ptr: NativePointer, flags: Int)
++
++internal fun nMakeVulkanNoAllocator(
++    instancePtr: NativePointer,
++    physicalDevicePtr: NativePointer,
++    devicePtr: NativePointer,
++    queuePtr: NativePointer,
++    graphicsQueueIndex: Int,
++    instanceProcAddr: NativePointer,
++    deviceProcAddr: NativePointer,
++    apiVersion: Int
++): NativePointer = _nMakeVulkan(
++    instancePtr, physicalDevicePtr, devicePtr, queuePtr,
++    graphicsQueueIndex, instanceProcAddr, deviceProcAddr, apiVersion,
++    NullPointer
++)
+diff --git a/skiko/src/nativeMain/kotlin/org/jetbrains/skia/Actuals.native.kt b/skiko/src/nativeMain/kotlin/org/jetbrains/skia/Actuals.native.kt
+index d6337d94ce..2eca5b7800 100644
+--- a/skiko/src/nativeMain/kotlin/org/jetbrains/skia/Actuals.native.kt
++++ b/skiko/src/nativeMain/kotlin/org/jetbrains/skia/Actuals.native.kt
+@@ -3,7 +3,6 @@ package org.jetbrains.skia
+ import kotlinx.cinterop.ByteVar
+ import kotlinx.cinterop.CPointer
+ import org.jetbrains.skia.impl.InteropPointer
+-import org.jetbrains.skia.impl.Native.Companion.NullPointer
+ import org.jetbrains.skia.impl.NativePointer
+ import org.jetbrains.skia.impl.withResult
+ 
+@@ -56,10 +55,9 @@ internal actual fun nMakeVulkanImpl(
+     deviceProcAddr: NativePointer,
+     apiVersion: Int,
+     memoryAllocator: VulkanMemoryAllocator?
+-): NativePointer = _nMakeVulkan(
++): NativePointer = nMakeVulkanNoAllocator(
+     instancePtr, physicalDevicePtr, devicePtr, queuePtr,
+-    graphicsQueueIndex, instanceProcAddr, deviceProcAddr, apiVersion,
+-    NullPointer
++    graphicsQueueIndex, instanceProcAddr, deviceProcAddr, apiVersion
+ )
+ 
+ @SymbolName("uloc_getDefault_skiko")
+diff --git a/skiko/src/webMain/kotlin/org/jetbrains/skia/Actuals.web.kt b/skiko/src/webMain/kotlin/org/jetbrains/skia/Actuals.web.kt
+index bee8f36c69..d0d0ceda2c 100644
+--- a/skiko/src/webMain/kotlin/org/jetbrains/skia/Actuals.web.kt
++++ b/skiko/src/webMain/kotlin/org/jetbrains/skia/Actuals.web.kt
+@@ -1,7 +1,6 @@
+ package org.jetbrains.skia
+ 
+ import kotlinx.browser.window
+-import org.jetbrains.skia.impl.Native.Companion.NullPointer
+ import org.jetbrains.skia.impl.NativePointer
+ 
+ internal actual fun <R> commonSynchronized(lock: Any, block: () -> R) {
+@@ -47,8 +46,7 @@ internal actual fun nMakeVulkanImpl(
+     deviceProcAddr: NativePointer,
+     apiVersion: Int,
+     memoryAllocator: VulkanMemoryAllocator?
+-): NativePointer = _nMakeVulkan(
++): NativePointer = nMakeVulkanNoAllocator(
+     instancePtr, physicalDevicePtr, devicePtr, queuePtr,
+-    graphicsQueueIndex, instanceProcAddr, deviceProcAddr, apiVersion,
+-    NullPointer
++    graphicsQueueIndex, instanceProcAddr, deviceProcAddr, apiVersion
+ )
+
+From c303c406b2ed957008fb821f3ed24ec7f2dac776 Mon Sep 17 00:00:00 2001
+From: LunasaVT <me@lunasa.dev>
+Date: Wed, 27 May 2026 15:34:54 +0530
+Subject: [PATCH 9/9] Better documentation for VulkanMemoryAllocator.kt
+
+---
+ .../jetbrains/skia/VulkanMemoryAllocator.kt   | 102 +++++++++++-------
+ 1 file changed, 65 insertions(+), 37 deletions(-)
+
+diff --git a/skiko/src/commonMain/kotlin/org/jetbrains/skia/VulkanMemoryAllocator.kt b/skiko/src/commonMain/kotlin/org/jetbrains/skia/VulkanMemoryAllocator.kt
+index 26db4d80b0..a1c428b026 100644
+--- a/skiko/src/commonMain/kotlin/org/jetbrains/skia/VulkanMemoryAllocator.kt
++++ b/skiko/src/commonMain/kotlin/org/jetbrains/skia/VulkanMemoryAllocator.kt
+@@ -1,35 +1,35 @@
+ package org.jetbrains.skia
+ 
+ /**
+- * Controls how Skia allocates Vulkan device memory.
++ * Interface for Vulkan device memory allocation used by Skia.
+  *
+- * You may pass an implementation of this class to [DirectContext.makeVulkan].
+- * When omitted, a built-in per-allocation allocator is used that is always functional, however,
+- * it does not do any sub-allocations.
++ * @see [DirectContext.makeVulkan]
+  */
+ abstract class VulkanMemoryAllocator {
+ 
+     /**
+      * Describes how Skia intends to use a buffer allocation.
++     *
++     * This may or may not be acknowledged by the underlying allocator implementation.
+      */
+     enum class BufferUsage(internal val ordinalValue: Int) {
+         /**
+-         * Accessed only on the GPU. This is always device local.
++         * GPU-only memory.
+          */
+         GPU_ONLY(0),
+ 
+         /**
+-         * Frequently updated by the CPU, read by the GPU.
++         * CPU-written, GPU-read memory.
+          */
+         CPU_WRITES_GPU_READS(1),
+ 
+         /**
+-         * Staging buffer for CPU-to-GPU transfers. Must be host-visible and host-coherent.
++         * CPU-to-GPU transfer staging memory.
+          */
+         TRANSFERS_FROM_CPU_TO_GPU(2),
+ 
+         /**
+-         * Buffer written by the GPU and read back on the CPU. Must be host-visible.
++         * GPU-to-CPU transfer memory.
+          */
+         TRANSFERS_FROM_GPU_TO_CPU(3);
+     }
+@@ -37,12 +37,12 @@ abstract class VulkanMemoryAllocator {
+     /**
+      * The result of a successful allocation.
+      *
+-     * @param deviceMemory    The allocated `VkDeviceMemory` handle (as a [Long]).
+-     * @param offset          Byte offset within [deviceMemory]; 0 for dedicated allocations.
+-     * @param size            Size of this allocation in bytes.
+-     * @param memoryTypeIndex Index into `VkPhysicalDeviceMemoryProperties.memoryTypes` that
+-     *                        was used. The allocator bridge uses this to determine coherency
+-     *                        and mappability flags for Skia.
++     * @property deviceMemory Vulkan `VkDeviceMemory` handle.
++     * @property offset Byte offset within `deviceMemory`.
++     *                  For dedicated allocations this is typically `0`.
++     * @property size Allocation size in bytes.
++     * @property memoryTypeIndex Index into
++     * `VkPhysicalDeviceMemoryProperties.memoryTypes`.
+      */
+     data class Allocation(
+         val deviceMemory: Long,
+@@ -54,58 +54,85 @@ abstract class VulkanMemoryAllocator {
+     /**
+      * Allocate device memory for [image].
+      *
+-     * @param image                  `VkImage` handle (as [Long]) that needs memory.
+-     * @param allocationPropertyFlags Hints from Skia; combination of [ALLOCATION_FLAG_*] constants.
++     * @param image Vulkan `VkImage` handle.
++     * @param allocationPropertyFlags Bitmask of `ALLOCATION_FLAG_*` values.
++     *
++     * @return Allocation information, or `null` if allocation failed.
+      */
+     abstract fun allocateImageMemory(image: Long, allocationPropertyFlags: Int): Allocation?
+ 
+     /**
+      * Allocate device memory for [buffer].
+      *
+-     * @param buffer                 `VkBuffer` handle (as [Long]) that needs memory.
+-     * @param usage                  How Skia intends to use this buffer — drives memory type choice.
+-     * @param allocationPropertyFlags Hints from Skia; combination of [ALLOCATION_FLAG_*] constants.
++     * @param buffer Vulkan `VkBuffer` handle.
++     * @param usage Intended usage pattern for the buffer.
++     * @param allocationPropertyFlags Bitmask of `ALLOCATION_FLAG_*` values.
++     *
++     * @return Allocation information, or `null` if allocation failed.
+      */
+     abstract fun allocateBufferMemory(buffer: Long, usage: BufferUsage, allocationPropertyFlags: Int): Allocation?
+ 
+     /**
+-     * Map [deviceMemory] for CPU access and return the mapped address as a [Long],
+-     * or 0 if the memory cannot be or was not mapped.
++     * Maps a Vulkan memory allocation for CPU access.
++     *
++     * Only called for host-visible memory types.
+      *
+-     * Only called for host-visible (mappable) memory. The default implementation returns 0.
++     * @param deviceMemory Vulkan `VkDeviceMemory` handle.
++     *
++     * @return Mapped pointer address as a `Long`, or `0` on failure.
+      */
+     open fun mapMemory(deviceMemory: Long): Long = 0L
+ 
+     /**
+-     * Unmap [deviceMemory] previously returned by [mapMemory].
++     * Unmaps a previously mapped Vulkan memory allocation.
++     *
++     * @param deviceMemory Vulkan `VkDeviceMemory` handle.
+      */
+     open fun unmapMemory(deviceMemory: Long) {}
+ 
+     /**
+-     * Flush [size] bytes starting at [offset] within [deviceMemory] to make CPU writes
+-     * visible to the GPU.  Only called for non-coherent memory.
++     * Flushes CPU writes for a non-coherent memory range.
++     *
++     * Called only for non-coherent host-visible memory.
+      *
+-     * @return a `VkResult` value (0 = `VK_SUCCESS`).
++     * @param deviceMemory Vulkan `VkDeviceMemory` handle.
++     * @param offset Byte offset of the flushed range.
++     * @param size Size of the flushed range in bytes.
++     *
++     * @return Vulkan `VkResult`.
+      */
+     open fun flushMemory(deviceMemory: Long, offset: Long, size: Long): Int = 0
+ 
+     /**
+-     * Invalidate [size] bytes starting at [offset] within [deviceMemory] so GPU writes
+-     * become visible to the CPU. Only called for non-coherent memory.
++     * Invalidates a non-coherent memory range.
++     *
++     * Makes GPU writes visible to the CPU.
++     * Called only for non-coherent host-visible memory.
+      *
+-     * @return a `VkResult` value (0 = `VK_SUCCESS`).
++     * @param deviceMemory Vulkan `VkDeviceMemory` handle.
++     * @param offset Byte offset of the invalidated range.
++     * @param size Size of the invalidated range in bytes.
++     *
++     * @return Vulkan `VkResult`.
+      */
+     open fun invalidateMemory(deviceMemory: Long, offset: Long, size: Long): Int = 0
+ 
+     /**
+-     * Free a [deviceMemory] handle previously returned by [allocateImageMemory] or
+-     * [allocateBufferMemory].
++     * Frees a Vulkan memory allocation.
++     *
++     * @param deviceMemory Vulkan `VkDeviceMemory` handle previously returned
++     * by this allocator.
+      */
+     abstract fun freeMemory(deviceMemory: Long)
+ 
+     /**
+-     * @return `(totalAllocated, totalUsed)` byte counts for diagnostic purposes.
+-     * Both may be 0 if tracking is not implemented.
++     * Returns allocator memory statistics.
++     *
++     * @return Pair of:
++     * - total allocated bytes
++     * - total used bytes
++     *
++     * Implementations that do not track statistics may return `(0, 0)`.
+      */
+     open fun totalAllocatedAndUsedMemory(): Pair<Long, Long> = Pair(0L, 0L)
+ 
+@@ -120,23 +147,24 @@ abstract class VulkanMemoryAllocator {
+     }
+ 
+     companion object {
++
+         /**
+-         * Place allocation in its own `VkDeviceMemory`
++         * Requests a dedicated `VkDeviceMemory` allocation.
+          */
+         const val ALLOCATION_FLAG_DEDICATED: Int = 0b0001
+ 
+         /**
+-         * Lazily allocated and device-only, may be unavailable until accessed.
++         * Requests lazily allocated device-local memory.
+          */
+         const val ALLOCATION_FLAG_LAZY: Int = 0b0010
+ 
+         /**
+-         * Keep this memory persistently mapped (host-visible allocations only).
++         * Requests persistent mapping for host-visible memory.
+          */
+         const val ALLOCATION_FLAG_PERSISTENTLY_MAPPED: Int = 0b0100
+ 
+         /**
+-         * Allocate in a protected memory region.
++         * Requests protected memory allocation.
+          */
+         const val ALLOCATION_FLAG_PROTECTED: Int = 0b1000
+     }
