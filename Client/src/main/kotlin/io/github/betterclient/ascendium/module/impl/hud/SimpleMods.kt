@@ -21,7 +21,7 @@ object FPSMod : TextModule("FPS", "Display your frames per second.") {
             _smoothFPS.add(System.currentTimeMillis())
             template.replace("%FPS%", smoothFPS.toString(), true)
         } else {
-            template.replace("%FPS%", minecraft.fps.toString(), true)
+            template.replace("%FPS%", minecraft.Afps.toString(), true)
         }
     }
 

@@ -91,7 +91,7 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     }
 
     @Override
-    public @NotNull int getFps() {
+    public @NotNull int getAfps() {
         return currentFps;
     }
 

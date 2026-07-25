@@ -1,20 +1,23 @@
 package io.github.betterclient.ascendium.util
 
+import com.mojang.blaze3d.opengl.GlSampler
+import com.mojang.blaze3d.opengl.GlTexture
+import com.mojang.blaze3d.platform.NativeImage
 import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.blaze3d.textures.AddressMode
 import com.mojang.blaze3d.textures.FilterMode
 import com.mojang.blaze3d.textures.GpuTextureView
 import com.mojang.blaze3d.textures.TextureFormat
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderAdapter
 import kotlinx.atomicfu.locks.withLock
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gl.RenderPipelines
-import net.minecraft.client.gui.render.state.GuiRenderState
-import net.minecraft.client.gui.render.state.TexturedQuadGuiElementRenderState
-import net.minecraft.client.render.GameRenderer
-import net.minecraft.client.texture.GlTexture
-import net.minecraft.client.texture.NativeImage
-import net.minecraft.client.texture.TextureSetup
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.render.TextureSetup
+import net.minecraft.client.renderer.GameRenderer
+import net.minecraft.client.renderer.RenderPipelines
+import net.minecraft.client.renderer.state.GameRenderState
+import net.minecraft.client.renderer.state.gui.BlitRenderState
+import net.minecraft.client.renderer.state.gui.GuiRenderState
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Color
 import org.jetbrains.skia.Pixmap
@@ -24,24 +27,23 @@ import org.lwjgl.system.MemoryUtil
 import java.lang.reflect.Field
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
-
-val NativeImage.pointer: Long
-    get() = this.imageId()
 
 val GameRenderer.guiState: GuiRenderState
     get() {
         val guiStateField: Field = GameRenderer::class.java.declaredFields
-            .first { it.type == GuiRenderState::class.java }
+            .first { it.type == GameRenderState::class.java }
         guiStateField.isAccessible = true
-        return guiStateField.get(this) as GuiRenderState
+        return (guiStateField.get(this) as GameRenderState).guiRenderState
     }
 
-class V1218SkiaRenderAdapter : SkiaRenderAdapter {
-    val adapter = V1218SkiaRenderAdapterObject()
+class V2612SkiaRenderAdapter : SkiaRenderAdapter {
+    val adapter = V2612SkiaRenderAdapterObject()
     override fun withSkia(block: (Canvas) -> Unit) {
         adapter.withSkia(block)
     }
@@ -51,7 +53,7 @@ class V1218SkiaRenderAdapter : SkiaRenderAdapter {
     }
 }
 
-class V1218SkiaRenderAdapterObject {
+class V2612SkiaRenderAdapterObject {
     private var vpW = 0
     private var vpH = 0
 
@@ -73,12 +75,7 @@ class V1218SkiaRenderAdapterObject {
         }
     }
 
-    companion object {
-        val UI_SCALE
-            get() = 1f
-    }
-
-    lateinit var state: TexturedQuadGuiElementRenderState
+    lateinit var state: BlitRenderState
 
     fun withSkia(block: (Canvas) -> Unit) {
         if (this.content == null)
@@ -91,7 +88,7 @@ class V1218SkiaRenderAdapterObject {
                 if (imageToDraw.width == texture.texture().getWidth(0) && imageToDraw.height == texture.texture().getHeight(0)) {
                     RenderSystem.getDevice().createCommandEncoder().writeToTexture(texture.texture(), imageToDraw)
                 }
-                MinecraftClient.getInstance().gameRenderer.guiState.addSimpleElement(state)
+                Minecraft.getInstance().gameRenderer.guiState.addBlitToCurrentLayer(state)
             }
         }
         render.set(true)
@@ -117,20 +114,21 @@ class V1218SkiaRenderAdapterObject {
                 )
             )
 
-            texture.texture().setTextureFilter(
-                FilterMode.NEAREST,
-                FilterMode.NEAREST,
-                false
-            )
-
-            state = TexturedQuadGuiElementRenderState(
+            state = BlitRenderState(
                 RenderPipelines.GUI_TEXTURED,
-                TextureSetup.withoutGlTexture(texture),
+                TextureSetup.singleTexture(texture, GlSampler(
+                    AddressMode.REPEAT,
+                    AddressMode.REPEAT,
+                    FilterMode.NEAREST,
+                    FilterMode.NEAREST,
+                    1,
+                    OptionalDouble.empty()
+                )),
                 Matrix3x2fStack(),
                 0,
                 0,
-                MinecraftClient.getInstance().window.scaledWidth,
-                MinecraftClient.getInstance().window.scaledHeight,
+                Minecraft.getInstance().window.guiScaledWidth,
+                Minecraft.getInstance().window.guiScaledHeight,
                 0.0f,
                 1.0f,
                 0.0f,
@@ -236,6 +234,6 @@ class V1218SkiaRenderAdapterObject {
         }
 
         pool.shutdown()
-        pool.awaitTermination(Long.MAX_VALUE, java.util.concurrent.TimeUnit.NANOSECONDS)
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
     }
 }

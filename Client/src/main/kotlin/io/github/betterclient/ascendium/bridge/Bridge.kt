@@ -4,14 +4,19 @@ import java.awt.image.BufferedImage
 import kotlin.math.sqrt
 
 //globally accessible client!
-inline val minecraft: MinecraftBridge
-    get() {
-        return try {
-            Class.forName("net.minecraft.class_310").getMethod("method_1551").invoke(null) as MinecraftBridge
-        } catch (_: Exception) {
-            Class.forName("net.minecraft.client.MinecraftClient").getMethod("getInstance").invoke(null) as MinecraftBridge
-        }
+val minecraft: MinecraftBridge by lazy {
+    if (!BridgeAdapterManager.activeAdapter.isObfuscated) {
+        //>=26.1
+        return@lazy Class.forName("net.minecraft.client.Minecraft").getMethod("getInstance").invoke(null) as MinecraftBridge
     }
+
+    //<=1.21.11
+    return@lazy try {
+        Class.forName("net.minecraft.class_310").getMethod("method_1551").invoke(null) as MinecraftBridge
+    } catch (_: Exception) {
+        Class.forName("net.minecraft.client.MinecraftClient").getMethod("getInstance").invoke(null) as MinecraftBridge
+    }
+}
 
 fun createOpenGLTexture(): TextureBridge {
     return BridgeAdapterManager.useBridgeUtil({ it.openglTextureAdapter }) as TextureBridge
@@ -29,7 +34,7 @@ interface MinecraftBridge {
     val isWorldNull: Boolean
     val server: String
     val ping: Int
-    val fps: Int
+    val Afps: Int
     val mouse: MouseBridge
     val gameOptions: OptionsBridge
     val window: WindowBridge

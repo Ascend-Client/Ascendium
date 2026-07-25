@@ -4,6 +4,11 @@ import net.fabricmc.loader.api.FabricLoader
 import org.spongepowered.asm.mixin.Mixins
 
 object BridgeAdapterManager {
+    val activeAdapter by lazy {
+        adapters[FabricLoader.getInstance().getModContainer("minecraft").get().metadata.version.friendlyString]
+            ?: throw UnsupportedOperationException("This version of minecraft is not supported.")
+    }
+
     fun initMixins() {
         adapters.map { it.value.mixinName }.distinct().forEach {
             Mixins.addConfiguration("ascendium.$it.mixins.json")
@@ -11,9 +16,7 @@ object BridgeAdapterManager {
     }
 
     fun shouldApply(className: String): Boolean {
-        val adapter =
-            adapters[FabricLoader.getInstance().getModContainer("minecraft").get().metadata.version.friendlyString]
-        if (adapter == null) throw UnsupportedOperationException("This version of minecraft is not supported.")
+        val adapter = activeAdapter
 
         val adapterVersion = mixinMapping.entries
             .firstOrNull { (mixinName, _) -> className.contains(mixinName) }
@@ -23,13 +26,12 @@ object BridgeAdapterManager {
             return true //apply or else
         }
 
+        println("Apply $className with ${adapter.mixinName}, ${adapterVersion?.let { className.contains(it) }}")
         return adapterVersion?.let { className.contains(it) } ?: false
     }
 
     fun useBridgeUtil(adapterName: (adapter: BridgeAdapter) -> String, vararg parameters: Any?): Any {
-        val adapter =
-            adapters[FabricLoader.getInstance().getModContainer("minecraft").get().metadata.version.friendlyString]
-        if (adapter == null) throw UnsupportedOperationException("This version of minecraft is not supported.")
+        val adapter = activeAdapter
         val adapterName1 = adapterName(adapter)
         return Class.forName("io.github.betterclient.ascendium.util.$adapterName1").constructors[0].newInstance(
             *parameters
@@ -38,6 +40,7 @@ object BridgeAdapterManager {
 }
 
 val `1_21_4` = BridgeAdapter(
+    isObfuscated = true,
     mixinName = "1.21.4",
     keybindingBridgeAdapter = "V1214KeybindingHelper",
     screenBridgeAdapter = "Post120BridgedScreen",
@@ -186,8 +189,47 @@ val cts8c = `1_16_5`.copy(
     keybindingBridgeAdapter = "CTSKeybindingHelper"
 )
 
+//26.1.2 has to be a new root because it requires non obfuscated names + mojmap
+val `26_1_2` = BridgeAdapter(
+    mixinName = "26.1.2",
+    isObfuscated = false,
+    keybindingBridgeAdapter = "V2612KeybindingHelper",
+    screenBridgeAdapter = "V2612BridgedScreen",
+    skiaRenderAdapter = "V2612SkiaRenderAdapter",
+    openglTextureAdapter = "V2612OpenGLTextureAdapter",
+    rawOpenGLTextureAdapter = "V2612RawOpenGLAdapter",
+    offscreen = "RequireOffscreen",
+
+    minecraftClientAdapter = "2612",
+    entityAdapter = "2612",
+    itemStackAdapter = "2612",
+    playerEntityAdapter = "2612",
+    keybindingAdapter = "2612",
+    optionsAdapter = "2612",
+    simpleResourceReloadAdapter = "2612",
+    soundEngineAdapter = "2612",
+    spriteAtlasTextureAdapter = "2612",
+    unihexFontAdapter = "2612",
+    inGameHudAdapter = "2612",
+    screenAdapter = "2612",
+    splashOverlayAdapter = "2612",
+    titleScreenAdapter = "2612",
+    windowAdapter = "2612",
+    chatHudAdapter = "2612",
+    clickEventAdapter = "2612",
+    styleAdapter = "2612",
+    textAdapter = "2612",
+    mouseAdapter = "2612",
+    mainAdapter = "2612",
+
+    applyElse = listOf(
+        "2612.options.MixinKeybindingCategory"
+    )
+)
+
 data class BridgeAdapter(
     val mixinName: String,
+    val isObfuscated: Boolean,
     val keybindingBridgeAdapter: String,
     val screenBridgeAdapter: String,
     val skiaRenderAdapter: String,
@@ -233,7 +275,8 @@ val adapters = mutableMapOf(
     "1.21.8" to `1_21_8`,
     "1.21.9" to `1_21_9`,
     "1.21.10" to `1_21_10`,
-    "1.21.11" to `1_21_11`
+    "1.21.11" to `1_21_11`,
+    "26.1.2" to `26_1_2`,
 )
 
 val mixinMapping = mapOf<String, (adapter: BridgeAdapter) -> String>(

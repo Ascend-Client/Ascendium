@@ -1,10 +1,9 @@
-package io.github.betterclient.ascendium.mixin.v1218;
+package io.github.betterclient.ascendium.mixin.v2612.render;
 
+import com.mojang.blaze3d.opengl.GlTexture;
+import com.mojang.blaze3d.platform.Window;
 import io.github.betterclient.ascendium.bridge.WindowBridge;
-import io.github.betterclient.ascendium.util.V1218SkiaRenderAdapterObject;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.GlTexture;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,28 +15,28 @@ public class MixinWindow implements WindowBridge {
 
     @Shadow private int framebufferHeight;
 
-    @Shadow private int scaleFactor;
+    @Shadow private int guiScale;
 
     @Shadow @Final private long handle;
 
     @Override
     public int getFbWidth() {
-        return (int) (this.framebufferWidth / V1218SkiaRenderAdapterObject.Companion.getUI_SCALE());
+        return (this.framebufferWidth);
     }
 
     @Override
     public int getFbHeight() {
-        return (int) (this.framebufferHeight / V1218SkiaRenderAdapterObject.Companion.getUI_SCALE());
+        return (this.framebufferHeight);
     }
 
     @Override
     public int getFbo() {
-        return ((GlTexture) MinecraftClient.getInstance().getFramebuffer().getColorAttachment()).getGlId();
+        return ((GlTexture) Minecraft.getInstance().getMainRenderTarget().getColorTexture()).glId();
     }
 
     @Override
     public @NotNull double getScale() {
-        return this.scaleFactor / V1218SkiaRenderAdapterObject.Companion.getUI_SCALE();
+        return this.guiScale;
     }
 
     @Override

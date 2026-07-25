@@ -31,7 +31,7 @@ base {
     archivesName.set(project.property("archives_base_name") as String)
 }
 
-val targetJavaVersion = 21
+val targetJavaVersion = 25
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
 }
@@ -92,11 +92,15 @@ dependencies {
         }
 
         if (item.path.contains("Adapters")) {
-            include(if(compile) {
-                item
+            if(item.path.startsWith(":Adapters:1.")) {
+                include(if(compile) {
+                    item
+                } else {
+                    project(item.path, "namedElements")
+                })
             } else {
-                project(item.path, "namedElements")
-            })
+                include(item)
+            }
         }
     }
 
