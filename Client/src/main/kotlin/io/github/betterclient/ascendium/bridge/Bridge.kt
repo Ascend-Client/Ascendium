@@ -207,3 +207,7 @@ interface RequiresOffscreen { val does: Boolean }
 interface RawTexture {
     fun render(id: Int)
 }
+
+interface VulkanRenderer {
+    val isVulkan: Boolean
+}

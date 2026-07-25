@@ -69,7 +69,9 @@ val `1_21_4` = BridgeAdapter(
     styleAdapter = "1214",
     textAdapter = "1214",
     mainAdapter = "1214",
-    mouseAdapter = "1214"
+    mouseAdapter = "1214",
+
+    vulkanRenderer = "UnsupportedVulkanRenderer" //TODO: check for vulkanmod
 )
 
 val `1_21_5` = `1_21_4`.copy(
@@ -224,7 +226,8 @@ val `26_1_2` = BridgeAdapter(
 
     applyElse = listOf(
         "2612.options.MixinKeybindingCategory"
-    )
+    ),
+    vulkanRenderer = "UnsupportedVulkanRenderer" //TODO: vulkanmod
 )
 
 val `26_2` = `26_1_2`.copy(
@@ -234,6 +237,8 @@ val `26_2` = `26_1_2`.copy(
 
     openglTextureAdapter = "V262OpenGLTextureAdapter",
     rawOpenGLTextureAdapter = "V262RawOpenGLAdapter",
+
+    vulkanRenderer = "V262VulkanRenderer",
 )
 
 data class BridgeAdapter(
@@ -245,6 +250,7 @@ data class BridgeAdapter(
     val openglTextureAdapter: String,
     val rawOpenGLTextureAdapter: String,
     val offscreen: String,
+    val vulkanRenderer: String,
 
     val minecraftClientAdapter: String,
     val entityAdapter: String,
