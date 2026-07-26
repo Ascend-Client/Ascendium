@@ -27,19 +27,13 @@ class V1214RawOpenGLAdapter() : RawTexture {
 
             return id
         }
-
-        val GameRenderer.buffers: BufferBuilderStorage
-            get() = GameRenderer::class.java.declaredFields
-                .first { it.type == BufferBuilderStorage::class.java }
-                .also { it.isAccessible = true }
-                .get(this) as BufferBuilderStorage
     }
 
     override fun render(id: Int) {
         val instance = MinecraftClient.getInstance()
         val window = instance.window
 
-        val consumers = instance.gameRenderer.buffers.entityVertexConsumers
+        val consumers = MinecraftClient.getInstance().bufferBuilders.entityVertexConsumers
         val renderLayer = RenderLayer.getGuiTextured(
             cache.computeIfAbsent(id) { tex -> generateID(tex) }
         )

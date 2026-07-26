@@ -28,6 +28,7 @@ Ascendium is a modern Minecraft client built with Fabric and Jetpack Compose.
 | 1.21.10 | ✅         |
 | 1.21.9  | ✅         |
 | 1.21.8  | ✅         |
+| 1.21.5  | ✅         |
 | 1.21.4  | ✅         |
 | 1.21.1  | ✅         |
 | 1.20.6  | ✅         |
@@ -41,5 +42,11 @@ Ascendium is a modern Minecraft client built with Fabric and Jetpack Compose.
 - Vulkan is supported when using Minecraft 26.2 or above.
 - VulkanMod is also supported, it is only tested for these versions:
 - - 26.1.2
+- - 1.21.11
+- - 1.21.10
+- - 1.21.9
+- - 1.21.5
+- - 1.21.4
+- - Other versions might work, but are untested.
 
 License: GPL v3

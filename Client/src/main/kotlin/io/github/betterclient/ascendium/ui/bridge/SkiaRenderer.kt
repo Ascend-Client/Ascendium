@@ -1,12 +1,11 @@
 package io.github.betterclient.ascendium.ui.bridge
 
-import androidx.compose.runtime.BroadcastFrameClock
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
 import io.github.betterclient.ascendium.bridge.minecraft
-import kotlinx.coroutines.Dispatchers
-import org.jetbrains.skia.*
-import kotlin.coroutines.CoroutineContext
+import io.github.betterclient.ascendium.bridge.vulkanChecker
+import org.jetbrains.skia.Canvas
+import org.jetbrains.skia.Paint
 
 object ScalingUtils {
     fun <T : Number> getUnscaled(i: T): Float {
@@ -21,16 +20,12 @@ object ScalingUtils {
 }
 
 class SkiaRenderer {
-    val adapter = when (Ascendium.settings.uiBackend) {
-        "Compose" -> {
+    val adapter = when {
+        vulkanChecker.isVulkan -> VulkanSkiaRenderer()
+        Ascendium.settings._ui.value == "Compose" -> {
             (BridgeAdapterManager.useBridgeUtil({ it.skiaRenderAdapter }) as SkiaRenderAdapter)
         }
-        "Vulkan" -> {
-            VulkanSkiaRenderer()
-        }
-        else -> {
-            OffscreenSkiaRenderer()
-        }
+        else -> OffscreenSkiaRenderer()
     }
 
     fun withSkia(block: (Canvas) -> Unit) {

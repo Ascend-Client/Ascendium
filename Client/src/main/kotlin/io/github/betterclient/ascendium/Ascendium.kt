@@ -12,6 +12,7 @@ import io.github.betterclient.ascendium.module.config.DropdownSetting
 import io.github.betterclient.ascendium.module.config.NumberSetting
 import io.github.betterclient.ascendium.ui.move.MoveModuleUI
 import io.github.betterclient.ascendium.util.SkiaRuntimeDownloader
+import io.github.betterclient.ascendium.util.VulkanModChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.setMain
@@ -49,9 +50,10 @@ object Ascendium {
         }
 
         if (vulkanChecker.isVulkan) {
+            val optName = if (vulkanChecker is VulkanModChecker) "VulkanMod" else "Vulkan"
             settings._ui.options.clear()
-            settings._ui.options.add("Vulkan")
-            settings._ui.set("Vulkan")
+            settings._ui.options.add(optName)
+            settings._ui.set(optName)
         } else {
             settings._ui.options.remove("Vulkan")
         }

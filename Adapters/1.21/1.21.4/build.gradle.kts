@@ -23,6 +23,8 @@ dependencies {
     modImplementation(libs.fabric.kotlin.loader)
 
     implementation(libs.skiko.awt)
+
+    modCompileOnly("maven.modrinth:vulkanmod:0.5.6")
 }
 
 loom {

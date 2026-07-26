@@ -20,9 +20,12 @@ class VulkanSkiaRenderer() : SkiaRenderAdapter {
     }
 
     override fun withSkia(block: (Canvas) -> Unit) {
-        if (vpW != minecraft.window.fbWidth || vpH != minecraft.window.fbHeight) {
-            vpW = minecraft.window.fbWidth
-            vpH = minecraft.window.fbHeight
+        val width = minecraft.window.fbWidth
+        val height = minecraft.window.fbHeight
+        if (width <= 0 || height <= 0) return
+        if (vpW != width || vpH != height || !::backendRenderTarget.isInitialized || !::surface.isInitialized) {
+            vpW = width
+            vpH = height
 
             activeTexture.close()
             activeTexture = createOpenGLTexture()
@@ -30,10 +33,10 @@ class VulkanSkiaRenderer() : SkiaRenderAdapter {
             data = vulkanChecker.getVulkanContext()
             context = genContext(data)
 
-            if (::backendRenderTarget.isInitialized) backendRenderTarget.close()
-            backendRenderTarget = activeTexture.toBackendRenderTarget()?: return
-
             if (::surface.isInitialized) surface.close()
+            if (::backendRenderTarget.isInitialized) backendRenderTarget.close()
+
+            backendRenderTarget = activeTexture.toBackendRenderTarget() ?: return
             surface = Surface.makeFromBackendRenderTarget(
                 context = context,
                 rt = backendRenderTarget,
@@ -41,6 +44,10 @@ class VulkanSkiaRenderer() : SkiaRenderAdapter {
                 colorFormat = SurfaceColorFormat.RGBA_8888,
                 colorSpace = ColorSpace.sRGB
             )!!
+        }
+        if (!::surface.isInitialized) {
+            activeTexture.blit()
+            return
         }
 
         surface.canvas.let {

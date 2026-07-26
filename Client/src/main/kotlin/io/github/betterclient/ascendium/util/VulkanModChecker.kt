@@ -26,7 +26,9 @@ class VulkanModChecker() : VulkanChecker {
             val instancePtr = vkInstance.javaClass.getMethod("address").invoke(vkInstance) as Long
 
             val graphicsQueue = deviceManagerClass.getMethod("getGraphicsQueue").invoke(null)
-            val vkQueue = graphicsQueue.javaClass.getMethod("vkQueue").invoke(graphicsQueue)
+            val queueMethod = graphicsQueue.javaClass.methods.firstOrNull { it.name == "vkQueue" || it.name == "queue" } ?: throw NoSuchMethodException()
+
+            val vkQueue = queueMethod.invoke(graphicsQueue)
             val queuePtr = vkQueue.javaClass.getMethod("address").invoke(vkQueue) as Long
 
             val queueFamilies = queueClass.getMethod("getQueueFamilies").invoke(null)

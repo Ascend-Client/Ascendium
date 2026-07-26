@@ -23,8 +23,8 @@ dependencies {
     modImplementation(libs.fabric.kotlin.loader)
 
     modRuntimeOnly("maven.modrinth:sodium:${project.property("sodium_ver")}")
-    modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_ver")}")
     modRuntimeOnly("maven.modrinth:in-game-account-switcher:${project.property("igas_ver")}")
+    modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_ver")}")
 }
 
 loom {
