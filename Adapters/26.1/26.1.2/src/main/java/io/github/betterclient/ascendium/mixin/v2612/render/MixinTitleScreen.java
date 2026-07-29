@@ -10,9 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = TitleScreen.class, priority = 2000)
 public class MixinTitleScreen {
-    @Inject(method = "init", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "init", at = @At(value = "TAIL"))
     public void init(CallbackInfo ci) {
         BridgeKt.getMinecraft().openScreen(CustomMainMenu.INSTANCE);
-        ci.cancel();
     }
 }

@@ -1,20 +1,14 @@
 package io.github.betterclient.ascendium.util
 
-import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
 import io.github.betterclient.ascendium.bridge.TextureBridge
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.bridge.vulkanChecker
 import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
-import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gl.ShaderProgram
 import net.minecraft.client.gl.ShaderProgramKeys
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.render.BufferBuilderStorage
-import net.minecraft.client.render.BufferRenderer
 import net.minecraft.client.render.RenderLayer
-import net.minecraft.client.render.Tessellator
 import net.minecraft.client.render.VertexFormat
 import net.minecraft.client.render.VertexFormats
 import net.minecraft.client.texture.NativeImage
@@ -33,7 +27,6 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import kotlin.math.min
 
 class V1214OpenGLTextureAdapter() : TextureBridge {
     private val internal = if (vulkanChecker.isVulkan) {
@@ -125,15 +118,10 @@ private class V1214VulkanTextureAdapter : TextureBridge {
         height: Float
     ) {
         val matrix = ctx.matrices.peek().positionMatrix
-
-        // 2. Instantiate our custom layer
         val customLayer = BatchedGuiTextureLayer(texture)
 
-        // 3. Retrieve the consumer from DrawContext (this queues the draw call)
         val consumer = MinecraftClient.getInstance().bufferBuilders.entityVertexConsumers.getBuffer(customLayer)
 
-        // 4. Build the quad. Note: We do NOT call BufferRenderer or end the buffer manually.
-        // Minecraft will automatically draw this during the correct, bright GUI pass!
         consumer.vertex(matrix, x, y, 0f).texture(0.0f, 0.0f)
         consumer.vertex(matrix, x, y + height, 0f).texture(0.0f, 1.0f)
         consumer.vertex(matrix, x + width, y + height, 0f).texture(1.0f, 1.0f)
@@ -344,8 +332,8 @@ class BatchedGuiTextureLayer(texture: Identifier) : RenderLayer(
     VertexFormats.POSITION_TEXTURE,
     VertexFormat.DrawMode.QUADS,
     1536,
-    false, // hasCrumbling
-    true,  // translucent
+    false, //hasCrumbling
+    true,  //translucent
     {
         RenderSystem.enableBlend()
         RenderSystem.defaultBlendFunc()

@@ -1,6 +1,8 @@
 package io.github.betterclient.ascendium.bridge
 
+import io.github.betterclient.ascendium.util.Either
 import org.jetbrains.skia.BackendRenderTarget
+import org.jetbrains.skia.BackendTexture
 import java.awt.image.BufferedImage
 import kotlin.math.sqrt
 
@@ -21,6 +23,13 @@ val minecraft: MinecraftBridge by lazy {
 
 fun createOpenGLTexture(): TextureBridge {
     return BridgeAdapterManager.useBridgeUtil({ it.openglTextureAdapter }) as TextureBridge //the 26.2 implementation of OpenGLTexture should work on vulkan aswell
+}
+
+fun createResizableTexture(
+    width: Int = minecraft.window.fbWidth,
+    height: Int = minecraft.window.fbHeight
+) : ResizableTexture {
+    return BridgeAdapterManager.useBridgeUtil({ it.resizableTextureAdapter }, width, height) as ResizableTexture
 }
 
 fun createRawOpenGLRenderer(): RawTexture {
@@ -123,6 +132,8 @@ class BoundingBox(val start: Pos3D, val end: Pos3D) {
 }
 
 interface WindowBridge {
+    fun copyTextureTo(texture: ResizableTexture)
+
     val windowHandle: Long
     val scale: Double
     val fbWidth: Int
@@ -208,6 +219,21 @@ interface TextureBridge {
     fun blit()
     fun close()
     fun toBackendRenderTarget(): BackendRenderTarget?
+}
+
+interface ResizableTexture {
+    fun resize(width: Int, height: Int)
+    fun close()
+    //BackendRenderTarget if vulkan, BackendTexture if opengl
+    fun toSkia(): Either<BackendRenderTarget, BackendTexture>
+    fun recreate()
+
+    val width: Int
+    val height: Int
+
+    //integer if opengl, long if vulkan
+    val id: Either<Int, Long>
+    val textureView: Any?
 }
 
 interface RequiresOffscreen { val does: Boolean }

@@ -24,6 +24,10 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
     var glTexture by AtomicInteger(-1).value0
     val renderer = createRawOpenGLRenderer()
     @Volatile var lastCall = System.currentTimeMillis()
+    @Volatile var context0: DirectContext? = null
+    
+    override val myContext: DirectContext
+        get() = context0!!
 
     val version = GL11.glGetString(GL11.GL_VERSION)
     val minor: Int
@@ -76,6 +80,7 @@ class OffscreenSkiaRenderer : SkiaRenderAdapter {
         glfwMakeContextCurrent(handle)
         GL.createCapabilities()
         val dc = DirectContext.makeGL()
+        context0 = dc
         var surface = createSkiaSurface(lastW, lastH, dc)
         this.glTexture = surface.textureID
         var compatibilityMode = Ascendium.settings.uiBackend != "Offscreen" //if true, we want to use GL11.glFinish()

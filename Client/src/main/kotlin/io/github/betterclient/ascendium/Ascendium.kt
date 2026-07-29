@@ -86,7 +86,10 @@ class ClientSettings {
     val _ui = DropdownSetting("UI Backend (changed on restart)", "Compose", mutableListOf("Compose", "Vulkan", "Offscreen", "Offscreen (compatibility)"))
     val uiBackend by _ui.state
 
-    val settings = mutableListOf(_t, _mf, _bo, _ui)
+    val _blur = NumberSetting("Blur radius (Vulkan only)", 8.0, 1.0, 16.0)
+    val _blurFPS = NumberSetting("Blur FPS (Vulkan only)", 30.0, 1.0, 144.0)
+
+    val settings = mutableListOf(_t, _mf, _bo, _ui, _blur, _blurFPS)
 }
 
 class AscendiumPreLaunch() : PreLaunchEntrypoint {

@@ -13,6 +13,9 @@ class V1214SkiaRenderAdapter : SkiaRenderAdapter {
     override fun task(block: () -> Unit) {
         block() //this is hardware rendering, not needed
     }
+
+    override val myContext: DirectContext
+        get() = V1214SkiaRenderAdapterObject.context
 }
 
 object V1214SkiaRenderAdapterObject {

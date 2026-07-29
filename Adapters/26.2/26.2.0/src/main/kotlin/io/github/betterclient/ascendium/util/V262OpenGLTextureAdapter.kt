@@ -169,16 +169,20 @@ class V262OpenGLTextureAdapter() : TextureBridge {
 
         val text = texture.texture() as? VulkanGpuTexture ?: throw UnsupportedOperationException("Texture is not a VulkanGpuTexture!")
 
-        return BackendRenderTarget.makeVulkan(
-            width = text.getWidth(0),
-            height = text.getHeight(0),
-            imagePtr = text.vkImage(),
-            imageTiling = VK10.VK_IMAGE_TILING_OPTIMAL,
-            imageLayout = VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            format = VulkanConst.toVk(text.format),
-            imageUsageFlags = VulkanConst.textureUsageToVk(text.usage(), text.format),
-            sampleCnt = 1,
-            levelCnt = text.mipLevels
-        )
+        return toBackendTarget(text)
     }
+}
+
+fun toBackendTarget(text: VulkanGpuTexture): BackendRenderTarget {
+    return BackendRenderTarget.makeVulkan(
+        width = text.getWidth(0),
+        height = text.getHeight(0),
+        imagePtr = text.vkImage(),
+        imageTiling = VK10.VK_IMAGE_TILING_OPTIMAL,
+        imageLayout = VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        format = VulkanConst.toVk(text.format),
+        imageUsageFlags = VulkanConst.textureUsageToVk(text.usage(), text.format),
+        sampleCnt = 1,
+        levelCnt = text.mipLevels
+    )
 }

@@ -23,12 +23,13 @@
     "reload.MixinSoundEngine",
     "reload.MixinUnihexFont",
     "render.MixinChatHud",
+    "render.MixinGuiGraphicsExtractor",
+    "render.MixinGuiRenderer",
     "render.MixinInGameHud",
     "render.MixinScreen",
     "render.MixinSplashOverlay",
     "render.MixinTitleScreen",
     "render.MixinWindow",
-    "render.MixinGuiGraphicsExtractor",
     "texture.MixinSpriteAtlasTexture"
   ],
   "injectors": {

@@ -163,29 +163,31 @@ class V2612OpenGLTextureAdapter() : TextureBridge {
         initTexture()
         if (!::texture.isInitialized) return null
 
-        val gpuTexture = texture.texture()
-
-        val vulkanImageField = gpuTexture.javaClass.getDeclaredField("glTexture").apply { isAccessible = true }
-        val glTexture = vulkanImageField.get(gpuTexture)
-
-        val getVulkanImageMethod = glTexture.javaClass.getMethod("getVulkanImage")
-        val vulkanImage = getVulkanImageMethod.invoke(glTexture) ?: return null
-
-        val imageId = vulkanImage.javaClass.getMethod("getId").invoke(vulkanImage) as Long
-        val format = vulkanImage.javaClass.getField("format").getInt(vulkanImage)
-        val usage = vulkanImage.javaClass.getField("usage").getInt(vulkanImage)
-        val mipLevels = vulkanImage.javaClass.getField("mipLevels").getInt(vulkanImage)
-
-        return BackendRenderTarget.makeVulkan(
-            width = gpuTexture.getWidth(0),
-            height = gpuTexture.getHeight(0),
-            imagePtr = imageId,
-            imageTiling = 0, //VK10.VK_IMAGE_TILING_OPTIMAL
-            imageLayout = 2, //VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-            format = format,
-            imageUsageFlags = usage,
-            sampleCnt = 1,
-            levelCnt = mipLevels
-        )
+        return toBackendRenderTarget(texture.texture())
     }
+}
+
+fun toBackendRenderTarget(gpuTexture: GpuTexture): BackendRenderTarget? {
+    val vulkanImageField = gpuTexture.javaClass.getDeclaredField("glTexture").apply { isAccessible = true }
+    val glTexture = vulkanImageField.get(gpuTexture)
+
+    val getVulkanImageMethod = glTexture.javaClass.getMethod("getVulkanImage")
+    val vulkanImage = getVulkanImageMethod.invoke(glTexture) ?: return null
+
+    val imageId = vulkanImage.javaClass.getMethod("getId").invoke(vulkanImage) as Long
+    val format = vulkanImage.javaClass.getField("format").getInt(vulkanImage)
+    val usage = vulkanImage.javaClass.getField("usage").getInt(vulkanImage)
+    val mipLevels = vulkanImage.javaClass.getField("mipLevels").getInt(vulkanImage)
+
+    return BackendRenderTarget.makeVulkan(
+        width = gpuTexture.getWidth(0),
+        height = gpuTexture.getHeight(0),
+        imagePtr = imageId,
+        imageTiling = 0, //VK10.VK_IMAGE_TILING_OPTIMAL
+        imageLayout = 2, //VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        format = format,
+        imageUsageFlags = usage,
+        sampleCnt = 1,
+        levelCnt = mipLevels
+    )
 }

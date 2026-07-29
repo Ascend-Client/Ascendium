@@ -1,6 +1,5 @@
 package io.github.betterclient.ascendium.module
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -23,24 +22,24 @@ import androidx.compose.ui.platform.FrameRecomposer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.scene.CanvasLayersComposeScene
 import androidx.compose.ui.scene.ComposeScene
-import kotlinx.coroutines.Dispatchers
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.Ascendium
 import io.github.betterclient.ascendium.bridge.minecraft
+import io.github.betterclient.ascendium.bridge.vulkanChecker
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.event.eventBus
+import io.github.betterclient.ascendium.module.config.BooleanSetting
 import io.github.betterclient.ascendium.module.config.ColorSetting
-import io.github.betterclient.ascendium.ui.bridge.OffscreenSkiaRenderer
-import io.github.betterclient.ascendium.ui.bridge.SkiaRenderer
-import io.github.betterclient.ascendium.ui.bridge.VulkanSkiaRenderer
-import io.github.betterclient.ascendium.ui.bridge.getScaled
-import io.github.betterclient.ascendium.ui.bridge.getUnscaled
+import io.github.betterclient.ascendium.ui.bridge.*
+import io.github.betterclient.ascendium.util.ui.BlurBehind
 import io.github.betterclient.ascendium.util.ui.MCFont
 import io.github.betterclient.ascendium.util.ui.ModifyAll
+import io.github.betterclient.ascendium.util.ui.blurBackground
+import kotlinx.coroutines.Dispatchers
 
 abstract class ComposableHUDModule(name: String, description: String, val hasBackground: Boolean = true) : Module(name, description) {
     var previewHeight by mutableStateOf(150)
@@ -48,6 +47,7 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
     var y by mutableStateOf(100)
     val textColor by color("Text Color", -1)
     val backgroundColor = ColorSetting("Background Color", 0x51000000)
+    val backgroundBlur = BooleanSetting("Background Blur", true)
     abstract val minecraftFont: Boolean
     var scale by number("Scale", 1.0, 0.25, 3.0)
     open val renderBackground = true
@@ -64,6 +64,9 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
         if (hasBackground) {
             settings.add(backgroundColor)
         }
+        if (vulkanChecker.isVulkan) {
+            settings.add(backgroundBlur)
+        }
     }
 
     @Composable
@@ -79,37 +82,37 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
         val yDp: Dp = remember(y, scale) { with(density) { y.getUnscaled().toDp() } }
 
         val bg by backgroundColor.state
+        val blur by backgroundBlur.state
         val colorScheme = createScheme(
             textColor = Color(textColor),
             backgroundColor = Color(bg)
         )
+
         MaterialTheme(
             colorScheme = colorScheme,
-            typography =
-                Typography()
-                    .let { if (minecraftFont) it.MCFont() else it }
-                    .ModifyAll { it ->
-                        it.copy(color = colorScheme.onBackground)
-                    }
+            typography = Typography()
+                .let { if (minecraftFont) it.MCFont() else it }
+                .ModifyAll { it.copy(color = colorScheme.onBackground) }
         ) {
             Box(Modifier.onGloballyPositioned {
                 _width = it.size.width.getScaled().toInt()
                 _height = it.size.height.getScaled().toInt()
             }) {
                 Box(
-                    Modifier
+                    modifier = Modifier
                         .then(if (!overridePreview) Modifier.offset(xDp, yDp) else Modifier)
                         .then(
                             if (hasBackground && renderBackground) {
-                                Modifier
-                                    .dropShadow(
-                                        shape = RoundedCornerShape(8.dp),
-                                        shadow = Shadow(color = Color(bg), radius = 16.dp)
-                                    )
-                                    .background(Color(bg), RoundedCornerShape(8.dp))
-                            } else {
-                                Modifier
-                            }
+                                Modifier.dropShadow(
+                                    shape = RoundedCornerShape(8.dp),
+                                    shadow = Shadow(color = Color(bg), radius = 16.dp)
+                                )
+                            } else Modifier
+                        )
+                        .blurBackground(
+                            enabled = blur && vulkanChecker.isVulkan && hasBackground && renderBackground,
+                            shape = RoundedCornerShape(8.dp),
+                            backgroundColor = if (hasBackground && renderBackground) Color(bg) else Color.Unspecified
                         )
                         .padding(4.dp)
                 ) {
@@ -174,6 +177,8 @@ abstract class ComposableHUDModule(name: String, description: String, val hasBac
             if (Ascendium.settings.uiBackend != "Compose" && (myRenderer.adapter !is OffscreenSkiaRenderer && myRenderer.adapter !is VulkanSkiaRenderer)) {
                 myRenderer = SkiaRenderer()
             }
+
+            BlurBehind.onFrameStart(myRenderer)
 
             myRenderer.task {
                 tryInitCompose(modules, hud)

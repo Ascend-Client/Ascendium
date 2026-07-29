@@ -15,9 +15,11 @@ import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.dp
 import io.github.betterclient.ascendium.bridge.KeybindingBridge
 import io.github.betterclient.ascendium.bridge.minecraft
+import io.github.betterclient.ascendium.bridge.vulkanChecker
 import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.module.HUDModule
+import io.github.betterclient.ascendium.util.ui.blurBackground
 
 object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing", hasBackground = false) {
     val pressedColor by color("Pressed Color", 0x71000000)
@@ -78,21 +80,29 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
 
     @Composable
     fun JoystickMovement() {
+        val currentColor = Color(unPressedColor)
+        val blur by backgroundBlur.state
+
         Box(
-            Modifier
-                .then(if (!mouseKeys && !spaceBar) Modifier.width(100.dp) else Modifier) //there's nothing to aspectRatio off of
-                .aspectRatio(4/3f)
+            modifier = Modifier
+                .then(if (!mouseKeys && !spaceBar) Modifier.width(100.dp) else Modifier)
+                .aspectRatio(4 / 3f)
                 .dropShadow(
-                    shape = RoundedCornerShape(8.dp),
-                    shadow = Shadow(color = Color(unPressedColor), radius = 16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    shadow = Shadow(color = currentColor, radius = 16.dp)
                 )
-                .background(Color(unPressedColor), RoundedCornerShape(16.dp))
+                .blurBackground(
+                    enabled = blur && vulkanChecker.isVulkan,
+                    shape = RoundedCornerShape(16.dp),
+                    backgroundColor = currentColor
+                )
+                .padding(8.dp)
         ) {
             val trail = remember { mutableStateListOf<Pair<Float, Float>>() }
 
             val xPos by animateFloatAsState(
                 when {
-                    keyLeft.pressed && !keyRight.pressed -> -0.9f //larger
+                    keyLeft.pressed && !keyRight.pressed -> -0.9f
                     keyRight.pressed && !keyLeft.pressed -> 0.9f
                     else -> 0f
                 }
@@ -117,7 +127,10 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
                     modifier = Modifier
                         .align(BiasAlignment(tx, ty))
                         .size(joystickSize.dp)
-                        .background(Color(textColor).copy(alpha = (index + 1) / trail.size.toFloat()), RoundedCornerShape(joystickSize.dp))
+                        .background(
+                            color = Color(textColor).copy(alpha = (index + 1) / trail.size.toFloat()),
+                            shape = RoundedCornerShape(joystickSize.dp)
+                        )
                 )
             }
 
@@ -125,7 +138,10 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
                 Modifier
                     .align(BiasAlignment(xPos, yPos))
                     .size(joystickSize.dp)
-                    .background(Color(textColor), RoundedCornerShape(50))
+                    .background(
+                        color = Color(textColor),
+                        shape = RoundedCornerShape(50)
+                    )
             )
         }
     }
@@ -136,16 +152,25 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
     }
 
     @Composable
-    fun RenderKey(key: KeybindingBridge, label: String = key.getBoundKey, modifier: Modifier = Modifier) {
+    fun RenderKey(
+        key: KeybindingBridge,
+        label: String = key.getBoundKey,
+        modifier: Modifier = Modifier
+    ) {
+        val currentColor = Color(if (key.pressed) pressedColor else unPressedColor)
+        val blur by backgroundBlur.state
+
         Box(
             modifier = modifier
+                .padding(2.dp)
                 .dropShadow(
                     shape = RoundedCornerShape(8.dp),
-                    shadow = Shadow(color = Color(if (key.pressed) pressedColor else unPressedColor), radius = 16.dp)
+                    shadow = Shadow(color = currentColor, radius = 16.dp)
                 )
-                .background(
-                    Color(if (key.pressed) pressedColor else unPressedColor),
-                    RoundedCornerShape(8.dp)
+                .blurBackground(
+                    enabled = blur && vulkanChecker.isVulkan,
+                    shape = RoundedCornerShape(8.dp),
+                    backgroundColor = currentColor
                 )
                 .padding(8.dp),
             contentAlignment = Alignment.Center
@@ -155,24 +180,18 @@ object KeystrokesMod : HUDModule("Keystrokes", "Show what keys you are pressing"
     }
 
     @Composable
-    fun RowScope.RenderKeyRow(key: KeybindingBridge, label: String = key.getBoundKey, forceSquare: Boolean = false) {
-        Box(
+    fun RowScope.RenderKeyRow(
+        key: KeybindingBridge,
+        label: String = key.getBoundKey,
+        forceSquare: Boolean = false
+    ) {
+        RenderKey(
+            key = key,
+            label = label,
             modifier = Modifier
-                .dropShadow(
-                    shape = RoundedCornerShape(8.dp),
-                    shadow = Shadow(color = Color(if (key.pressed) pressedColor else unPressedColor), radius = 16.dp)
-                )
-                .background(
-                    Color(if (key.pressed) pressedColor else unPressedColor),
-                    RoundedCornerShape(8.dp)
-                )
                 .weight(1f)
                 .then(if (forceSquare) Modifier.aspectRatio(1f) else Modifier)
-                .padding(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(label.uppercase())
-        }
+        )
     }
 
     @EventTarget

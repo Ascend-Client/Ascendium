@@ -5,6 +5,7 @@ import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.bridge.vulkanChecker
 import org.jetbrains.skia.Canvas
+import org.jetbrains.skia.DirectContext
 import org.jetbrains.skia.Paint
 
 object ScalingUtils {
@@ -41,6 +42,8 @@ class SkiaRenderer {
 interface SkiaRenderAdapter {
     fun withSkia(block: (Canvas) -> Unit)
     fun task(block: () -> Unit)
+
+    val myContext: DirectContext
 }
 
 private val cache = mutableMapOf<Int, Paint>()

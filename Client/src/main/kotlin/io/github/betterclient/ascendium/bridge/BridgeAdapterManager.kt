@@ -46,6 +46,7 @@ val `1_21_4` = BridgeAdapter(
     skiaRenderAdapter = "V1214SkiaRenderAdapter",
     openglTextureAdapter = "V1214OpenGLTextureAdapter",
     rawOpenGLTextureAdapter = "V1214RawOpenGLAdapter",
+    resizableTextureAdapter = "V1214ResizableTextureAdapter",
     offscreen = "DontRequireOffscreen",
 
     minecraftClientAdapter = "1214",
@@ -87,6 +88,7 @@ val `1_21_8` = `1_21_5`.copy(
     mixinName = "1.21.8",
     skiaRenderAdapter = "V1218SkiaRenderAdapter",
     openglTextureAdapter = "V1218OpenGLTextureAdapter",
+    resizableTextureAdapter = "V1218ResizableTextureAdapter",
     rawOpenGLTextureAdapter = "V1218RawOpenGLAdapter",
 
     splashOverlayAdapter = "1218",
@@ -198,6 +200,7 @@ val `26_1_2` = BridgeAdapter(
     screenBridgeAdapter = "V2612BridgedScreen",
     skiaRenderAdapter = "DisabledSkiaAdapter",
     openglTextureAdapter = "V2612OpenGLTextureAdapter",
+    resizableTextureAdapter = "V2612ResizableTextureAdapter",
     rawOpenGLTextureAdapter = "V2612RawOpenGLAdapter",
     offscreen = "RequireOffscreen",
 
@@ -225,7 +228,8 @@ val `26_1_2` = BridgeAdapter(
 
     applyElse = listOf(
         "2612.options.MixinKeybindingCategory",
-        "2612.render.MixinGuiGraphicsExtractor"
+        "2612.render.MixinGuiGraphicsExtractor",
+        "2612.render.MixinGuiRenderer"
     ),
     vulkanChecker = "VulkanModChecker"
 )
@@ -234,8 +238,10 @@ val `26_2` = `26_1_2`.copy(
     mixinName = "26.2",
     minecraftClientAdapter = "262",
     inGameHudAdapter = "262",
+    windowAdapter = "262",
 
     openglTextureAdapter = "V262OpenGLTextureAdapter",
+    resizableTextureAdapter = "V262ResizableTextureAdapter",
     rawOpenGLTextureAdapter = "V262RawOpenGLAdapter",
 
     vulkanChecker = "V262VulkanChecker",
@@ -249,6 +255,7 @@ data class BridgeAdapter(
     val skiaRenderAdapter: String,
     val openglTextureAdapter: String,
     val rawOpenGLTextureAdapter: String,
+    val resizableTextureAdapter: String,
     val offscreen: String,
     val vulkanChecker: String,
 

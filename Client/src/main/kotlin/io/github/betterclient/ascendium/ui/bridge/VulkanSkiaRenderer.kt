@@ -15,6 +15,9 @@ class VulkanSkiaRenderer() : SkiaRenderAdapter {
     lateinit var backendRenderTarget: BackendRenderTarget
     lateinit var surface: Surface
 
+    override val myContext: DirectContext
+        get() = context
+
     override fun task(block: () -> Unit) {
         block()
     }
@@ -27,14 +30,15 @@ class VulkanSkiaRenderer() : SkiaRenderAdapter {
             vpW = width
             vpH = height
 
+            if (::surface.isInitialized) surface.close()
+            if (::backendRenderTarget.isInitialized) backendRenderTarget.close()
+            context.close()
+
             activeTexture.close()
             activeTexture = createOpenGLTexture()
 
             data = vulkanChecker.getVulkanContext()
             context = genContext(data)
-
-            if (::surface.isInitialized) surface.close()
-            if (::backendRenderTarget.isInitialized) backendRenderTarget.close()
 
             backendRenderTarget = activeTexture.toBackendRenderTarget() ?: return
             surface = Surface.makeFromBackendRenderTarget(

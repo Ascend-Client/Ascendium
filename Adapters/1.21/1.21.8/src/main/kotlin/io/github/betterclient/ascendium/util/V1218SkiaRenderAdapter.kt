@@ -17,6 +17,7 @@ import net.minecraft.client.texture.NativeImage
 import net.minecraft.client.texture.TextureSetup
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Color
+import org.jetbrains.skia.DirectContext
 import org.jetbrains.skia.Pixmap
 import org.jetbrains.skia.Surface
 import org.joml.Matrix3x2fStack
@@ -49,6 +50,9 @@ class V1218SkiaRenderAdapter : SkiaRenderAdapter {
     override fun task(block: () -> Unit) {
         adapter.tasks.add(block)
     }
+
+    override val myContext: DirectContext
+        get() = throw UnsupportedOperationException()
 }
 
 class V1218SkiaRenderAdapterObject {
@@ -65,6 +69,8 @@ class V1218SkiaRenderAdapterObject {
     private val lock = ReentrantLock()
     val tasks = ConcurrentLinkedQueue<() -> Unit>()
     val render = AtomicBoolean(true)
+
+    @Volatile var context: DirectContext? = null
 
     init {
         Thread(this::backgroundRenderLoop, "Skia-Software-Renderer").apply {
@@ -195,6 +201,7 @@ class V1218SkiaRenderAdapterObject {
             snapshot.peekPixels()?.let { pixmap ->
                 parsePixels(pixmap)
             }
+            snapshot.close()
             lock.withLock {
                 val temp = frontImage
                 frontImage = backImage

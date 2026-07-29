@@ -10,6 +10,7 @@ import io.github.betterclient.ascendium.bridge.minecraft
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.render.state.TexturedQuadGuiElementRenderState
+import net.minecraft.client.texture.GlTexture
 import net.minecraft.client.texture.NativeImage
 import net.minecraft.client.texture.TextureSetup
 import org.jetbrains.skia.BackendRenderTarget
@@ -155,29 +156,31 @@ class V1218OpenGLTextureAdapter() : TextureBridge {
         initTexture()
         if (!::texture.isInitialized) return null
 
-        val gpuTexture = texture.texture()
-
-        val vulkanImageField = gpuTexture.javaClass.getDeclaredField("glTexture").apply { isAccessible = true }
-        val glTexture = vulkanImageField.get(gpuTexture)
-
-        val getVulkanImageMethod = glTexture.javaClass.getMethod("getVulkanImage")
-        val vulkanImage = getVulkanImageMethod.invoke(glTexture) ?: return null
-
-        val imageId = vulkanImage.javaClass.getMethod("getId").invoke(vulkanImage) as Long
-        val format = vulkanImage.javaClass.getField("format").getInt(vulkanImage)
-        val usage = vulkanImage.javaClass.getField("usage").getInt(vulkanImage)
-        val mipLevels = vulkanImage.javaClass.getField("mipLevels").getInt(vulkanImage)
-
-        return BackendRenderTarget.makeVulkan(
-            width = gpuTexture.getWidth(0),
-            height = gpuTexture.getHeight(0),
-            imagePtr = imageId,
-            imageTiling = 0, //VK10.VK_IMAGE_TILING_OPTIMAL
-            imageLayout = 2, //VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-            format = format,
-            imageUsageFlags = usage,
-            sampleCnt = 1,
-            levelCnt = mipLevels
-        )
+        return toBackendTarget(texture.texture())
     }
+}
+
+fun toBackendTarget(texture: GpuTexture): BackendRenderTarget? {
+    val vulkanImageField = texture.javaClass.getDeclaredField("glTexture").apply { isAccessible = true }
+    val glTexture = vulkanImageField.get(texture)
+
+    val getVulkanImageMethod = glTexture.javaClass.getMethod("getVulkanImage")
+    val vulkanImage = getVulkanImageMethod.invoke(glTexture) ?: return null
+
+    val imageId = vulkanImage.javaClass.getMethod("getId").invoke(vulkanImage) as Long
+    val format = vulkanImage.javaClass.getField("format").getInt(vulkanImage)
+    val usage = vulkanImage.javaClass.getField("usage").getInt(vulkanImage)
+    val mipLevels = vulkanImage.javaClass.getField("mipLevels").getInt(vulkanImage)
+
+    return BackendRenderTarget.makeVulkan(
+        width = texture.getWidth(0),
+        height = texture.getHeight(0),
+        imagePtr = imageId,
+        imageTiling = 0, //VK10.VK_IMAGE_TILING_OPTIMAL
+        imageLayout = 2, //VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        format = format,
+        imageUsageFlags = usage,
+        sampleCnt = 1,
+        levelCnt = mipLevels
+    )
 }
