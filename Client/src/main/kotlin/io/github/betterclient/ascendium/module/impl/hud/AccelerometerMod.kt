@@ -1,12 +1,11 @@
 package io.github.betterclient.ascendium.module.impl.hud
 
 import androidx.compose.animation.core.*
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,13 +67,16 @@ object AccelerometerMod : HUDModule("Accelerometer", "Track your speed") {
                     modifier = Modifier.size(25.dp, 100.dp),
                     valueRange = 0f..max
                 )
-            "Horizontal" ->
+            "Horizontal" -> {
                 Slider(
-                    value,
-                    {},
-                    modifier = Modifier.size(100.dp, 25.dp),
-                    valueRange = 0f..max
+                    state = rememberSliderState(
+                        value = value,
+                        trackRange = 0f..max
+                    ),
+                    onValueChange = {},
+                    modifier = Modifier.size(100.dp, 25.dp)
                 )
+            }
         }
     }
 

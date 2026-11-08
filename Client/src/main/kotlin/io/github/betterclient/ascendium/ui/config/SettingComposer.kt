@@ -45,17 +45,26 @@ fun SettingEditor(setting: Setting) {
             }
             is NumberSetting -> {
                 var num by remember { mutableStateOf(setting.value) }
+                val sliderState = rememberSliderState(
+                    value = num.toFloat(),
+                    trackRange = setting.min.toFloat()..setting.max.toFloat()
+                )
+
+                LaunchedEffect(num) {
+                    sliderState.value = num.toFloat()
+                }
+
                 ResetButton { setting.reset(); num = setting.value }
                 Text(String.format("%.1f", num))
                 Slider(
-                    num.toFloat(),
+                    state = sliderState,
                     onValueChange = {
-                            num = it.toDouble()
-                            setting.value = it.toDouble()
-                            ConfigManager.saveConfig()
+                        num = it.toDouble()
+                        setting.value = it.toDouble()
+                        ConfigManager.saveConfig()
                     },
                     onValueChangeFinished = { ConfigManager.saveConfig() },
-                    modifier = Modifier.weight(1f), valueRange = setting.min.toFloat()..setting.max.toFloat()
+                    modifier = Modifier.weight(1f)
                 )
             }
             is ColorSetting -> {

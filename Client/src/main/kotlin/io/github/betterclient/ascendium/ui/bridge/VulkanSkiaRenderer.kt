@@ -5,6 +5,7 @@ import io.github.betterclient.ascendium.bridge.createOpenGLTexture
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.bridge.vulkanChecker
 import org.jetbrains.skia.*
+import org.jetbrains.skiko.ExperimentalSkikoApi
 
 class VulkanSkiaRenderer() : SkiaRenderAdapter {
     private var vpW = 0
@@ -64,6 +65,7 @@ class VulkanSkiaRenderer() : SkiaRenderAdapter {
         activeTexture.blit()
     }
 
+    @OptIn(ExperimentalSkikoApi::class)
     private fun genContext(data: VulkanContext) = DirectContext.makeVulkan(
         instancePtr = data.instancePtr,
         physicalDevicePtr = data.physicalDevicePtr,

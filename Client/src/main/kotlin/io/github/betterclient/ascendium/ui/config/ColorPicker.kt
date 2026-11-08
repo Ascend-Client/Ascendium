@@ -184,8 +184,14 @@ fun RowScope.Slider(slider: Pair<String, (Float) -> Pair<Color, Float>>, control
             .padding(4.dp),
         contentAlignment = Alignment.Center
     ) {
+        val sliderState = rememberSliderState(value = value)
+
+        LaunchedEffect(value) {
+            sliderState.value = value
+        }
+
         Slider(
-            value = value,
+            state = sliderState,
             onValueChange = { controller.selectByColor(fn(it).first, true) },
             modifier = Modifier.fillMaxWidth()
         )
