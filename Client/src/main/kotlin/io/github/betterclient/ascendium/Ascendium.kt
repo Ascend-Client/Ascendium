@@ -1,6 +1,10 @@
 package io.github.betterclient.ascendium
 
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.InternalComposeUiApi
+import androidx.compose.ui.graphics.SkikoGraphicsCompatRegistry
+import androidx.compose.ui.graphics.platform.PlatformGraphicsRegistry
+import androidx.compose.ui.platform.registerSkikoComposeImplementation
 import io.github.betterclient.ascendium.bridge.BridgeAdapterManager
 import io.github.betterclient.ascendium.bridge.minecraft
 import io.github.betterclient.ascendium.bridge.requireOffscreen
@@ -59,10 +63,12 @@ object Ascendium {
         }
     }
 
+    @OptIn(InternalComposeUiApi::class)
     fun preLaunch() {
         //load correct runtime onto classpath, this has to be blocking since the client cannot start without skia
         SkiaRuntimeDownloader.download()
         BridgeAdapterManager.initMixins()
+        registerSkikoComposeImplementation()
     }
 }
 

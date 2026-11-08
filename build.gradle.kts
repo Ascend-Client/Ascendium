@@ -8,7 +8,6 @@ subprojects {
     if(this.childProjects.isNotEmpty()) return@subprojects
     if(!(this.path.contains("Adapters") || this.path.contains("SupportedVersions") || this.path.contains("Client")))
         return@subprojects
-
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
     apply(plugin = "fabric-loom")
