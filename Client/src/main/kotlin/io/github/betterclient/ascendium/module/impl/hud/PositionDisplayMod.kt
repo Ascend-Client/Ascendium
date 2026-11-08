@@ -11,6 +11,7 @@ import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.module.HUDModule
 import java.util.Locale.getDefault
+import kotlin.math.floor
 
 object PositionDisplayMod : HUDModule("Position Display", "Display your position and information") {
     val info = info("Leave blank to disable")
@@ -63,16 +64,18 @@ object PositionDisplayMod : HUDModule("Position Display", "Display your position
         val player = minecraft.player
         val pos = player.getPos()
         return this
-            .replace("%X%", pos.x.toInt().toString(), ignoreCase = true)
-            .replace("%Y%", pos.y.toInt().toString(), ignoreCase = true)
-            .replace("%Z%", pos.z.toInt().toString(), ignoreCase = true)
+            .replace("%X%", floor(pos.x).toInt().toString(), ignoreCase = true)
+            .replace("%Y%", floor(pos.y).toInt().toString(), ignoreCase = true)
+            .replace("%Z%", floor(pos.z).toInt().toString(), ignoreCase = true)
             .replace(
                 "%B%",
                 player.biome
-                    .replace("minecraft:", "")
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(getDefault()) else it.toString() },
-                ignoreCase = true
+                    .substringAfter(':')
+                    .split("_")
+                    .joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) },
+                    ignoreCase = true
             )
+            //TODO: Use the biome's translation key instead of just polishing the ID
             .replace("%F%", player.facing, ignoreCase = true)
     }
 
