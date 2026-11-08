@@ -16,6 +16,8 @@ import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.Identifier;
@@ -101,7 +103,10 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
 
     @Override
     public int getPing() {
-        return getCurrentServer() == null ? -1 : ((int) getCurrentServer().ping);
+        if (this.player == null) return -1;
+        ClientPacketListener handler = this.player.connection;
+        PlayerInfo info = handler.getPlayerInfo(this.player.getUUID());
+        return info == null ? -1 : info.getLatency();
     }
 
     @Override
