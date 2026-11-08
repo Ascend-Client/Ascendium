@@ -1,5 +1,6 @@
 package io.github.betterclient.ascendium.mixin.cts;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.betterclient.ascendium.Ascendium;
 import io.github.betterclient.ascendium.bridge.*;
 import io.github.betterclient.ascendium.event.EntityHitEvent;
@@ -15,10 +16,12 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.realms.gui.screen.RealmsMainScreen;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ReloadableResourceManager;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
@@ -28,6 +31,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.skia.IRect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -64,6 +68,10 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
     @Shadow @Nullable public ClientWorld world;
 
     @Shadow public abstract void openScreen(Screen par1);
+
+    @Shadow
+    @Final
+    private ItemRenderer itemRenderer;
 
     @Override
     public @NotNull OptionsBridge getGameOptions() {
@@ -179,5 +187,20 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
             case null -> null;
             default -> MCScreen.OTHER_SCREEN;
         };
+    }
+
+    @Override
+    public void renderItem(@NotNull IRect rect, @NotNull ItemStackBridge item, boolean decorate) {
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(rect.getLeft(), rect.getTop(), 0);
+        RenderSystem.scalef(
+                rect.getWidth() / 16f,
+                rect.getHeight() / 16f,
+                1f
+        );
+
+        itemRenderer.renderInGui((ItemStack)(Object)item, 0, 0);
+
+        RenderSystem.popMatrix();
     }
 }

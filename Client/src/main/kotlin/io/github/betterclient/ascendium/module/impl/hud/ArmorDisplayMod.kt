@@ -26,6 +26,7 @@ import io.github.betterclient.ascendium.event.EventTarget
 import io.github.betterclient.ascendium.event.RenderHudEvent
 import io.github.betterclient.ascendium.module.HUDModule
 import io.github.betterclient.ascendium.ui.config.rgb
+import io.github.betterclient.ascendium.util.ui.renderWithMC
 import java.io.ByteArrayInputStream
 import javax.imageio.ImageIO
 
@@ -101,19 +102,6 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
         RenderItem(FakeItemStack(
             IdentifierBridge("minecraft", "textures/item/golden_apple.png"), 64, 1f
         ))
-    }
-
-    @Composable
-    private fun RenderItem(item: ItemStackBridge?) {
-        remember(item?.itemIdentifier) {
-            item?.itemIdentifier?.let { id ->
-                minecraft.loadResource(id)?.let {
-                    ImageIO.read(ByteArrayInputStream(it)).toComposeImageBitmap()
-                }
-            }
-        }?.let {
-            RenderItemBitmap(item, it)
-        }
     }
 
     @Composable
@@ -221,5 +209,29 @@ object ArmorDisplayMod : HUDModule("Armor display", "Display your armor") {
         leggings = minecraft.player.getArmor(1)
         boots = minecraft.player.getArmor(0)
         heldItem = minecraft.player.getMainHandItem()
+    }
+
+    @Composable
+    private fun RenderItem(item: ItemStackBridge?) {
+        item?.let {
+            RenderItem(
+                enabled = this.enabledState,
+                item = it,
+                decorate = true,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+
+    @Composable
+    fun RenderItem(
+        enabled: MutableState<Boolean>,
+        item: ItemStackBridge,
+        decorate: Boolean,
+        modifier: Modifier = Modifier,
+    ) {
+        Box(modifier.renderWithMC(enabled) { rect ->
+            minecraft.renderItem(rect, item, decorate)
+        })
     }
 }

@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -23,12 +24,14 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.skia.IRect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -178,5 +181,26 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
             case null -> null;
             default -> MCScreen.OTHER_SCREEN;
         };
+    }
+
+    @Override
+    public void renderItem(@NotNull IRect rect, @NotNull ItemStackBridge item, boolean decorate) {
+        var guiRenderState = Minecraft.getInstance().gameRenderer.gameRenderState().guiRenderState;
+        var drawCtx = new GuiGraphicsExtractor(
+                Minecraft.getInstance(),
+                guiRenderState,
+                0,
+                0
+        );
+
+        var scaleX = rect.getWidth() / 16.0f;
+        var scaleY = rect.getHeight() / 16.0f;
+
+        drawCtx.pose().pushMatrix();
+        drawCtx.pose().translate(rect.getLeft(), rect.getTop());
+        drawCtx.pose().scale(scaleX, scaleY);
+        drawCtx.item(((ItemStack)((Object)item)), 0, 0);
+        if (decorate) drawCtx.itemDecorations(Minecraft.getInstance().font, ((ItemStack)((Object)item)), 0, 0);
+        drawCtx.pose().popMatrix();
     }
 }

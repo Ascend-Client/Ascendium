@@ -4,7 +4,7 @@ loom = "1.17-SNAPSHOT"
 fabric-loader = "0.19.3"
 fabric-kotlin-loader = "1.13.13+kotlin.2.4.10"
 
-skiko = "0.150.1-vulkan-SNAPSHOT"
+skiko = "0.156.1"
 jetbrains-compose = "1.12.0-beta01"
 material3 = "1.12.0-alpha03"
 colorpicker-compose = "1.2.0"

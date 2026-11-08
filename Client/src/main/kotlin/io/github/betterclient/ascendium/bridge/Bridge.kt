@@ -1,8 +1,10 @@
 package io.github.betterclient.ascendium.bridge
 
 import io.github.betterclient.ascendium.util.Either
+import net.minecraft.item.ItemStack
 import org.jetbrains.skia.BackendRenderTarget
 import org.jetbrains.skia.BackendTexture
+import org.jetbrains.skia.IRect
 import java.awt.image.BufferedImage
 import kotlin.math.sqrt
 
@@ -54,6 +56,7 @@ interface MinecraftBridge {
     val window: WindowBridge
     val player: PlayerBridge
 
+    fun renderItem(rect: IRect, item: ItemStackBridge, decorate: Boolean)
     fun openScreen(screen: BridgeScreen)
     fun setScreen(mcScreen: MCScreen)
     fun raycast(entityBridge: EntityBridge, camera: Pos3D, possibleHits: Pos3D, box: BoundingBox, id: Int, d3: Double): RaycastResultBridge?

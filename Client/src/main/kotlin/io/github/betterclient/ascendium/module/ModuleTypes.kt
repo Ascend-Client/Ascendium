@@ -8,7 +8,9 @@ import io.github.betterclient.ascendium.event.eventBus
 import io.github.betterclient.ascendium.module.config.*
 
 open class Module(val name: String, val description: String) {
-    var enabled: Boolean by mutableStateOf(false)
+    val enabledState = mutableStateOf(false)
+    var enabled by enabledState
+
     val settings: MutableList<Setting> = mutableStateListOf()
 
     open fun toggle() {

@@ -10,8 +10,7 @@
     "common.MixinItemStack",
     "common.MixinPlayerEntity",
     "common.MixinStyle",
-    "common.MixinText",
-    "reload.MixinSimpleResourceReload"
+    "common.MixinText"
   ],
   "client": [
     "MixinMain",

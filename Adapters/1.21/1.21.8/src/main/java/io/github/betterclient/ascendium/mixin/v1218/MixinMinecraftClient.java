@@ -3,9 +3,12 @@ package io.github.betterclient.ascendium.mixin.v1218;
 import io.github.betterclient.ascendium.Ascendium;
 import io.github.betterclient.ascendium.bridge.*;
 import io.github.betterclient.ascendium.event.EntityHitEvent;
+import io.github.betterclient.ascendium.util.V1218OpenGLTextureAdapterKt;
+import io.github.betterclient.ascendium.util.V1218SkiaRenderAdapterKt;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.RunArgs;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -19,6 +22,7 @@ import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ReloadableResourceManagerImpl;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
@@ -28,6 +32,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.skia.IRect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -175,5 +180,23 @@ public abstract class MixinMinecraftClient implements MinecraftBridge {
             case null -> null;
             default -> MCScreen.OTHER_SCREEN;
         };
+    }
+
+    @Override
+    public void renderItem(@NotNull IRect rect, @NotNull ItemStackBridge item, boolean decorate) {
+        var ctx = V1218SkiaRenderAdapterKt.getGuiState(MinecraftClient.getInstance().gameRenderer);
+        var context = new DrawContext(MinecraftClient.getInstance(), ctx);
+        var matrices = context.getMatrices();
+
+        matrices.pushMatrix();
+        matrices.translate(rect.getLeft(), rect.getTop());
+        matrices.scale(
+                rect.getWidth() / 16f,
+                rect.getHeight() / 16f
+        );
+
+        context.drawItem((ItemStack) (Object) item, 0, 0);
+
+        matrices.popMatrix();
     }
 }

@@ -10,9 +10,16 @@ object BridgeAdapterManager {
     }
 
     fun initMixins() {
-        adapters.map { it.value.mixinName }.distinct().forEach {
-            Mixins.addConfiguration("ascendium.$it.mixins.json")
-        }
+        adapters.values
+            .map { it.mixinName }
+            .distinct()
+            .map { "ascendium.$it.mixins.json" }
+            .filter { configPath ->
+                javaClass.classLoader.getResource(configPath) != null
+            }
+            .forEach { configPath ->
+                Mixins.addConfiguration(configPath)
+            }
     }
 
     fun shouldApply(className: String): Boolean {

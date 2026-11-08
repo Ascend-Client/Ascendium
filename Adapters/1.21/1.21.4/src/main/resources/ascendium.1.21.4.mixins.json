@@ -8,7 +8,6 @@
     "v1214.common.MixinEntity",
     "v1214.common.MixinItemStack",
     "v1214.common.MixinPlayerEntity",
-    "v1214.reload.MixinSimpleResourceReload",
     "v1214.text.MixinClickEvent",
     "v1214.text.MixinStyle",
     "v1214.text.MixinText"

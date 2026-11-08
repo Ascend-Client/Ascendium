@@ -8,7 +8,6 @@
     "v1218.MixinClickEvent",
     "v1218.MixinSplashOverlay",
     "v1218.MixinWindow",
-    "v1218.MixinSimpleResourceReload",
     "v1218.MixinPlayerEntity",
     "v1218.MixinScreen",
     "v1218.MixinCubeMapRenderer",
